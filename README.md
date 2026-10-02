@@ -78,7 +78,7 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translat
 
 ---
 
-## По-русски
+## --ру.
 
 **Wisp - эхо на плече.** Бесплатный плеер в браузере, где вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы. Попробовать: [wispplayer.com](https://wispplayer.com), в наушниках.
 
