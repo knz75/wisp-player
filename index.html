@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#02070a">
+<meta name="description" content="Wisp — плеер, в котором вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы.">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wisp">
+<title>Wisp — эхо на плече</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: #000; }
+  body { min-height: 100vh; user-select: none; -webkit-user-select: none; }
+  button, label, input { touch-action: manipulation; }
+  svg.i { width: 22px; height: 22px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+  .hidden { display: none !important; }
+  /* Общие правила, на которые опираются все скины */
+  #skin .ic-pause, #skin .ic-lock { display: none; }
+  #skin.is-playing .ic-pause, #skin.is-locked .ic-lock { display: inline-block; }
+  #skin.is-playing .ic-play, #skin.is-locked .ic-unlock { display: none; }
+  #skin .need-multi { display: none; }
+  #skin.multi .need-multi { display: block; }
+  #skin .need-track { visibility: hidden; }
+  #skin.has-track .need-track { visibility: visible; }
+  #skin.is-locked [data-widget="presets"] { opacity: .35; pointer-events: none; }
+  /* Заблокированный радар не держит палец — страница листается прямо по нему */
+  #skin.is-locked [data-widget="radar"] canvas { touch-action: pan-y pinch-zoom; }
+  #skin.is-radio [data-widget="seek"], #skin.is-radio .times { visibility: hidden; }
+  #skin.is-plain [data-widget="radar"] canvas { opacity: .35; }
+  /* Свёрнутая панель показывает только свой заголовок */
+  #skin [data-fold] { cursor: pointer; }
+  #skin .folded > :not([data-fold]) { display: none !important; }
+  #skin [data-widget="radar"] canvas, #skin [data-widget="viz"] canvas { display: block; width: 100%; height: 100%; }
+  #skin [data-widget="radar"] canvas { touch-action: none; }
+  #skin [data-widget="ring"] svg { width: 100%; height: 100%; display: block; }
+  .w-orbit .ob-shapes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .w-orbit .ob-s { padding: 0 !important; }
+  .w-orbit .ob-s svg { width: 26px; height: 26px; display: block; }
+  .w-orbit .ob-row { display: grid; grid-template-columns: 1fr 52px; gap: 5px; margin-top: 6px; }
+  .w-orbit .ob-dir { font-size: 1.15rem !important; }
+  .w-orbit .ob-l { display: flex; justify-content: space-between; align-items: baseline; font-size: .62rem; letter-spacing: 1px; text-transform: uppercase; opacity: .8; margin-top: 10px; }
+  .w-orbit .ob-l b { font-variant-numeric: tabular-nums; font-size: .75rem; }
+  .w-seek { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; margin: 0; touch-action: none; display: block; }
+  .w-seek::-webkit-slider-runnable-track { height: var(--seek-h, 3px); background: linear-gradient(to right, var(--seek-c, #3ef0ff) var(--p, 0%), var(--seek-bg, #234) var(--p, 0%)); }
+  .w-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: calc(var(--seek-h, 3px) / 2 - 7px); border-radius: var(--seek-r, 2px); background: var(--seek-c, #3ef0ff); border: none; box-shadow: 0 0 8px var(--seek-c, #3ef0ff); }
+  .w-seek::-moz-range-track { height: var(--seek-h, 3px); background: var(--seek-bg, #234); }
+  .w-seek::-moz-range-progress { height: var(--seek-h, 3px); background: var(--seek-c, #3ef0ff); }
+  .w-seek::-moz-range-thumb { width: 14px; height: 14px; border-radius: var(--seek-r, 2px); background: var(--seek-c, #3ef0ff); border: none; }
+
+  /* Меню: не зависит от скина */
+  .psheet { position: fixed; inset: 0; z-index: 50; overflow-y: auto; background: rgba(4,6,8,.97); color: #dfe7ea;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .psheet .in { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .psheet .bar { display: flex; align-items: center; gap: 10px; }
+  .psheet h2 { flex: 1; margin: 0; font-size: 1.05rem; }
+  .psheet h3 { margin: 4px 0 0; font-size: .72rem; letter-spacing: 1.5px; text-transform: uppercase; color: #7d8b90; }
+  .psheet .x { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #2c3438; background: #11171a; color: #dfe7ea; font-size: 1rem; cursor: pointer; }
+  .psheet .skins { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .psheet .sk { display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid #2c3438; border-radius: 12px; background: #0d1214; cursor: pointer; text-align: left; color: inherit; font: inherit; }
+  .psheet .sk.on { border-color: #3ef0ff; box-shadow: 0 0 12px rgba(62,240,255,.35); }
+  .psheet .sk .pv { width: 52px; height: 52px; flex-shrink: 0; border-radius: 10px; }
+  .psheet .sk b { display: block; font-size: .92rem; }
+  .psheet .sk small { color: #7d8b90; font-size: .78rem; line-height: 1.35; display: block; margin-top: 2px; }
+  .psheet .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .psheet .mb { height: 44px; border: 1px solid #2c3438; border-radius: 10px; background: #11171a; color: #dfe7ea; font: inherit; font-size: .85rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0 6px; text-align: center; }
+  .psheet .seg { display: flex; gap: 6px; }
+  .psheet .seg .mb { flex: 1; }
+  .psheet .seg .mb.on { border-color: #3ef0ff; color: #3ef0ff; }
+  .psheet #helpText { font-size: .93rem; line-height: 1.55; }
+  .psheet #helpText p { margin: 0 0 10px; user-select: text; -webkit-user-select: text; }
+  .psheet #helpText b { color: #3ef0ff; }
+  .psheet .tin { width: 100%; height: 44px; border: 1px solid #2c3438; border-radius: 10px; background: #0d1214; color: #dfe7ea; font: inherit; font-size: .9rem;
+    padding: 0 12px; user-select: text; -webkit-user-select: text; }
+  .psheet .tin:focus { outline: none; border-color: #3ef0ff; }
+  .psheet select.tin { appearance: none; -webkit-appearance: none; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, #7d8b90 50%), linear-gradient(135deg, #7d8b90 50%, transparent 50%); background-position: calc(100% - 18px) 19px, calc(100% - 12px) 19px; background-size: 6px 6px; background-repeat: no-repeat; }
+  .psheet a.mb { text-decoration: none; }
+  .psheet .note { margin: 0; font-size: .8rem; line-height: 1.45; color: #7d8b90; }
+  #stList { display: flex; flex-direction: column; gap: 6px; }
+  #stList .st { display: flex; align-items: center; gap: 6px; border: 1px solid #2c3438; border-radius: 12px; background: #0d1214; padding: 4px 4px 4px 0; }
+  #stList .st.on { border-color: #3ef0ff; }
+  #stList .sp { flex: 1; min-width: 0; text-align: left; background: none; border: none; color: inherit; font: inherit; padding: 8px 10px; cursor: pointer; }
+  #stList .sp b { display: block; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #stList .sp small { display: block; font-size: .72rem; color: #7d8b90; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #stList .bd { font-size: .68rem; font-weight: 700; color: #7dff9a; flex-shrink: 0; }
+  #stList .del { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid #2c3438; background: #11171a; color: #7d8b90; cursor: pointer; }
+  #toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
+    z-index: 60; max-width: calc(100% - 32px); padding: 10px 14px; border-radius: 12px; background: rgba(20,26,30,.96); border: 1px solid #2c3438; color: #dfe7ea;
+    font: 600 .85rem -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; transition: opacity .25s, transform .25s; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+<style id="skinCss"></style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path fill="currentColor" d="M6 5h2v14H6zM9.5 12 18 5v14z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path fill="currentColor" d="M16 5h2v14h-2zM14.5 12 6 5v14z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 8.5A8 8 0 1 1 4 12"/><path d="M4 4v4.5h4.5"/></g><text x="12.5" y="15.6" font-size="7.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="sans-serif">30</text></symbol>
+  <symbol id="i-fwd" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.8 8.5A8 8 0 1 0 20 12"/><path d="M20 4v4.5h-4.5"/></g><text x="11.5" y="15.6" font-size="7.5" font-weight="700" text-anchor="middle" fill="currentColor" font-family="sans-serif">30</text></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 6.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v6M9 13h6"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 6.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path stroke="currentColor" stroke-width="1.8" d="M3.5 9.5h17"/></symbol>
+  <symbol id="i-files" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 3h7l4 4v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 3v4h4"/></g><circle cx="11" cy="15" r="1.8" fill="currentColor"/><path d="M12.8 15V9.5l2.5 1" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-radio" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7M5.6 18.4a9 9 0 0 1 0-12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></g><circle cx="12" cy="12" r="1.9" fill="currentColor"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 7.6-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-parrot" viewBox="7 0 96 96"><path d="M46 16 C56 12 66 16 70 24 C76 28 76 38 70 43 C70 38 67 35 63 35 C64 47 62 58 56 68 L50 92 L46 70 C38 62 34 48 36 34 C37 24 40 18 46 16 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M62 24 C64.5 28 64.5 32 63 35 M44 40 C52 46 56 55 52 66 M46 16 C42 10 44 6 49 4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".8"/><circle cx="57" cy="25" r="3.5" fill="currentColor"/></symbol>
+</svg>
+
+<div id="skin"></div>
+<input type="file" id="fileInput" accept="audio/*" multiple class="hidden">
+<input type="file" id="dirInput" webkitdirectory directory multiple class="hidden">
+<input type="file" id="skinFile" accept=".json,application/json" class="hidden">
+<audio id="audio" class="hidden"></audio>
+
+<div id="menu" class="psheet hidden"><div class="in">
+  <div class="bar"><h2 data-i="menu"></h2><button class="x" id="menuClose">✕</button></div>
+  <h3 data-i="skins"></h3>
+  <div class="skins" id="skinList"></div>
+  <div class="row2">
+    <button class="mb" id="expSkin" data-i="expSkin"></button>
+    <label class="mb" for="skinFile" data-i="impSkin"></label>
+  </div>
+  <a class="mb" id="fbLink" href="#" target="_blank" rel="noopener" data-i="feedback"></a>
+  <h3 data-i="lang"></h3>
+  <select id="langSel" class="tin"></select>
+  <h3 data-i="help"></h3>
+  <div id="helpText"></div>
+</div></div>
+
+<div id="radioSheet" class="psheet hidden"><div class="in">
+  <div class="bar"><h2 data-i="radio"></h2><button class="x" id="radioClose">✕</button></div>
+  <h3 data-i="stations"></h3>
+  <div id="stList"></div>
+  <h3 data-i="addSt"></h3>
+  <input id="stUrl" class="tin" type="url" inputmode="url" placeholder="https://…" autocomplete="off">
+  <input id="stName" class="tin" type="text" data-ph="stNamePh" autocomplete="off">
+  <div class="row2"><button class="mb" id="stPlay" data-i="playNow"></button><button class="mb" id="stSave" data-i="save"></button></div>
+  <p class="note" data-i="radioNote"></p>
+</div></div>
+<div id="toast"></div>
+
+<script>
+// ======================================================================
+//  Встроенные скины. Каждый — полностью своя разметка и стиль.
+// ======================================================================
+const SKINS = [];
+
+// ---------------- 1. DRONE HUD ----------------
+SKINS.push({
+  id: 'hud',
+  name: { ru: 'Drone HUD', pl: 'Drone HUD', en: 'Drone HUD' },
+  desc: { ru: 'Тактический экран дрона: векторная сетка, развёртка радара, прицел на цели.',
+          pl: 'Taktyczny ekran drona: siatka wektorowa, przemiatanie radaru, celownik.',
+          en: 'Tactical drone display: vector grid, radar sweep, target reticle.' },
+  preview: 'radial-gradient(circle at 50% 50%, transparent 30%, #3ef0ff 31%, transparent 33%, transparent 60%, rgba(62,240,255,.5) 61%, transparent 63%), linear-gradient(135deg,#02080b,#062026)',
+  viz: 'wave',
+  radar: { r: 120, pad: 22, rings: 'dense', ticks: 'deg', sweep: true, beam: 'dashed', reticle: true, head: 'vector', dist: true, cross: true },
+  css: `
+#skin { --c:#3ef0ff; --c2:#7dff9a; --w:#ffb020; --bg:#02070a; --pn:rgba(6,22,28,.62); --ln:rgba(62,240,255,.24); --tx:#cdeff6; --dm:#5b8792;
+  --r-bg:rgba(1,10,14,.85); --r-grid:#3ef0ff; --r-acc:#7dff9a; --r-acc2:#3ef0ff; --r-txt:#6fa9b6; --r-lock:#ffb020;
+  --v-a:#7dff9a; --v-b:#3ef0ff; --seek-c:#3ef0ff; --seek-bg:rgba(62,240,255,.15); --theme:#02070a;
+  min-height:100vh; color:var(--tx); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(18px + env(safe-area-inset-bottom,0px));
+  background:
+    radial-gradient(ellipse 90% 45% at 50% -5%, rgba(62,240,255,.20), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(125,255,154,.08), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(62,240,255,.045) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(62,240,255,.045) 0 1px, transparent 1px 28px), var(--bg); }
+#skin::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); mix-blend-mode:multiply; }
+#skin .hud { max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:10px; position:relative; z-index:2; }
+#skin .top { display:flex; align-items:center; gap:10px; }
+#skin .logo { width:40px; height:40px; color:var(--c2); filter:drop-shadow(0 0 6px var(--c2)); flex-shrink:0; }
+#skin .logo svg { width:100%; height:100%; }
+#skin .brand { flex:1; min-width:0; line-height:1.15; }
+#skin .brand b { font-size:1.05rem; letter-spacing:4px; white-space:nowrap; color:#fff; text-shadow:0 0 10px rgba(62,240,255,.6); }
+#skin .brand b i { font-style:normal; color:var(--c); }
+#skin .st { font-size:.62rem; letter-spacing:2px; color:var(--dm); text-transform:uppercase; display:flex; align-items:center; gap:6px; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#skin.no-track .st { text-transform:none; letter-spacing:.5px; color:var(--c); font-size:.62rem; }
+#skin.no-track .st::before { display:none; }
+#skin .st::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--dm); }
+#skin.is-playing .st { color:var(--c2); }
+#skin.is-playing .st::before { background:var(--c2); box-shadow:0 0 8px var(--c2); animation:blink 1.2s steps(2) infinite; }
+@keyframes blink { 50% { opacity:.2; } }
+#skin .sq { width:40px; height:40px; flex-shrink:0; border:1px solid var(--ln); background:rgba(62,240,255,.05); color:var(--c);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px); }
+#skin .pn { position:relative; padding:10px; border:1px solid var(--ln);
+  background:
+   linear-gradient(var(--c),var(--c)) top left/14px 2px no-repeat, linear-gradient(var(--c),var(--c)) top left/2px 14px no-repeat,
+   linear-gradient(var(--c),var(--c)) top right/14px 2px no-repeat, linear-gradient(var(--c),var(--c)) top right/2px 14px no-repeat,
+   linear-gradient(var(--c),var(--c)) bottom left/14px 2px no-repeat, linear-gradient(var(--c),var(--c)) bottom left/2px 14px no-repeat,
+   linear-gradient(var(--c),var(--c)) bottom right/14px 2px no-repeat, linear-gradient(var(--c),var(--c)) bottom right/2px 14px no-repeat,
+   var(--pn);
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+#skin .ph { display:flex; justify-content:space-between; gap:8px; font-size:.62rem; letter-spacing:2px; text-transform:uppercase; color:var(--c); margin-bottom:8px; }
+#skin .ph span:first-child::before { content:'▸ '; }
+#skin .ph .r { color:var(--dm); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#skin .now { display:flex; align-items:center; gap:10px; }
+#skin .play { width:56px; height:56px; flex-shrink:0; border:1px solid var(--c2); color:var(--c2); background:rgba(125,255,154,.08); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 0 14px rgba(125,255,154,.25), inset 0 0 12px rgba(125,255,154,.15);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); }
+#skin .play svg { width:26px; height:26px; }
+#skin.no-track .play { animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow:0 0 24px rgba(125,255,154,.6), inset 0 0 16px rgba(125,255,154,.3); } }
+#skin .meta { flex:1; min-width:0; }
+#skin .tt { color:var(--c2); font-size:.86rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 0 8px rgba(125,255,154,.4); }
+#skin .tm { display:flex; align-items:baseline; gap:8px; margin-top:2px; }
+#skin .tm b { font-size:1.75rem; font-weight:300; letter-spacing:2px; color:#fff; text-shadow:0 0 12px rgba(62,240,255,.55); font-variant-numeric:tabular-nums; }
+#skin .tm small { font-size:.7rem; color:var(--dm); font-variant-numeric:tabular-nums; white-space:nowrap; }
+#skin .viz { height:46px; margin:8px 0 2px; border-top:1px dashed var(--ln); border-bottom:1px dashed var(--ln); }
+#skin .times { display:flex; justify-content:space-between; font-size:.62rem; color:var(--dm); letter-spacing:1px; margin-top:-2px; }
+#skin .tr { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px; }
+#skin .hb, #skin .wb { height:40px; border:1px solid var(--ln); background:rgba(62,240,255,.05); color:var(--c); font:inherit; font-size:.7rem;
+  letter-spacing:1px; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; min-width:0;
+  white-space:nowrap; overflow:hidden; padding:0 4px;
+  clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px); }
+#skin .hb:active, #skin .wb:active { background:rgba(62,240,255,.18); }
+#skin .wb.on { background:var(--c); color:#001218; box-shadow:0 0 14px rgba(62,240,255,.5); font-weight:700; }
+#skin .rbox { position:relative; width:100%; max-width:340px; margin:0 auto; }
+#skin .radar { width:100%; aspect-ratio:1/1; }
+#skin .rlock { position:absolute; top:0; right:0; width:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  border:1px solid rgba(125,255,154,.45); background:rgba(2,10,14,.85); color:var(--c2); font:inherit; font-size:.62rem; letter-spacing:1px; text-transform:uppercase;
+  clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px); }
+#skin .rlock svg { width:20px; height:20px; }
+#skin.is-locked .rlock { color:var(--w); border-color:var(--w); background:rgba(40,24,0,.9); box-shadow:0 0 14px rgba(255,176,32,.45); }
+#skin .ph[data-fold] span:first-child::before { content:'▾ '; }
+#skin .folded .ph[data-fold] span:first-child::before { content:'▸ '; }
+#skin .folded .ph { margin-bottom:0; }
+#skin.is-locked .radar { opacity:.65; }
+#skin .ro { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:6px; }
+#skin .ro div { border:1px solid var(--ln); padding:5px 6px; background:rgba(0,0,0,.25); min-width:0; }
+#skin .ro small { display:block; font-size:.55rem; letter-spacing:2px; color:var(--dm); }
+#skin .ro b { display:block; font-size:.85rem; color:var(--c); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#skin.is-locked .ro .lkv b { color:var(--w); }
+#skin .presets { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
+#skin .mods { display:grid; grid-template-columns:1fr; gap:10px; }
+@media (min-width:520px) { #skin .mods { grid-template-columns:1fr 1fr; } }
+#skin .md small { display:block; font-size:.58rem; letter-spacing:2px; color:var(--dm); text-transform:uppercase; margin-bottom:5px; }
+#skin .md .row { display:flex; gap:5px; }
+#skin .md .row .wb { flex:1; }
+#skin .lockb { width:100%; color:var(--c2); border-color:rgba(125,255,154,.4); }
+#skin.is-locked .lockb { color:var(--w); border-color:var(--w); background:rgba(255,176,32,.1); box-shadow:0 0 12px rgba(255,176,32,.35); }
+#skin .files { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:6px; }
+#skin .files .hb { letter-spacing:0; }
+#skin.no-track .files .hb { border-color:var(--c2); color:var(--c2); }
+#skin .ob-s { height:44px; color:var(--dm); }
+#skin .ob-s.on { color:#001218; }
+#skin.orbiting .ph .r { color:var(--c2); }
+#skin .ob-l { color:var(--dm); }
+#skin .ob-l b { color:var(--c); }
+#skin .list { max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; }
+#skin .li { display:flex; justify-content:space-between; gap:8px; padding:7px 8px; font-size:.75rem; border-left:2px solid transparent; cursor:pointer; background:rgba(62,240,255,.03); }
+#skin .li .n { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+#skin .li .t { color:var(--dm); flex-shrink:0; }
+#skin .li.cur { border-left-color:var(--c2); color:var(--c2); background:rgba(125,255,154,.07); }
+`,
+  html: `
+<div class="hud">
+  <header class="top">
+    <div class="logo"><svg viewBox="7 0 96 96"><use href="#i-parrot"/></svg></div>
+    <div class="brand"><b>WISP<i>//</i></b><div class="st" data-txt="state"></div></div>
+    <button class="sq" data-act="menu"><svg class="i"><use href="#i-menu"/></svg></button>
+  </header>
+
+  <section class="pn">
+    <div class="ph"><span data-i="src"></span><span class="r" data-txt="sub"></span></div>
+    <div class="now">
+      <button class="play" data-act="play"><svg class="i ic-play"><use href="#i-play"/></svg><svg class="i ic-pause"><use href="#i-pause"/></svg></button>
+      <div class="meta"><div class="tt" data-txt="title"></div><div class="tm"><b data-txt="time"></b><small class="need-track" data-txt="remain"></small></div></div>
+    </div>
+    <div class="viz" data-widget="viz"></div>
+    <div data-widget="seek"></div>
+    <div class="times need-track"><span>00:00</span><span data-txt="dur"></span></div>
+    <div class="tr">
+      <button class="hb" data-act="prev"><svg class="i"><use href="#i-prev"/></svg></button>
+      <button class="hb" data-act="back"><svg class="i"><use href="#i-back"/></svg></button>
+      <button class="hb" data-act="fwd"><svg class="i"><use href="#i-fwd"/></svg></button>
+      <button class="hb" data-act="next"><svg class="i"><use href="#i-next"/></svg></button>
+    </div>
+    <div class="files">
+      <button class="hb" data-act="open"><svg class="i"><use href="#i-files"/></svg><span data-i="files"></span></button>
+      <button class="hb" data-act="openDir"><svg class="i"><use href="#i-folder"/></svg><span data-i="folder"></span></button>
+      <button class="hb" data-act="radio"><svg class="i"><use href="#i-radio"/></svg><span data-i="radio"></span></button>
+    </div>
+  </section>
+
+  <section class="pn need-multi">
+    <div class="ph" data-fold="list"><span data-i="chapters"></span><span class="r" data-txt="count"></span></div>
+    <div class="list" data-widget="list"></div>
+  </section>
+
+  <section class="pn">
+    <div class="ph"><span data-i="grid"></span><span class="r">3 M / HRTF</span></div>
+    <div class="rbox"><div class="radar" data-widget="radar"></div>
+      <button class="rlock" data-act="lock"><svg class="i ic-unlock"><use href="#i-unlock"/></svg><svg class="i ic-lock"><use href="#i-lock"/></svg></button></div>
+    <div class="ro">
+      <div><small>AZM</small><b data-txt="deg"></b></div>
+      <div><small>RNG</small><b data-txt="dist"></b></div>
+      <div class="lkv"><small data-i="lock"></small><b data-txt="locks"></b></div>
+    </div>
+    <div class="presets" data-widget="presets"></div>
+  </section>
+
+  <section class="pn">
+    <div class="ph" data-fold="orbit" data-fold-default="closed"><span data-i="orbit"></span><span class="r" data-txt="orbit"></span></div>
+    <div data-widget="orbit"></div>
+  </section>
+
+  <section class="pn">
+    <div class="ph" data-fold="ctrl" data-fold-default="closed"><span data-i="ctrl"></span><span class="r" data-txt="csum"></span></div>
+    <div class="mods">
+      <div class="md"><small data-i="speed"></small><div class="row" data-widget="speed"></div></div>
+      <div class="md"><small data-i="fx"></small><div class="row" data-widget="fx"></div></div>
+      <div class="md"><small data-i="echo"></small><div class="row" data-widget="echo"></div></div>
+      <div class="md"><small data-i="sleep"></small><div class="row" data-widget="sleep"></div></div>
+    </div>
+  </section>
+</div>`
+});
+
+// ---------------- 2. WATCH ----------------
+SKINS.push({
+  id: 'watch',
+  name: { ru: 'Watch', pl: 'Watch', en: 'Watch' },
+  desc: { ru: 'Циферблат умных часов: всё в одном круге, крупно и просто. Удобно на ходу.',
+          pl: 'Tarcza smartwatcha: wszystko w jednym kole, duże i proste. Wygodne w ruchu.',
+          en: 'Smartwatch face: everything in one circle, big and simple. Handy on the move.' },
+  preview: 'radial-gradient(circle, #111 52%, #ff6a3d 53%, #ff6a3d 58%, #000 59%)',
+  viz: 'none',
+  radar: { r: 118, pad: 32, rings: 'soft', ticks: 'hours', sweep: false, beam: 'solid', head: 'dot', cross: false, label: false,
+    font: '-apple-system, "Segoe UI", Roboto, sans-serif' },
+  css: `
+#skin { --o:#ff6a3d; --o2:#ffd23d; --tx:#f4f4f6; --dm:#8a8a92;
+  --r-bg:#0b0b0d; --r-grid:#ffffff; --r-acc:#ff6a3d; --r-acc2:#ffd23d; --r-txt:#8a8a92; --r-lock:#4da3ff; --theme:#000;
+  --seek-c:#ff6a3d; --seek-bg:#2a2a2e; --seek-h:4px; --seek-r:50%;
+  min-height:100vh; background:#000; color:var(--tx); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(22px + env(safe-area-inset-bottom,0px));
+  display:flex; flex-direction:column; align-items:center; gap:16px; }
+#skin .bar { width:100%; max-width:420px; display:flex; justify-content:space-between; align-items:center; }
+#skin .clock { font-size:.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--dm); max-width:62%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+#skin.is-playing .clock { color:var(--o); }
+#skin .rb { width:44px; height:44px; border-radius:50%; border:none; background:#1c1c1f; color:var(--tx); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+#skin .face { position:relative; width:min(86vw,360px); aspect-ratio:1/1; }
+#skin .ring { position:absolute; inset:0; }
+#skin .rg-bg { stroke:#1c1c1f; stroke-width:3.2; }
+#skin .rg-fg { stroke:var(--o); stroke-width:3.2; stroke-linecap:round; filter:drop-shadow(0 0 3px var(--o)); transition:stroke-dashoffset .4s; }
+#skin .radar { position:absolute; inset:5%; border-radius:50%; overflow:hidden; }
+#skin.is-locked .rg-fg { stroke:#4da3ff; filter:drop-shadow(0 0 3px #4da3ff); }
+#skin .info { width:100%; max-width:420px; text-align:center; margin-top:-4px; }
+#skin .ttl { font-size:.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#skin .sub { font-size:.66rem; color:var(--dm); text-transform:uppercase; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+#skin .tline { display:flex; justify-content:center; align-items:baseline; gap:10px; margin-top:6px; }
+#skin .big { font-size:2.2rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.5px; line-height:1; }
+#skin .rem { font-size:.8rem; color:var(--o); font-variant-numeric:tabular-nums; }
+#skin .tr { display:flex; align-items:center; gap:18px; }
+#skin .tb { width:58px; height:58px; border-radius:50%; border:none; background:#1c1c1f; color:var(--tx); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+#skin .tb svg { width:26px; height:26px; }
+#skin .tb.pl { width:78px; height:78px; background:var(--o); color:#000; box-shadow:0 0 24px rgba(255,106,61,.45); }
+#skin .tb.pl svg { width:34px; height:34px; }
+#skin .tb:active, #skin .rb:active, #skin .chip:active { transform:scale(.94); }
+#skin .chips { width:100%; max-width:420px; display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+#skin .chip { height:58px; border-radius:18px; border:none; background:#1c1c1f; color:var(--tx); cursor:pointer; font:inherit;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0; }
+#skin .chip small { font-size:.62rem; color:var(--dm); text-transform:uppercase; letter-spacing:.8px; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 4px; }
+#skin .chip b { font-size:1rem; font-variant-numeric:tabular-nums; }
+#skin.fx-off .chip.fx b { color:var(--dm); }
+#skin .chip.fx b, #skin .chip.sl b { color:var(--o2); }
+#skin .row2 { width:100%; max-width:420px; display:flex; justify-content:space-between; }
+#skin .rlock { position:absolute; top:-4px; right:-4px; width:42px; height:42px; border-radius:50%; border:none; background:#1c1c1f; color:var(--tx);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; }
+#skin .rlock svg { width:22px; height:22px; }
+#skin.is-locked .rlock { background:#4da3ff; color:#000; box-shadow:0 0 16px rgba(77,163,255,.6); }
+#skin .orb h4::after { content:'▾'; margin-left:6px; color:var(--dm); }
+#skin .orb.folded h4::after { content:'▸'; }
+#skin .orb { width:100%; max-width:420px; background:#121214; border-radius:22px; padding:12px; }
+#skin .orb h4 { margin:0 0 10px; font-size:.7rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--dm); display:flex; justify-content:space-between; }
+#skin.orbiting .orb h4 span:last-child { color:var(--o); }
+#skin .wb { height:44px; border:none; border-radius:14px; background:#1c1c1f; color:var(--tx); font:inherit; font-size:.85rem; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; min-width:0; white-space:nowrap; overflow:hidden; }
+#skin .wb.on { background:var(--o); color:#000; }
+#skin .ob-l { color:var(--dm); }
+`,
+  html: `
+<div class="bar">
+  <button class="rb" data-act="open"><svg class="i"><use href="#i-files"/></svg></button>
+  <div class="clock" data-txt="state"></div>
+  <button class="rb" data-act="menu"><svg class="i"><use href="#i-menu"/></svg></button>
+</div>
+<div class="face">
+  <div class="ring" data-widget="ring"></div>
+  <div class="radar" data-widget="radar"></div>
+  <button class="rlock" data-act="lock"><svg class="i ic-unlock"><use href="#i-unlock"/></svg><svg class="i ic-lock"><use href="#i-lock"/></svg></button>
+</div>
+<div class="info">
+  <div class="ttl" data-txt="title"></div><div class="sub" data-txt="sub"></div>
+  <div class="tline"><span class="big" data-txt="time"></span><span class="rem need-track" data-txt="remain"></span></div>
+</div>
+<div class="tr">
+  <button class="tb" data-act="back"><svg class="i"><use href="#i-back"/></svg></button>
+  <button class="tb pl" data-act="play"><svg class="i ic-play"><use href="#i-play"/></svg><svg class="i ic-pause"><use href="#i-pause"/></svg></button>
+  <button class="tb" data-act="fwd"><svg class="i"><use href="#i-fwd"/></svg></button>
+</div>
+<div class="chips">
+  <button class="chip" data-act="speed"><small data-i="speed"></small><b data-txt="speed"></b></button>
+  <button class="chip fx" data-act="fx"><small data-i="fx"></small><b data-txt="fxs"></b></button>
+  <button class="chip sl" data-act="sleep"><small data-i="sleep"></small><b data-txt="sleeps"></b></button>
+  <button class="chip ec" data-act="echo"><small data-i="echo"></small><b data-txt="echos"></b></button>
+</div>
+<div class="orb"><h4 data-fold="orbit" data-fold-default="closed"><span data-i="orbit"></span><span data-txt="orbit"></span></h4><div data-widget="orbit"></div></div>
+<div class="row2">
+  <button class="rb" data-act="prev"><svg class="i"><use href="#i-prev"/></svg></button>
+  <button class="rb" data-act="openDir"><svg class="i"><use href="#i-folder"/></svg></button>
+  <button class="rb" data-act="radio"><svg class="i"><use href="#i-radio"/></svg></button>
+  <button class="rb" data-act="next"><svg class="i"><use href="#i-next"/></svg></button>
+</div>`
+});
+
+// ---------------- 3. CLASSIC '99 ----------------
+SKINS.push({
+  id: 'classic',
+  name: { ru: "Classic '99", pl: "Classic '99", en: "Classic '99" },
+  desc: { ru: 'Привет из эпохи Winamp: окошки с фаской, зелёный дисплей, бегущая строка, блочный спектр.',
+          pl: 'Pozdrowienia z ery Winampa: okienka z fazą, zielony wyświetlacz, przewijany tytuł, blokowe widmo.',
+          en: 'Greetings from the Winamp era: beveled windows, green LCD, scrolling title, block spectrum.' },
+  preview: 'linear-gradient(#000 0 45%, #00ff40 45% 50%, #000 50% 60%, #3a3d4a 60%)',
+  viz: 'blocks',
+  radar: { r: 126, pad: 14, rings: 'meters', ticks: 'none', beam: 'solid', head: 'vector', dist: true, you: true, cross: true, diag: true,
+    font: '"Courier New", monospace' },
+  css: `
+#skin { --lcd:#00ff40; --lcd2:#00a82b; --face:#2c2f3a; --hi:#6b7088; --lo:#101117;
+  --r-bg:#000; --r-grid:#00c832; --r-acc:#00ff40; --r-acc2:#00c832; --r-txt:#00a82b; --r-lock:#ff4040;
+  --v-a:#00d43a; --v-b:#ff3030; --seek-c:#c8c8d0; --seek-bg:#14151b; --seek-h:6px; --seek-r:1px; --theme:#1a1b22;
+  min-height:100vh; color:#d8d8e0; font-family:Tahoma,Verdana,"Segoe UI",sans-serif;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(18px + env(safe-area-inset-bottom,0px));
+  background:repeating-linear-gradient(45deg,#1b1c23 0 6px,#1e1f27 6px 12px); }
+#skin .wrap { max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
+#skin .win { background:linear-gradient(#3a3d4c,#262833); border:1px solid #000; box-shadow:inset 1px 1px 0 var(--hi), inset -1px -1px 0 var(--lo); padding:4px 6px 8px; }
+#skin .tb { height:18px; margin:-1px -3px 6px; display:flex; align-items:center; gap:6px; font-size:.62rem; font-weight:700; letter-spacing:2px; color:#e8e8f0; text-transform:uppercase;
+  background:linear-gradient(90deg,#1a3a8a,#5a7ad8 50%,#1a3a8a); padding:0 6px; }
+#skin .tb .s { flex:1; height:4px; background:repeating-linear-gradient(0deg,#c8d0f0 0 1px,transparent 1px 2px); opacity:.5; }
+#skin .tb button { width:14px; height:12px; border:1px solid #000; background:linear-gradient(#cfd2de,#8a8ea0); padding:0; cursor:pointer; color:#000; font-size:9px; line-height:1; display:flex; align-items:center; justify-content:center; }
+#skin .tb button svg { width:10px; height:10px; }
+#skin .lcd { background:#000; border:2px solid; border-color:var(--lo) var(--hi) var(--hi) var(--lo); padding:6px 8px; display:grid; grid-template-columns:auto 1fr; gap:4px 10px; align-items:center; }
+#skin .tm { font-family:"Courier New",monospace; font-weight:700; font-size:1.9rem; color:var(--lcd); text-shadow:0 0 6px rgba(0,255,64,.6); line-height:1; font-variant-numeric:tabular-nums; }
+#skin .stt { max-width:110px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:"Courier New",monospace; font-size:.6rem; color:var(--lcd2); text-transform:uppercase; letter-spacing:1px; margin-top:3px; }
+#skin .mq { overflow:hidden; white-space:nowrap; font-family:"Courier New",monospace; font-size:.8rem; color:var(--lcd); }
+#skin .mq span { display:inline-block; padding-left:100%; animation:mq 14s linear infinite; }
+#skin.no-track .mq span { animation-duration:10s; }
+@keyframes mq { to { transform:translateX(-100%); } }
+#skin .viz { height:38px; }
+#skin .info { grid-column:1/-1; display:flex; gap:10px; font-family:"Courier New",monospace; font-size:.62rem; color:var(--lcd2); text-transform:uppercase; }
+#skin .info b { color:var(--lcd); font-weight:400; }
+#skin .seek { margin:6px 0 4px; }
+#skin .btns { display:flex; gap:3px; }
+#skin .b, #skin .wb { height:28px; flex:1; min-width:0; border:1px solid #000; background:linear-gradient(#d8dbe6,#9a9eb2); color:#111; cursor:pointer; font:inherit; font-size:.7rem; font-weight:700;
+  box-shadow:inset 1px 1px 0 #fff, inset -1px -1px 0 #5a5e70; display:flex; align-items:center; justify-content:center; padding:0 2px; white-space:nowrap; overflow:hidden; }
+#skin .b svg { width:16px; height:16px; }
+#skin .b:active, #skin .wb:active { box-shadow:inset 1px 1px 0 #5a5e70, inset -1px -1px 0 #fff; }
+#skin .wb.on { background:linear-gradient(#7affa0,#1fbf52); }
+#skin.is-locked .lk { background:linear-gradient(#ff9a9a,#d03030); }
+#skin .rbox { position:relative; width:100%; max-width:320px; margin:2px auto 6px; }
+#skin .rlock { position:absolute; top:4px; right:4px; flex:none; height:26px; padding:0 6px; font-size:.62rem; }
+#skin .rlock svg { width:14px; height:14px; }
+#skin.is-locked .rlock { background:linear-gradient(#ff9a9a,#d03030); }
+#skin .tb[data-fold]::before { content:'▾'; font-size:.7rem; }
+#skin .folded .tb[data-fold]::before { content:'▸'; }
+#skin .folded .tb { margin-bottom:-2px; }
+#skin .radar { width:100%; aspect-ratio:1/1; border:2px solid; border-color:var(--lo) var(--hi) var(--hi) var(--lo); background:#000; }
+#skin .pre, #skin .row { display:flex; gap:3px; margin-top:3px; }
+#skin .pre { display:grid; grid-template-columns:1fr 1fr; }
+#skin .lbl { font-size:.6rem; letter-spacing:1px; text-transform:uppercase; color:#a8acc0; margin:6px 0 2px; }
+#skin .ob-s { height:34px; }
+#skin .ob-l { color:#a8acc0; }
+#skin .list { background:#000; border:2px solid; border-color:var(--lo) var(--hi) var(--hi) var(--lo); max-height:200px; overflow-y:auto; font-family:"Courier New",monospace; font-size:.75rem; }
+#skin .li { display:flex; justify-content:space-between; gap:8px; padding:2px 6px; color:var(--lcd2); cursor:pointer; }
+#skin .li .n { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+#skin .li.cur { color:#fff; background:#0a2a8a; }
+`,
+  html: `
+<div class="wrap">
+  <div class="win">
+    <div class="tb">Wisp ·&nbsp;<span data-i="tagline"></span><span class="s"></span><button data-act="menu"><svg class="i"><use href="#i-menu"/></svg></button></div>
+    <div class="lcd">
+      <div><div class="tm" data-txt="time"></div><div class="stt" data-txt="state"></div></div>
+      <div style="min-width:0"><div class="mq"><span data-txt="title"></span></div><div class="viz" data-widget="viz"></div></div>
+      <div class="info"><span><b data-txt="speed"></b></span><span>3D <b data-txt="fxs"></b></span><span><b data-txt="dist"></b> <b data-txt="deg"></b></span></div>
+    </div>
+    <div class="seek" data-widget="seek"></div>
+    <div class="btns">
+      <button class="b" data-act="prev"><svg class="i"><use href="#i-prev"/></svg></button>
+      <button class="b" data-act="back"><svg class="i"><use href="#i-back"/></svg></button>
+      <button class="b" data-act="play"><svg class="i ic-play"><use href="#i-play"/></svg><svg class="i ic-pause"><use href="#i-pause"/></svg></button>
+      <button class="b" data-act="fwd"><svg class="i"><use href="#i-fwd"/></svg></button>
+      <button class="b" data-act="next"><svg class="i"><use href="#i-next"/></svg></button>
+      <button class="b" data-act="open"><svg class="i"><use href="#i-files"/></svg></button>
+      <button class="b" data-act="openDir"><svg class="i"><use href="#i-folder"/></svg></button>
+      <button class="b" data-act="radio"><svg class="i"><use href="#i-radio"/></svg></button>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="tb"><span data-i="grid"></span><span class="s"></span></div>
+    <div class="rbox"><div class="radar" data-widget="radar"></div>
+      <button class="b rlock" data-act="lock"><svg class="i ic-unlock"><use href="#i-unlock"/></svg><svg class="i ic-lock"><use href="#i-lock"/></svg>&nbsp;<span data-txt="locks"></span></button></div>
+    <div class="pre" data-widget="presets"></div>
+  </div>
+
+  <div class="win">
+    <div class="tb" data-fold="ctrl" data-fold-default="closed"><span data-i="ctrl"></span><span class="s"></span><span data-txt="csum"></span></div>
+    <div class="lbl" data-i="speed"></div><div class="row" data-widget="speed"></div>
+    <div class="lbl" data-i="fx"></div><div class="row" data-widget="fx"></div>
+    <div class="lbl" data-i="echo"></div><div class="row" data-widget="echo"></div>
+    <div class="lbl" data-i="sleep"></div><div class="row" data-widget="sleep"></div>
+  </div>
+
+  <div class="win">
+    <div class="tb" data-fold="orbit" data-fold-default="closed"><span data-i="orbit"></span><span class="s"></span><span data-txt="orbit"></span></div>
+    <div data-widget="orbit"></div>
+  </div>
+
+  <div class="win need-multi">
+    <div class="tb" data-fold="list"><span data-i="playlist"></span><span class="s"></span><span data-txt="count"></span></div>
+    <div class="list" data-widget="list"></div>
+  </div>
+</div>`
+});
+
+// ======================================================================
+//  Wisp — ядро. Скин отвечает только за вид; всё поведение здесь.
+//  Скин = { id, name, desc, preview, css, html, radar, viz }
+//  В разметке скина: data-act="…" (кнопки), data-txt="…" (тексты),
+//  data-widget="…" (радар, волна, полоса и т.д.), data-i="…" (перевод).
+// ======================================================================
+const $ = id => document.getElementById(id);
+const audioEl = $('audio'), root = $('skin');
+const audioPlain = new Audio(); // для станций, которые не разрешают 3D: играет мимо обработки, обычным стерео
+const M = () => S.plain ? audioPlain : audioEl;
+const dpr = Math.min(window.devicePixelRatio || 1, 3);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+};
+
+// ---------------- Языки ----------------
+const T = {
+  ru: { src:'Источник', grid:'Пространство', ctrl:'Управление', chapters:'Главы', chapter:'Глава', speed:'Скорость', fx:'3D звук', echo:'Простор', tagline:'эхо на плече', radio:'Радио', stations:'Станции', addSt:'Добавить станцию', stNamePh:'Название (можно не писать)', playNow:'Слушать', save:'Сохранить', live:'Эфир', stereo:'стерео', badUrl:'Нужна ссылка, которая начинается с https://', streamFail:'Станция не отвечает', no3d:'Эта станция не разрешает 3D — играет обычным стерео', radioNote:'Нужна прямая ссылка на поток, а не на страницу станции. Работают только адреса https://. Если станция не разрешает 3D, она играет обычным стерео.',
+    on:'Вкл', off:'Выкл', lock:'Замок', unlocked:'Открыт', locked:'Закрыт', sleep:'Таймер сна', min:'мин',
+    lsh:'Левое плечо', rsh:'Правое плечо', ahead:'Впереди', center:'В голове', you:'ты',
+    st_play:'Играет', st_pause:'Пауза', st_idle:'Ожидание', open:'Открыть книгу или музыку', phones:'Наденьте наушники',
+    menu:'Меню', skins:'Скины', expSkin:'Сохранить скин', impSkin:'Загрузить скин', lang:'Язык', help:'Справка',
+    bad:'Файл скина не подошёл', big:'Скин слишком большой', custom:'Загруженный скин', playlist:'Плейлист',
+    files:'Файлы', folder:'Папка', noAudio:'В папке нет аудиофайлов', orbit:'Орбита', pace:'Круг за', size:'Размер', stop:'Стоп',
+    sh_circle:'Круг', sh_oval:'Овал', sh_square:'Квадрат', sh_triangle:'Треугольник', sh_star:'Звезда', sh_eight:'Восьмёрка',
+    sh_spiral:'Спираль', sh_comet:'Комета', sh_pendulum:'Маятник', sh_wander:'Блуждание' },
+  pl: { src:'Źródło', grid:'Przestrzeń', ctrl:'Sterowanie', chapters:'Rozdziały', chapter:'Rozdział', speed:'Prędkość', fx:'Dźwięk 3D', echo:'Pogłos', tagline:'echo na ramieniu', radio:'Radio', stations:'Stacje', addSt:'Dodaj stację', stNamePh:'Nazwa (opcjonalnie)', playNow:'Słuchaj', save:'Zapisz', live:'Na żywo', stereo:'stereo', badUrl:'Potrzebny link zaczynający się od https://', streamFail:'Stacja nie odpowiada', no3d:'Ta stacja nie pozwala na 3D — gra w zwykłym stereo', radioNote:'Potrzebny bezpośredni link do strumienia, a nie do strony stacji. Działają tylko adresy https://. Jeśli stacja nie pozwala na 3D, gra w zwykłym stereo.',
+    on:'Wł.', off:'Wył.', lock:'Blokada', unlocked:'Otwarta', locked:'Zamknięta', sleep:'Wyłącznik', min:'min',
+    lsh:'Lewe ramię', rsh:'Prawe ramię', ahead:'Z przodu', center:'W głowie', you:'ty',
+    st_play:'Gra', st_pause:'Pauza', st_idle:'Gotowy', open:'Otwórz audiobook lub muzykę', phones:'Załóż słuchawki',
+    menu:'Menu', skins:'Skórki', expSkin:'Zapisz skórkę', impSkin:'Wczytaj skórkę', lang:'Język', help:'Pomoc',
+    bad:'Nieprawidłowy plik skórki', big:'Skórka jest za duża', custom:'Wczytana skórka', playlist:'Playlista',
+    files:'Pliki', folder:'Folder', noAudio:'W folderze nie ma plików audio', orbit:'Orbita', pace:'Okrążenie', size:'Rozmiar', stop:'Stop',
+    sh_circle:'Koło', sh_oval:'Owal', sh_square:'Kwadrat', sh_triangle:'Trójkąt', sh_star:'Gwiazda', sh_eight:'Ósemka',
+    sh_spiral:'Spirala', sh_comet:'Kometa', sh_pendulum:'Wahadło', sh_wander:'Błądzenie' },
+  en: { src:'Source', grid:'Space', ctrl:'Controls', chapters:'Chapters', chapter:'Chapter', speed:'Speed', fx:'3D sound', echo:'Room', tagline:'echo on your shoulder', radio:'Radio', stations:'Stations', addSt:'Add a station', stNamePh:'Name (optional)', playNow:'Listen', save:'Save', live:'Live', stereo:'stereo', badUrl:'The link must start with https://', streamFail:'Station is not responding', no3d:'This station does not allow 3D — playing plain stereo', radioNote:'You need a direct stream link, not the station web page. Only https:// addresses work. If a station does not allow 3D, it plays plain stereo.',
+    on:'On', off:'Off', lock:'Lock', unlocked:'Unlocked', locked:'Locked', sleep:'Sleep', min:'min',
+    lsh:'Left shoulder', rsh:'Right shoulder', ahead:'Ahead', center:'In your head', you:'you',
+    st_play:'Playing', st_pause:'Paused', st_idle:'Standby', open:'Open an audiobook or music', phones:'Put on headphones',
+    menu:'Menu', skins:'Skins', expSkin:'Save skin', impSkin:'Load skin', lang:'Language', help:'Help',
+    bad:'Skin file not valid', big:'Skin is too large', custom:'Loaded skin', playlist:'Playlist',
+    files:'Files', folder:'Folder', noAudio:'No audio files in this folder', orbit:'Orbit', pace:'Lap time', size:'Size', stop:'Stop',
+    sh_circle:'Circle', sh_oval:'Oval', sh_square:'Square', sh_triangle:'Triangle', sh_star:'Star', sh_eight:'Figure 8',
+    sh_spiral:'Spiral', sh_comet:'Comet', sh_pendulum:'Pendulum', sh_wander:'Wander' }
+};
+const HELP = {
+  ru: `<p><b>Нужны наушники.</b> Без них пространства не будет.</p>
+<p><b>Файлы / Папка.</b> Можно выбрать несколько глав или сразу всю папку — плеер помнит, где вы остановились в каждой.</p>
+<p><b>Радар.</b> В центре — вы. Тяните попугая Wisp — звук переедет туда. Ближе — громче и чище, дальше — тише и глуше.</p>
+<p><b>Орбита.</b> Попугай летает сам по выбранной фигуре. Хорошо тренирует слух: со временем «впереди» и «сзади» различаются всё лучше. Для работы попробуйте поставить звук далеко впереди-сбоку — он не будет мешать думать.</p>
+<p><b>3D звук: Выкл</b> — обычное стерео, чтобы сравнить. <b>Замок</b> — чтобы в кармане ничего не сдвинулось. <b>Таймер сна</b> — в конце звук плавно затихает. <b>Простор</b> — ощущение дали; для книг его можно выключить.</p>
+<p><b>Скины</b> меняют весь вид плеера, а не только цвета. Скин — это файл: его можно сохранить, переделать и отправить другу.</p>
+<p>Лево и право слышат все. «Впереди» и «сзади» некоторые путают — это нормально для наушников.</p>`,
+  pl: `<p><b>Potrzebne słuchawki.</b> Bez nich nie będzie przestrzeni.</p>
+<p><b>Pliki / Folder.</b> Można wybrać kilka rozdziałów albo cały folder — odtwarzacz pamięta, gdzie skończyłeś w każdym.</p>
+<p><b>Radar.</b> W środku jesteś ty. Przeciągnij papugę Wisp — dźwięk przeniesie się tam. Bliżej — głośniej i czyściej, dalej — ciszej i głucho.</p>
+<p><b>Orbita.</b> Papuga lata sama po wybranej figurze. Dobrze trenuje słuch: z czasem „z przodu” i „z tyłu” rozróżnia się coraz lepiej. Do pracy postaw dźwięk daleko z przodu z boku — nie będzie przeszkadzał myśleć.</p>
+<p><b>Dźwięk 3D: Wył.</b> — zwykłe stereo do porównania. <b>Blokada</b> — żeby w kieszeni nic się nie przesunęło. <b>Wyłącznik</b> — na końcu dźwięk łagodnie cichnie. <b>Pogłos</b> — wrażenie oddalenia; przy audiobookach można je wyłączyć.</p>
+<p><b>Skórki</b> zmieniają cały wygląd odtwarzacza, nie tylko kolory. Skórka to plik: można ją zapisać, przerobić i wysłać znajomemu.</p>
+<p>Lewo i prawo słyszy każdy. „Z przodu” i „z tyłu” niektórym się mylą — to normalne w słuchawkach.</p>`,
+  en: `<p><b>Headphones needed.</b> Without them there is no space.</p>
+<p><b>Files / Folder.</b> Pick several chapters or a whole folder — the player remembers where you stopped in each.</p>
+<p><b>Radar.</b> You are in the middle. Drag Wisp the parrot and the sound moves there. Closer is louder and clearer, farther is quieter and duller.</p>
+<p><b>Orbit.</b> The parrot flies by itself along the chosen shape. Great ear training: over time “ahead” and “behind” get easier to tell apart. For work, put the sound far ahead to one side — it won't get in the way of thinking.</p>
+<p><b>3D sound: Off</b> — plain stereo to compare. <b>Lock</b> — so nothing moves in your pocket. <b>Sleep</b> — the sound fades out gently at the end. <b>Room</b> — a sense of distance; turn it off for audiobooks.</p>
+<p><b>Skins</b> change the whole player, not just colors. A skin is a file: save it, rework it, send it to a friend.</p>
+<p>Everyone hears left and right. Some people mix up “ahead” and “behind” — that is normal with headphones.</p>`
+};
+// ---------------- Ещё языки ----------------
+T.ru.feedback = 'Написать автору'; T.pl.feedback = 'Napisz do autora'; T.en.feedback = 'Write to the author';
+Object.assign(T, {
+  uk: { src:'Джерело', grid:'Простір', ctrl:'Керування', chapters:'Розділи', chapter:'Розділ', speed:'Швидкість', fx:'3D звук', echo:'Кімната', tagline:'ехо на плечі', radio:'Радіо', stations:'Станції', addSt:'Додати станцію', stNamePh:'Назва (необов’язково)', playNow:'Слухати', save:'Зберегти', live:'Ефір', stereo:'стерео', badUrl:'Потрібне посилання, що починається з https://', streamFail:'Станція не відповідає', no3d:'Ця станція не дозволяє 3D — грає звичайним стерео', radioNote:'Потрібне пряме посилання на потік, а не на сторінку станції. Працюють лише адреси https://. Якщо станція не дозволяє 3D, вона грає звичайним стерео.', on:'Увімк.', off:'Вимк.', lock:'Замок', unlocked:'Відкрито', locked:'Закрито', sleep:'Таймер сну', min:'хв', lsh:'Ліве плече', rsh:'Праве плече', ahead:'Попереду', center:'У голові', you:'ти', st_play:'Грає', st_pause:'Пауза', st_idle:'Очікування', open:'Відкрити книгу або музику', phones:'Надягніть навушники', menu:'Меню', skins:'Скіни', expSkin:'Зберегти скін', impSkin:'Завантажити скін', lang:'Мова', help:'Довідка', bad:'Файл скіна не підійшов', big:'Скін завеликий', custom:'Завантажений скін', playlist:'Плейлист', files:'Файли', folder:'Папка', noAudio:'У папці немає аудіофайлів', orbit:'Орбіта', pace:'Час кола', size:'Розмір', stop:'Стоп', sh_circle:'Коло', sh_oval:'Овал', sh_square:'Квадрат', sh_triangle:'Трикутник', sh_star:'Зірка', sh_eight:'Вісімка', sh_spiral:'Спіраль', sh_comet:'Комета', sh_pendulum:'Маятник', sh_wander:'Блукання', feedback:'Написати автору' },
+  de: { src:'Quelle', grid:'Raum', ctrl:'Steuerung', chapters:'Kapitel', chapter:'Kapitel', speed:'Tempo', fx:'3D-Klang', echo:'Hall', tagline:'Echo auf deiner Schulter', radio:'Radio', stations:'Sender', addSt:'Sender hinzufügen', stNamePh:'Name (optional)', playNow:'Anhören', save:'Speichern', live:'Live', stereo:'Stereo', badUrl:'Der Link muss mit https:// beginnen', streamFail:'Sender antwortet nicht', no3d:'Dieser Sender erlaubt kein 3D — Wiedergabe in normalem Stereo', radioNote:'Du brauchst einen direkten Stream-Link, nicht die Webseite des Senders. Nur https://-Adressen funktionieren. Erlaubt ein Sender kein 3D, läuft er in normalem Stereo.', on:'An', off:'Aus', lock:'Sperre', unlocked:'Offen', locked:'Gesperrt', sleep:'Schlaftimer', min:'Min', lsh:'Linke Schulter', rsh:'Rechte Schulter', ahead:'Vorne', center:'Im Kopf', you:'du', st_play:'Läuft', st_pause:'Pause', st_idle:'Bereit', open:'Hörbuch oder Musik öffnen', phones:'Kopfhörer aufsetzen', menu:'Menü', skins:'Skins', expSkin:'Skin speichern', impSkin:'Skin laden', lang:'Sprache', help:'Hilfe', bad:'Ungültige Skin-Datei', big:'Skin ist zu groß', custom:'Geladener Skin', playlist:'Playlist', files:'Dateien', folder:'Ordner', noAudio:'Keine Audiodateien in diesem Ordner', orbit:'Orbit', pace:'Rundenzeit', size:'Größe', stop:'Stopp', sh_circle:'Kreis', sh_oval:'Oval', sh_square:'Quadrat', sh_triangle:'Dreieck', sh_star:'Stern', sh_eight:'Acht', sh_spiral:'Spirale', sh_comet:'Komet', sh_pendulum:'Pendel', sh_wander:'Streifzug', feedback:'Dem Autor schreiben' },
+  es: { src:'Fuente', grid:'Espacio', ctrl:'Controles', chapters:'Capítulos', chapter:'Capítulo', speed:'Velocidad', fx:'Sonido 3D', echo:'Sala', tagline:'eco en tu hombro', radio:'Radio', stations:'Emisoras', addSt:'Añadir emisora', stNamePh:'Nombre (opcional)', playNow:'Escuchar', save:'Guardar', live:'En directo', stereo:'estéreo', badUrl:'El enlace debe empezar por https://', streamFail:'La emisora no responde', no3d:'Esta emisora no permite 3D: suena en estéreo normal', radioNote:'Necesitas un enlace directo al stream, no la web de la emisora. Solo funcionan direcciones https://. Si una emisora no permite 3D, suena en estéreo normal.', on:'Sí', off:'No', lock:'Bloqueo', unlocked:'Abierto', locked:'Bloqueado', sleep:'Temporizador', min:'min', lsh:'Hombro izquierdo', rsh:'Hombro derecho', ahead:'Delante', center:'En la cabeza', you:'tú', st_play:'Sonando', st_pause:'Pausa', st_idle:'En espera', open:'Abrir audiolibro o música', phones:'Ponte los auriculares', menu:'Menú', skins:'Skins', expSkin:'Guardar skin', impSkin:'Cargar skin', lang:'Idioma', help:'Ayuda', bad:'Archivo de skin no válido', big:'La skin es demasiado grande', custom:'Skin cargada', playlist:'Lista', files:'Archivos', folder:'Carpeta', noAudio:'No hay audio en esta carpeta', orbit:'Órbita', pace:'Tiempo de vuelta', size:'Tamaño', stop:'Parar', sh_circle:'Círculo', sh_oval:'Óvalo', sh_square:'Cuadrado', sh_triangle:'Triángulo', sh_star:'Estrella', sh_eight:'Ocho', sh_spiral:'Espiral', sh_comet:'Cometa', sh_pendulum:'Péndulo', sh_wander:'Deriva', feedback:'Escribir al autor' },
+  fr: { src:'Source', grid:'Espace', ctrl:'Commandes', chapters:'Chapitres', chapter:'Chapitre', speed:'Vitesse', fx:'Son 3D', echo:'Pièce', tagline:'l’écho sur ton épaule', radio:'Radio', stations:'Stations', addSt:'Ajouter une station', stNamePh:'Nom (facultatif)', playNow:'Écouter', save:'Enregistrer', live:'En direct', stereo:'stéréo', badUrl:'Le lien doit commencer par https://', streamFail:'La station ne répond pas', no3d:'Cette station n’autorise pas la 3D — lecture en stéréo normale', radioNote:'Il faut un lien direct vers le flux, pas la page web de la station. Seules les adresses https:// fonctionnent. Si une station n’autorise pas la 3D, elle joue en stéréo normale.', on:'Oui', off:'Non', lock:'Verrou', unlocked:'Ouvert', locked:'Verrouillé', sleep:'Minuterie', min:'min', lsh:'Épaule gauche', rsh:'Épaule droite', ahead:'Devant', center:'Dans la tête', you:'toi', st_play:'Lecture', st_pause:'Pause', st_idle:'En attente', open:'Ouvrir un livre audio ou de la musique', phones:'Mets tes écouteurs', menu:'Menu', skins:'Skins', expSkin:'Enregistrer le skin', impSkin:'Charger un skin', lang:'Langue', help:'Aide', bad:'Fichier de skin invalide', big:'Skin trop volumineux', custom:'Skin chargé', playlist:'Playlist', files:'Fichiers', folder:'Dossier', noAudio:'Aucun fichier audio dans ce dossier', orbit:'Orbite', pace:'Durée du tour', size:'Taille', stop:'Stop', sh_circle:'Cercle', sh_oval:'Ovale', sh_square:'Carré', sh_triangle:'Triangle', sh_star:'Étoile', sh_eight:'Huit', sh_spiral:'Spirale', sh_comet:'Comète', sh_pendulum:'Pendule', sh_wander:'Errance', feedback:'Écrire à l’auteur' },
+  it: { src:'Sorgente', grid:'Spazio', ctrl:'Comandi', chapters:'Capitoli', chapter:'Capitolo', speed:'Velocità', fx:'Suono 3D', echo:'Stanza', tagline:'eco sulla tua spalla', radio:'Radio', stations:'Stazioni', addSt:'Aggiungi stazione', stNamePh:'Nome (facoltativo)', playNow:'Ascolta', save:'Salva', live:'In diretta', stereo:'stereo', badUrl:'Il link deve iniziare con https://', streamFail:'La stazione non risponde', no3d:'Questa stazione non consente il 3D — suona in stereo normale', radioNote:'Serve un link diretto allo stream, non la pagina web della stazione. Funzionano solo indirizzi https://. Se una stazione non consente il 3D, suona in stereo normale.', on:'Sì', off:'No', lock:'Blocco', unlocked:'Sbloccato', locked:'Bloccato', sleep:'Timer', min:'min', lsh:'Spalla sinistra', rsh:'Spalla destra', ahead:'Davanti', center:'In testa', you:'tu', st_play:'In riproduzione', st_pause:'Pausa', st_idle:'In attesa', open:'Apri audiolibro o musica', phones:'Indossa le cuffie', menu:'Menu', skins:'Skin', expSkin:'Salva skin', impSkin:'Carica skin', lang:'Lingua', help:'Aiuto', bad:'File skin non valido', big:'Skin troppo grande', custom:'Skin caricata', playlist:'Playlist', files:'File', folder:'Cartella', noAudio:'Nessun file audio in questa cartella', orbit:'Orbita', pace:'Tempo giro', size:'Dimensione', stop:'Stop', sh_circle:'Cerchio', sh_oval:'Ovale', sh_square:'Quadrato', sh_triangle:'Triangolo', sh_star:'Stella', sh_eight:'Otto', sh_spiral:'Spirale', sh_comet:'Cometa', sh_pendulum:'Pendolo', sh_wander:'Vagare', feedback:'Scrivi all’autore' },
+  pt: { src:'Fonte', grid:'Espaço', ctrl:'Controles', chapters:'Capítulos', chapter:'Capítulo', speed:'Velocidade', fx:'Som 3D', echo:'Sala', tagline:'eco no seu ombro', radio:'Rádio', stations:'Estações', addSt:'Adicionar estação', stNamePh:'Nome (opcional)', playNow:'Ouvir', save:'Salvar', live:'Ao vivo', stereo:'estéreo', badUrl:'O link deve começar com https://', streamFail:'A estação não responde', no3d:'Esta estação não permite 3D — tocando em estéreo normal', radioNote:'É preciso um link direto para o stream, não a página da estação. Só endereços https:// funcionam. Se uma estação não permitir 3D, ela toca em estéreo normal.', on:'Lig.', off:'Desl.', lock:'Trava', unlocked:'Destravado', locked:'Travado', sleep:'Timer', min:'min', lsh:'Ombro esquerdo', rsh:'Ombro direito', ahead:'À frente', center:'Na cabeça', you:'você', st_play:'Tocando', st_pause:'Pausa', st_idle:'Em espera', open:'Abrir audiolivro ou música', phones:'Coloque os fones', menu:'Menu', skins:'Skins', expSkin:'Salvar skin', impSkin:'Carregar skin', lang:'Idioma', help:'Ajuda', bad:'Arquivo de skin inválido', big:'Skin grande demais', custom:'Skin carregada', playlist:'Playlist', files:'Arquivos', folder:'Pasta', noAudio:'Nenhum áudio nesta pasta', orbit:'Órbita', pace:'Tempo da volta', size:'Tamanho', stop:'Parar', sh_circle:'Círculo', sh_oval:'Oval', sh_square:'Quadrado', sh_triangle:'Triângulo', sh_star:'Estrela', sh_eight:'Oito', sh_spiral:'Espiral', sh_comet:'Cometa', sh_pendulum:'Pêndulo', sh_wander:'Deriva', feedback:'Escrever ao autor' },
+  tr: { src:'Kaynak', grid:'Alan', ctrl:'Kontroller', chapters:'Bölümler', chapter:'Bölüm', speed:'Hız', fx:'3D ses', echo:'Oda', tagline:'omzundaki yankı', radio:'Radyo', stations:'İstasyonlar', addSt:'İstasyon ekle', stNamePh:'Ad (isteğe bağlı)', playNow:'Dinle', save:'Kaydet', live:'Canlı', stereo:'stereo', badUrl:'Bağlantı https:// ile başlamalı', streamFail:'İstasyon yanıt vermiyor', no3d:'Bu istasyon 3D’ye izin vermiyor — normal stereo çalıyor', radioNote:'İstasyonun web sayfası değil, akışın doğrudan bağlantısı gerekir. Yalnızca https:// adresleri çalışır. İstasyon 3D’ye izin vermezse normal stereo çalar.', on:'Açık', off:'Kapalı', lock:'Kilit', unlocked:'Açık', locked:'Kilitli', sleep:'Uyku', min:'dk', lsh:'Sol omuz', rsh:'Sağ omuz', ahead:'Önde', center:'Kafanın içinde', you:'sen', st_play:'Çalıyor', st_pause:'Duraklatıldı', st_idle:'Hazır', open:'Sesli kitap veya müzik aç', phones:'Kulaklığını tak', menu:'Menü', skins:'Temalar', expSkin:'Temayı kaydet', impSkin:'Tema yükle', lang:'Dil', help:'Yardım', bad:'Geçersiz tema dosyası', big:'Tema çok büyük', custom:'Yüklenen tema', playlist:'Çalma listesi', files:'Dosyalar', folder:'Klasör', noAudio:'Bu klasörde ses dosyası yok', orbit:'Yörünge', pace:'Tur süresi', size:'Boyut', stop:'Dur', sh_circle:'Daire', sh_oval:'Oval', sh_square:'Kare', sh_triangle:'Üçgen', sh_star:'Yıldız', sh_eight:'Sekiz', sh_spiral:'Spiral', sh_comet:'Kuyruklu yıldız', sh_pendulum:'Sarkaç', sh_wander:'Gezinme', feedback:'Yazara yaz' }
+});
+Object.assign(HELP, {
+  uk: `<p><b>Потрібні навушники.</b> Без них простору не буде.</p>
+<p><b>Файли / Папка.</b> Можна вибрати кілька розділів або цілу папку — плеєр пам’ятає, де ви зупинилися в кожному.</p>
+<p><b>Радар.</b> У центрі — ви. Тягніть папугу Wisp — і звук переїде туди. Ближче — гучніше й чистіше, далі — тихіше й глухіше.</p>
+<p><b>Орбіта.</b> Папуга сам літає обраною фігурою. Добре тренує слух: з часом «попереду» і «позаду» розрізняти легше. Для роботи поставте звук далеко попереду збоку — він не заважатиме думати.</p>
+<p><b>3D звук: Вимк.</b> — звичайне стерео, щоб порівняти. <b>Замок</b> — щоб у кишені нічого не зрушило. <b>Таймер сну</b> — наприкінці звук плавно стихає. <b>Кімната</b> — відчуття відстані; для книжок її можна вимкнути.</p>
+<p><b>Скіни</b> змінюють увесь вигляд плеєра, а не лише кольори. Скін — це файл: його можна зберегти, переробити й надіслати другові.</p>
+<p>Ліво й право чують усі. «Попереду» і «позаду» дехто плутає — це нормально для навушників.</p>`,
+  de: `<p><b>Kopfhörer nötig.</b> Ohne sie gibt es keinen Raum.</p>
+<p><b>Dateien / Ordner.</b> Wähle mehrere Kapitel oder einen ganzen Ordner — der Player merkt sich, wo du in jedem aufgehört hast.</p>
+<p><b>Radar.</b> Du bist in der Mitte. Zieh den Papagei Wisp, und der Klang wandert dorthin. Näher ist lauter und klarer, weiter weg leiser und dumpfer.</p>
+<p><b>Orbit.</b> Der Papagei fliegt von selbst die gewählte Figur. Gutes Hörtraining: Mit der Zeit lassen sich „vorne“ und „hinten“ leichter unterscheiden. Zum Arbeiten den Klang weit nach vorne zur Seite setzen — er stört das Denken nicht.</p>
+<p><b>3D-Klang: Aus</b> — normales Stereo zum Vergleich. <b>Sperre</b> — damit sich in der Tasche nichts verschiebt. <b>Schlaftimer</b> — am Ende wird der Ton sanft leiser. <b>Hall</b> — Gefühl von Entfernung; für Hörbücher abschalten.</p>
+<p><b>Skins</b> ändern den ganzen Player, nicht nur die Farben. Ein Skin ist eine Datei: speichern, umbauen, an Freunde schicken.</p>
+<p>Links und rechts hört jeder. „Vorne“ und „hinten“ verwechseln manche — das ist bei Kopfhörern normal.</p>`,
+  es: `<p><b>Necesitas auriculares.</b> Sin ellos no hay espacio.</p>
+<p><b>Archivos / Carpeta.</b> Elige varios capítulos o una carpeta entera: el reproductor recuerda dónde te quedaste en cada uno.</p>
+<p><b>Radar.</b> Tú estás en el centro. Arrastra al loro Wisp y el sonido se moverá allí. Más cerca suena más fuerte y claro; más lejos, más bajo y apagado.</p>
+<p><b>Órbita.</b> El loro vuela solo siguiendo la figura elegida. Buen entrenamiento auditivo: con el tiempo cuesta menos distinguir «delante» y «detrás». Para trabajar, pon el sonido lejos, delante y a un lado: no te molestará al pensar.</p>
+<p><b>Sonido 3D: No</b> — estéreo normal para comparar. <b>Bloqueo</b> — para que nada se mueva en el bolsillo. <b>Temporizador</b> — al final el sonido se apaga suavemente. <b>Sala</b> — sensación de distancia; desactívala para audiolibros.</p>
+<p><b>Las skins</b> cambian todo el reproductor, no solo los colores. Una skin es un archivo: guárdala, modifícala, envíasela a un amigo.</p>
+<p>Izquierda y derecha las oye todo el mundo. «Delante» y «detrás» a veces se confunden: es normal con auriculares.</p>`,
+  fr: `<p><b>Écouteurs indispensables.</b> Sans eux, pas d’espace.</p>
+<p><b>Fichiers / Dossier.</b> Choisis plusieurs chapitres ou un dossier entier — le lecteur se souvient où tu t’es arrêté dans chacun.</p>
+<p><b>Radar.</b> Tu es au centre. Fais glisser le perroquet Wisp et le son s’y déplace. Plus près, c’est plus fort et plus net ; plus loin, plus doux et plus sourd.</p>
+<p><b>Orbite.</b> Le perroquet vole seul selon la figure choisie. Bon entraînement de l’oreille : avec le temps, « devant » et « derrière » se distinguent mieux. Pour travailler, place le son loin devant, sur le côté — il ne gênera pas ta réflexion.</p>
+<p><b>Son 3D : Non</b> — stéréo normale pour comparer. <b>Verrou</b> — pour que rien ne bouge dans la poche. <b>Minuterie</b> — à la fin, le son baisse doucement. <b>Pièce</b> — sensation de distance ; à couper pour les livres audio.</p>
+<p><b>Les skins</b> changent tout le lecteur, pas seulement les couleurs. Un skin est un fichier : enregistre-le, modifie-le, envoie-le à un ami.</p>
+<p>Tout le monde entend la gauche et la droite. Certains confondent « devant » et « derrière » — c’est normal au casque.</p>`,
+  it: `<p><b>Servono le cuffie.</b> Senza, lo spazio non c’è.</p>
+<p><b>File / Cartella.</b> Scegli più capitoli o un’intera cartella: il player ricorda dove ti sei fermato in ognuno.</p>
+<p><b>Radar.</b> Tu sei al centro. Trascina il pappagallo Wisp e il suono si sposta lì. Più vicino è più forte e nitido, più lontano più piano e ovattato.</p>
+<p><b>Orbita.</b> Il pappagallo vola da solo lungo la figura scelta. Ottimo allenamento dell’udito: col tempo distinguere «davanti» e «dietro» diventa più facile. Per lavorare, metti il suono lontano, davanti e di lato: non disturberà i pensieri.</p>
+<p><b>Suono 3D: No</b> — stereo normale per confrontare. <b>Blocco</b> — così in tasca non si sposta nulla. <b>Timer</b> — alla fine il suono si spegne dolcemente. <b>Stanza</b> — senso di distanza; per gli audiolibri si può disattivare.</p>
+<p><b>Le skin</b> cambiano tutto il player, non solo i colori. Una skin è un file: salvala, modificala, mandala a un amico.</p>
+<p>Sinistra e destra le sentono tutti. Qualcuno confonde «davanti» e «dietro»: con le cuffie è normale.</p>`,
+  pt: `<p><b>Precisa de fones.</b> Sem eles não há espaço.</p>
+<p><b>Arquivos / Pasta.</b> Escolha vários capítulos ou uma pasta inteira — o player lembra onde você parou em cada um.</p>
+<p><b>Radar.</b> Você está no centro. Arraste o papagaio Wisp e o som vai para lá. Mais perto fica mais alto e nítido; mais longe, mais baixo e abafado.</p>
+<p><b>Órbita.</b> O papagaio voa sozinho pela figura escolhida. Ótimo treino para o ouvido: com o tempo fica mais fácil distinguir “frente” e “trás”. Para trabalhar, coloque o som longe, à frente e de lado — ele não atrapalha o pensamento.</p>
+<p><b>Som 3D: Desl.</b> — estéreo normal para comparar. <b>Trava</b> — para nada mudar no bolso. <b>Timer</b> — no fim o som diminui suavemente. <b>Sala</b> — sensação de distância; desligue para audiolivros.</p>
+<p><b>As skins</b> mudam o player inteiro, não só as cores. Uma skin é um arquivo: salve, modifique, envie para um amigo.</p>
+<p>Todo mundo ouve esquerda e direita. Algumas pessoas confundem “frente” e “trás” — é normal com fones.</p>`,
+  tr: `<p><b>Kulaklık gerekli.</b> Kulaklık olmadan alan hissi olmaz.</p>
+<p><b>Dosyalar / Klasör.</b> Birden çok bölüm ya da bütün bir klasör seçebilirsin — oynatıcı her birinde nerede kaldığını hatırlar.</p>
+<p><b>Radar.</b> Ortadaki sensin. Papağan Wisp’i sürükle, ses oraya taşınır. Yakında daha yüksek ve net, uzakta daha kısık ve boğuk.</p>
+<p><b>Yörünge.</b> Papağan seçilen şekil boyunca kendi kendine uçar. İyi bir kulak egzersizi: zamanla «önde» ve «arkada»yı ayırt etmek kolaylaşır. Çalışırken sesi uzağa, öne ve yana koy — düşünmeni engellemez.</p>
+<p><b>3D ses: Kapalı</b> — karşılaştırmak için normal stereo. <b>Kilit</b> — cepte hiçbir şey kaymasın diye. <b>Uyku</b> — sonunda ses yavaşça kısılır. <b>Oda</b> — uzaklık hissi; sesli kitaplar için kapatabilirsin.</p>
+<p><b>Temalar</b> oynatıcının tüm görünümünü değiştirir, sadece renkleri değil. Tema bir dosyadır: kaydet, değiştir, arkadaşına gönder.</p>
+<p>Sol ve sağı herkes duyar. Bazıları «önde» ve «arkada»yı karıştırır — kulaklıkla bu normaldir.</p>`
+});
+const LANGS = [['en','English'],['ru','Русский'],['uk','Українська'],['pl','Polski'],['de','Deutsch'],['es','Español'],['fr','Français'],['it','Italiano'],['pt','Português'],['tr','Türkçe']];
+
+// Язык: сохранённый выбор, иначе язык телефона/браузера, иначе английский
+const LANG_ALIAS = { be: 'ru', kk: 'ru' };
+function detectLang() {
+  const list = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en']);
+  for (const raw of list) { const l = String(raw).slice(0, 2).toLowerCase(); const m = LANG_ALIAS[l] || l; if (T[m]) return m; }
+  return 'en';
+}
+let lang = store.get('pp_lang', null);
+if (!T[lang]) lang = detectLang();
+const t = k => (T[lang] && T[lang][k]) || T.en[k] || k;
+const L = v => typeof v === 'string' ? v : (v && (v[lang] || v.en)) || '';
+
+// ---------------- Состояние ----------------
+const S = {
+  pos: store.get('pp_pos', { x: -0.2, y: 0 }), speed: store.get('pp_speed', 1),
+  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: false, tracks: [], cur: -1, ready: false, seeking: false,
+  sleepMin: 0, sleepEnd: 0
+};
+const METERS = 3, SIZE = 300, C = 150;
+
+// ---------------- Звук ----------------
+let ac = null, panner, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave;
+// Мягкое «комнатное» эхо: шум, который со временем темнеет (как в настоящей комнате),
+// плюс 18 мс тишины в начале. Резкого белого шума с верхами больше нет — он и давал «писк».
+function makeImpulse(sec) {
+  const sr = ac.sampleRate, pre = Math.floor(sr * 0.018), len = Math.floor(sr * sec), b = ac.createBuffer(2, len, sr);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = b.getChannelData(ch); let y = 0;
+    for (let i = pre; i < len; i++) {
+      const p = (i - pre) / (len - pre), k = 0.35 * Math.pow(1 - p, 2) + 0.03;
+      y += k * ((Math.random() * 2 - 1) - y);
+      d[i] = y * Math.pow(1 - p, 2.5);
+    }
+  }
+  return b;
+}
+function initAudio() {
+  if (!ac) {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ac.createMediaElementSource(audioEl);
+    const mono = ac.createGain(); mono.channelCount = 1; mono.channelCountMode = 'explicit'; mono.channelInterpretation = 'speakers';
+    lowpass = ac.createBiquadFilter(); lowpass.type = 'lowpass'; lowpass.Q.value = 0.5;
+    panner = ac.createPanner(); panner.panningModel = 'HRTF'; panner.distanceModel = 'inverse'; panner.refDistance = 1; panner.rolloffFactor = 1;
+    const verb = ac.createConvolver(); verb.buffer = makeImpulse(0.6);
+    const wetLP = ac.createBiquadFilter(); wetLP.type = 'lowpass'; wetLP.frequency.value = 2400; wetLP.Q.value = 0.3;
+    const wetHP = ac.createBiquadFilter(); wetHP.type = 'highpass'; wetHP.frequency.value = 280; wetHP.Q.value = 0.3;
+    wet = ac.createGain(); spatialOut = ac.createGain(); dryGain = ac.createGain(); dryGain.gain.value = 0;
+    master = ac.createGain(); analyser = ac.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.75;
+    freq = new Uint8Array(analyser.frequencyBinCount); wave = new Uint8Array(analyser.fftSize);
+    src.connect(mono); mono.connect(lowpass); lowpass.connect(panner); panner.connect(spatialOut);
+    lowpass.connect(verb); verb.connect(wetLP); wetLP.connect(wetHP); wetHP.connect(wet); wet.connect(spatialOut);
+    src.connect(dryGain); spatialOut.connect(master); dryGain.connect(master);
+    master.connect(analyser); analyser.connect(ac.destination);
+    applyPos(true); applyFx(true);
+  }
+  if (ac.state === 'suspended') ac.resume();
+}
+function setParam(p, v, now) { if (now) p.setValueAtTime(v, ac.currentTime); else p.setTargetAtTime(v, ac.currentTime, 0.04); }
+function applyPos(now) {
+  if (!ac) return;
+  const x = S.pos.x * METERS, z = S.pos.y * METERS, d = Math.hypot(x, z);
+  const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7)));
+  if (panner.positionX) { setParam(panner.positionX, x, now); setParam(panner.positionY, 0, now); setParam(panner.positionZ, z, now); }
+  else panner.setPosition(x, 0, z);
+  setParam(lowpass.frequency, 20000 * Math.pow(5000 / 20000, k), now);
+  setParam(wet.gain, S.echo ? 0.015 + 0.07 * (d / METERS) : 0, now); // эхо тихое и тёмное; можно выключить
+}
+function setEcho(v) { S.echo = v; store.set('pp_echo', v); initAudio(); applyPos(false); render(); }
+function applyFx(now) {
+  if (!ac) return;
+  const tc = now ? 0.001 : 0.08;
+  spatialOut.gain.setTargetAtTime(S.fx ? 1 : 0, ac.currentTime, tc);
+  dryGain.gain.setTargetAtTime(S.fx ? 0 : 1, ac.currentTime, tc);
+}
+// ---------------- Орбита ----------------
+const TAU = Math.PI * 2;
+function poly(pts) {
+  const segs = []; let L = 0;
+  pts.forEach((a, i) => { const b = pts[(i + 1) % pts.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]); segs.push([a, b, l]); L += l; });
+  return u => { let d = u * L; for (const [a, b, l] of segs) { if (d <= l) { const k = d / l; return { x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k }; } d -= l; } return { x: pts[0][0], y: pts[0][1] }; };
+}
+const starPts = []; for (let k = 0; k < 10; k++) { const r = k % 2 ? 0.42 : 1, a = k * TAU / 10; starPts.push([r * Math.sin(a), -r * Math.cos(a)]); }
+function kepler(u, e) { const M = TAU * u; let E = M; for (let i = 0; i < 8; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E)); return E; }
+// Все фигуры: u от 0 до 1 → точка в круге радиуса 1 (край радара = 3 м). Начало — впереди.
+const SHAPES = {
+  circle:   u => ({ x: Math.sin(TAU * u), y: -Math.cos(TAU * u) }),
+  oval:     u => ({ x: 0.5 * Math.sin(TAU * u), y: -Math.cos(TAU * u) }),
+  square:   poly([[0, -0.7], [0.7, -0.7], [0.7, 0.7], [-0.7, 0.7], [-0.7, -0.7]]),
+  triangle: poly([[0, -1], [0.87, 0.5], [-0.87, 0.5]]),
+  star:     poly(starPts),
+  eight:    u => ({ x: Math.sin(TAU * u), y: -0.55 * Math.sin(2 * TAU * u) }),
+  spiral:   u => { const r = 0.12 + 0.88 * (0.5 - 0.5 * Math.cos(TAU * u)), a = TAU * u * 3; return { x: r * Math.sin(a), y: -r * Math.cos(a) }; },
+  // Комета: летит по вытянутому эллипсу, голова в фокусе — вдали медленно, у головы резко проносится мимо
+  comet:    u => { const e = 0.8, a = 1 / (1 + e), b = a * Math.sqrt(1 - e * e), E = kepler((u + 0.5) % 1, e); return { x: b * Math.sin(E), y: a * (Math.cos(E) - e) }; },
+  pendulum: u => { const th = 1.35 * Math.sin(TAU * u); return { x: Math.sin(th), y: -Math.cos(th) }; },
+  wander:   u => { const a = TAU * u; let x = 0.55 * Math.sin(a) + 0.3 * Math.sin(3 * a + 1) + 0.12 * Math.sin(7 * a + 2), y = -0.55 * Math.cos(2 * a) + 0.3 * Math.sin(5 * a + 0.5) - 0.1 * Math.cos(a);
+    const d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } return { x, y }; }
+};
+const SHAPE_IDS = Object.keys(SHAPES);
+const O = Object.assign({ shape: 'circle', period: 10, size: 0.7, dir: 1 }, store.get('pp_orbit', {}), { on: false, u: 0, last: 0, trail: [] });
+if (!SHAPES[O.shape]) O.shape = 'circle';
+let orbitTimer = null;
+const saveOrbit = () => store.set('pp_orbit', { shape: O.shape, period: O.period, size: O.size, dir: O.dir });
+function orbitTick() {
+  const now = performance.now(), dt = Math.min(0.2, (now - O.last) / 1000); O.last = now;
+  O.u = ((O.u + O.dir * dt / O.period) % 1 + 1) % 1;
+  const p = SHAPES[O.shape](O.u);
+  S.pos = { x: p.x * O.size, y: p.y * O.size }; applyPos(false);
+  O.trail.push(S.pos); if (O.trail.length > 36) O.trail.shift();
+}
+// Таймер, а не кадры экрана: орбита продолжает летать и с погашенным экраном
+function orbitStart() { ping('orbit'); initAudio(); O.on = true; O.last = performance.now(); O.trail = []; if (!orbitTimer) orbitTimer = setInterval(orbitTick, 40); orbitTick(); render(); requestDraw(); }
+function orbitStop() { if (!O.on) return; O.on = false; clearInterval(orbitTimer); orbitTimer = null; O.trail = []; store.set('pp_pos', S.pos); render(); requestDraw(); }
+function shapeIcon(id) {
+  const f = SHAPES[id], pts = [];
+  for (let i = 0; i <= 120; i++) { const p = f(i / 120); pts.push(p.x.toFixed(3) + ',' + p.y.toFixed(3)); }
+  return '<svg viewBox="-1.2 -1.2 2.4 2.4"><polyline points="' + pts.join(' ') + '" fill="none" stroke="currentColor" stroke-width="0.13" stroke-linejoin="round"/><circle r="0.14" fill="currentColor" opacity=".6"/></svg>';
+}
+const paceToV = p => Math.round(Math.log(p / 40) / Math.log(2 / 40) * 100);
+const vToPace = v => +(40 * Math.pow(2 / 40, v / 100)).toFixed(1);
+function makeOrbit(el) {
+  el.innerHTML = '<div class="ob-shapes">' + SHAPE_IDS.map(id => '<button class="wb ob-s" data-sh="' + id + '">' + shapeIcon(id) + '</button>').join('') + '</div>' +
+    '<div class="ob-row"><button class="wb ob-go"></button><button class="wb ob-dir"></button></div>' +
+    '<div class="ob-l"><span data-i="pace"></span><b class="ob-pv"></b></div><input type="range" class="w-seek ob-pace" min="0" max="100">' +
+    '<div class="ob-l"><span data-i="size"></span><b class="ob-sv"></b></div><input type="range" class="w-seek ob-size" min="20" max="100">';
+  const q = s => el.querySelector(s);
+  el.querySelectorAll('.ob-s').forEach(b => b.addEventListener('click', () => {
+    O.shape = b.dataset.sh; saveOrbit(); if (!O.on) { O.u = 0; orbitStart(); } else { O.trail = []; render(); }
+  }));
+  q('.ob-go').addEventListener('click', () => O.on ? orbitStop() : orbitStart());
+  q('.ob-dir').addEventListener('click', () => { O.dir = -O.dir; saveOrbit(); render(); });
+  const pace = q('.ob-pace'), size = q('.ob-size');
+  pace.value = paceToV(O.period); size.value = Math.round(O.size * 100);
+  pace.addEventListener('input', () => { O.period = vToPace(+pace.value); saveOrbit(); render(); });
+  size.addEventListener('input', () => { O.size = +size.value / 100; O.trail = []; saveOrbit(); render(); requestDraw(); });
+  return { el, shapes: [...el.querySelectorAll('.ob-s')], go: q('.ob-go'), dir: q('.ob-dir'), pace, size, pv: q('.ob-pv'), sv: q('.ob-sv') };
+}
+
+function setPos(x, y, save) {
+  S.pos = { x, y }; applyPos(false); requestDraw();
+  if (save) store.set('pp_pos', S.pos);
+}
+
+// ---------------- Тексты ----------------
+const fmt = s => { s = Math.floor(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(x).padStart(2, '0'); };
+const fmtM = s => { s = Math.ceil(s); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const stripExt = n => n.replace(/\.[^.]+$/, '');
+function posInfo() {
+  const m = Math.hypot(S.pos.x, S.pos.y) * METERS;
+  const deg = (Math.round(Math.atan2(S.pos.x, -S.pos.y) * 180 / Math.PI) + 360) % 360;
+  return { m, deg, dist: m < 0.05 ? '0.0 m' : m.toFixed(1) + ' m', degS: String(deg).padStart(3, '0') + '°' };
+}
+const TXT = {
+  orbit: () => O.on ? t('sh_' + O.shape) : t('off'),
+  title: () => S.radio ? S.radio.name : S.cur >= 0 ? stripExt(S.tracks[S.cur].name) : t('open'),
+  sub: () => S.radio ? t('radio') + ' · ' + (S.plain ? t('stereo') : '3D') : S.cur < 0 ? t('phones') : S.tracks.length > 1 ? t('chapter') + ' ' + (S.cur + 1) + '/' + S.tracks.length : (S.tracks[S.cur].name.split('.').pop() || '').toUpperCase(),
+  time: () => fmt(S.seeking ? seekPreview : M().currentTime),
+  dur: () => S.radio ? '' : isFinite(audioEl.duration) ? fmt(audioEl.duration) : '00:00',
+  remain: () => S.radio ? '● ' + t('live') : isFinite(audioEl.duration) ? '−' + fmt(audioEl.duration - audioEl.currentTime) : '−00:00',
+  dist: () => posInfo().dist,
+  deg: () => posInfo().degS,
+  speed: () => S.speed + '×',
+  state: () => S.cur < 0 && !S.radio ? t('tagline') : M().paused ? t('st_pause') : t('st_play'),
+  fxs: () => S.fx ? t('on') : t('off'),
+  echos: () => S.echo ? t('on') : t('off'),
+  csum: () => S.speed + '×' + (S.fx ? '' : ' · 2D') + (S.echo ? '' : ' · ' + t('echo') + ' ' + t('off')) + (S.sleepEnd ? ' · ☾' + fmtM(Math.max(0, (S.sleepEnd - Date.now()) / 1000)) : ''),
+  locks: () => S.locked ? t('locked') : t('unlocked'),
+  sleeps: () => S.sleepEnd ? fmtM(Math.max(0, (S.sleepEnd - Date.now()) / 1000)) : t('off'),
+  count: () => S.tracks.length ? (S.cur + 1) + ' / ' + S.tracks.length : '',
+  clock: () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+};
+let seekPreview = 0;
+
+// ---------------- Скин: монтаж ----------------
+let skin = null, W = { txt: [], radar: [], viz: [], seek: [], ring: [], speed: [], sleep: [], fx: [], echo: [], list: [], orbit: [] }, colors = {};
+const SPEEDS = [1, 1.25, 1.5], SLEEPS = [0, 15, 30, 60];
+
+function mountSkin(sk) {
+  skin = sk;
+  $('skinCss').textContent = sk.css;
+  root.innerHTML = sk.html;
+  W = { txt: [], radar: [], viz: [], seek: [], ring: [], speed: [], sleep: [], fx: [], echo: [], list: [], orbit: [] };
+  root.querySelectorAll('[data-txt]').forEach(el => W.txt.push(el));
+  root.querySelectorAll('[data-act]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); act(el.dataset.act, el); }));
+  root.querySelectorAll('[data-widget]').forEach(el => {
+    const w = el.dataset.widget; el.classList.add('w-' + w);
+    if (w === 'radar') W.radar.push(makeRadar(el));
+    else if (w === 'viz') W.viz.push(makeViz(el));
+    else if (w === 'seek') W.seek.push(makeSeek(el));
+    else if (w === 'ring') W.ring.push(makeRing(el));
+    else if (w === 'speed') W.speed.push(makeChoice(el, SPEEDS, v => v + '×', v => setSpeed(v)));
+    else if (w === 'sleep') W.sleep.push(makeChoice(el, SLEEPS, v => v ? v + ' ' + t('min') : t('off'), v => setSleep(v)));
+    else if (w === 'echo') W.echo.push(makeChoice(el, [1, 0], v => v ? t('on') : t('off'), v => setEcho(!!v)));
+    else if (w === 'fx') W.fx.push(makeChoice(el, [1, 0], v => v ? t('on') : t('off'), v => { S.fx = !!v; initAudio(); applyFx(false); render(); }));
+    else if (w === 'presets') makePresets(el);
+    else if (w === 'list') W.list.push(el);
+    else if (w === 'orbit') W.orbit.push(makeOrbit(el));
+  });
+  const folds = store.get('pp_fold', {});
+  root.querySelectorAll('[data-fold]').forEach(h => {
+    const key = sk.id + ':' + h.dataset.fold, box = h.parentElement;
+    box.classList.toggle('folded', key in folds ? folds[key] : h.dataset.foldDefault === 'closed');
+    h.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (b && b !== h) return; // кнопки в заголовке работают как обычно
+      const closed = !box.classList.contains('folded');
+      box.classList.toggle('folded', closed);
+      const f = store.get('pp_fold', {}); f[key] = closed; store.set('pp_fold', f);
+      if (!closed) { resizeAll(); requestDraw(); }
+    });
+  });
+  const cs = getComputedStyle(root);
+  ['r-bg', 'r-grid', 'r-acc', 'r-acc2', 'r-txt', 'r-lock', 'v-a', 'v-b'].forEach(k => colors[k] = cs.getPropertyValue('--' + k).trim() || '#3ef0ff');
+  const mt = document.querySelector('meta[name=theme-color]'); if (mt) mt.content = cs.getPropertyValue('--theme').trim() || '#000';
+  applyLang(); renderList(); resizeAll(); render(); requestDraw();
+}
+
+function act(a) {
+  switch (a) {
+    case 'play': initAudio(); if (S.cur < 0 && !S.radio) $('fileInput').click(); else if (M().paused) M().play().catch(() => {}); else M().pause(); break;
+    case 'radio': openRadio(); break;
+    case 'open': $('fileInput').click(); break;
+    case 'openDir': $('dirInput').click(); break;
+    case 'orbit': O.on ? orbitStop() : orbitStart(); break;
+    case 'prev': if (S.radio) { stepStation(-1); break; } if (audioEl.currentTime > 5 || S.cur <= 0) audioEl.currentTime = 0; else load(S.cur - 1); break;
+    case 'next': if (S.radio) stepStation(1); else load(S.cur + 1); break;
+    case 'back': skip(-30); break;
+    case 'fwd': skip(30); break;
+    case 'lock': S.locked = !S.locked; render(); requestDraw(); break;
+    case 'echo': setEcho(!S.echo); break;
+    case 'fx': S.fx = !S.fx; initAudio(); applyFx(false); render(); break;
+    case 'speed': setSpeed(SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]); break;
+    case 'sleep': setSleep(SLEEPS[(SLEEPS.indexOf(S.sleepMin) + 1) % SLEEPS.length]); break;
+    case 'menu': openMenu(); break;
+  }
+}
+
+function makeChoice(el, values, label, onPick) {
+  el.innerHTML = '';
+  const btns = values.map(v => {
+    const b = document.createElement('button'); b.className = 'wb'; b.dataset.v = v;
+    b.addEventListener('click', () => onPick(v)); el.appendChild(b); return b;
+  });
+  return { el, btns, values, label };
+}
+function makePresets(el) {
+  el.innerHTML = '';
+  [['lsh', -0.2, 0], ['rsh', 0.2, 0], ['ahead', 0, -0.83], ['center', 0, 0]].forEach(([k, x, y]) => {
+    const b = document.createElement('button'); b.className = 'wb'; b.dataset.i = k;
+    b.addEventListener('click', () => { if (S.locked) return; initAudio(); orbitStop(); setPos(x, y, true); });
+    el.appendChild(b);
+  });
+}
+function makeSeek(el) {
+  el.innerHTML = '<input type="range" class="w-seek" min="0" max="1000" value="0">';
+  const inp = el.firstChild;
+  inp.addEventListener('input', () => {
+    S.seeking = true; const d = audioEl.duration, p = inp.value / 1000;
+    W.seek.forEach(s => { s.value = inp.value; s.style.setProperty('--p', (p * 100) + '%'); });
+    if (isFinite(d)) seekPreview = p * d; render();
+  });
+  inp.addEventListener('change', () => { const d = audioEl.duration; if (isFinite(d)) audioEl.currentTime = inp.value / 1000 * d; S.seeking = false; });
+  return inp;
+}
+function makeRing(el) {
+  el.innerHTML = '<svg viewBox="0 0 100 100"><circle class="rg-bg" cx="50" cy="50" r="48" fill="none" pathLength="100"/><circle class="rg-fg" cx="50" cy="50" r="48" fill="none" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" transform="rotate(-90 50 50)"/></svg>';
+  return el.querySelector('.rg-fg');
+}
+
+// ---------------- Отрисовка состояния ----------------
+function render() {
+  root.classList.toggle('is-playing', !M().paused);
+  root.classList.toggle('is-radio', !!S.radio);
+  root.classList.toggle('is-plain', S.plain);
+  root.classList.toggle('has-track', S.cur >= 0 || !!S.radio);
+  root.classList.toggle('is-locked', S.locked);
+  root.classList.toggle('fx-off', !S.fx);
+  root.classList.toggle('no-track', S.cur < 0 && !S.radio);
+  root.classList.toggle('multi', S.tracks.length > 1);
+  W.txt.forEach(el => { const f = TXT[el.dataset.txt]; if (f) { const v = f(); if (el.textContent !== v) el.textContent = v; } });
+  const d = audioEl.duration, p = !S.seeking && isFinite(d) && d > 0 ? audioEl.currentTime / d : null;
+  if (p !== null) W.seek.forEach(s => { s.value = Math.round(p * 1000); s.style.setProperty('--p', (p * 100) + '%'); });
+  W.ring.forEach(r => r.setAttribute('stroke-dashoffset', 100 - (p || 0) * 100));
+  const choice = (list, cur) => list.forEach(c => c.btns.forEach((b, i) => {
+    const v = c.values[i]; b.classList.toggle('on', v === cur);
+    const txt = c === null ? '' : (c.values === SLEEPS && v === S.sleepMin && S.sleepEnd) ? fmtM(Math.max(0, (S.sleepEnd - Date.now()) / 1000)) : c.label(v);
+    if (b.textContent !== txt) b.textContent = txt;
+  }));
+  choice(W.speed, S.speed); choice(W.sleep, S.sleepMin); choice(W.fx, S.fx ? 1 : 0); choice(W.echo, S.echo ? 1 : 0);
+  root.classList.toggle('orbiting', O.on);
+  W.orbit.forEach(o => {
+    o.shapes.forEach(b => { b.classList.toggle('on', b.dataset.sh === O.shape); b.title = t('sh_' + b.dataset.sh); });
+    const go = O.on ? '■ ' + t('stop') : '▶ ' + t('sh_' + O.shape);
+    if (o.go.textContent !== go) o.go.textContent = go;
+    o.go.classList.toggle('on', O.on);
+    o.dir.textContent = O.dir > 0 ? '↻' : '↺';
+    o.pv.textContent = O.period + ' s'; o.sv.textContent = (O.size * METERS).toFixed(1) + ' m';
+  });
+}
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => el.textContent = t(el.dataset.i));
+  document.querySelectorAll('[data-ph]').forEach(el => el.placeholder = t(el.dataset.ph));
+  renderStations();
+  $('helpText').innerHTML = HELP[lang];
+  $('langSel').value = lang;
+  W.speed.concat(W.sleep, W.fx, W.echo).forEach(c => c.btns.forEach(b => b.textContent = ''));
+  renderSkinList(); render(); requestDraw();
+}
+
+// ---------------- Радар ----------------
+const PARROT = new Path2D('M46 16 C56 12 66 16 70 24 C76 28 76 38 70 43 C70 38 67 35 63 35 C64 47 62 58 56 68 L50 92 L46 70 C38 62 34 48 36 34 C37 24 40 18 46 16 Z'); // силуэт попугая, рамка 100×100
+const PARROT2 = new Path2D('M62 24 C64.5 28 64.5 32 63 35 M44 40 C52 46 56 55 52 66 M46 16 C42 10 44 6 49 4');
+function makeRadar(el) {
+  const cv = document.createElement('canvas'); el.innerHTML = ''; el.appendChild(cv);
+  cv.width = cv.height = SIZE * dpr;
+  const g = cv.getContext('2d'); if (g) g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  let drag = false;
+  const toPos = e => {
+    const r = cv.getBoundingClientRect(), s = SIZE / r.width, R = radarR();
+    let nx = ((e.clientX - r.left) * s - C) / R, ny = ((e.clientY - r.top) * s - C) / R;
+    const d = Math.hypot(nx, ny); if (d > 1) { nx /= d; ny /= d; }
+    setPos(nx, ny, false);
+  };
+  cv.addEventListener('pointerdown', e => { if (S.locked) return; initAudio(); orbitStop(); drag = true; cv.setPointerCapture(e.pointerId); toPos(e); });
+  cv.addEventListener('pointermove', e => { if (drag) toPos(e); });
+  const end = () => { if (drag) { drag = false; store.set('pp_pos', S.pos); } };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  return { g, cv };
+}
+const radarR = () => (skin && skin.radar && skin.radar.r) || 128;
+
+function drawRadar(g, now) {
+  if (!g) return;
+  const o = skin.radar || {}, c = colors, R = radarR();
+  const mono = o.font || 'ui-monospace, Menlo, Consolas, monospace';
+  g.clearRect(0, 0, SIZE, SIZE);
+  g.lineCap = 'round'; g.lineJoin = 'round'; g.setLineDash([]);
+  // поле
+  g.beginPath(); g.arc(C, C, R + (o.pad == null ? 14 : o.pad), 0, Math.PI * 2); g.fillStyle = c['r-bg']; g.fill();
+  // кольца
+  g.strokeStyle = c['r-grid']; g.lineWidth = 1;
+  const rings = o.rings || 'meters';
+  for (let i = 1; i <= 6; i++) {
+    const major = i % 2 === 0;
+    if (rings === 'soft' && !major) continue;
+    g.globalAlpha = major ? (rings === 'dense' ? .45 : .38) : .13;
+    g.setLineDash(rings === 'dense' && !major ? [2, 4] : []);
+    g.beginPath(); g.arc(C, C, R * i / 6, 0, Math.PI * 2); g.stroke();
+  }
+  g.setLineDash([]);
+  // оси
+  if (o.cross !== false) {
+    g.globalAlpha = .28; g.beginPath(); g.moveTo(C, C - R); g.lineTo(C, C + R); g.moveTo(C - R, C); g.lineTo(C + R, C); g.stroke();
+  }
+  if (o.diag) {
+    const d = R * Math.SQRT1_2; g.globalAlpha = .12; g.beginPath();
+    g.moveTo(C - d, C - d); g.lineTo(C + d, C + d); g.moveTo(C + d, C - d); g.lineTo(C - d, C + d); g.stroke();
+  }
+  // риски по краю
+  if (o.ticks === 'deg') {
+    g.font = '9px ' + mono; g.fillStyle = c['r-txt']; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let a = 0; a < 360; a += 5) {
+      const rad = (a - 90) * Math.PI / 180, cs = Math.cos(rad), sn = Math.sin(rad);
+      const len = a % 30 === 0 ? 8 : a % 10 === 0 ? 5 : 2.5;
+      g.globalAlpha = a % 30 === 0 ? .8 : .45;
+      g.beginPath(); g.moveTo(C + cs * (R + 2), C + sn * (R + 2)); g.lineTo(C + cs * (R + 2 + len), C + sn * (R + 2 + len)); g.stroke();
+    }
+    g.globalAlpha = .85;
+    for (let a = 0; a < 360; a += 30) {
+      const rad = (a - 90) * Math.PI / 180;
+      g.fillText(String(a).padStart(3, '0'), C + Math.cos(rad) * (R - 11), C + Math.sin(rad) * (R - 11));
+    }
+  } else if (o.ticks === 'hours') {
+    for (let a = 0; a < 360; a += 30) {
+      const rad = (a - 90) * Math.PI / 180, cs = Math.cos(rad), sn = Math.sin(rad), big = a % 90 === 0;
+      g.globalAlpha = big ? .9 : .5; g.lineWidth = big ? 3 : 2;
+      g.beginPath(); g.moveTo(C + cs * (R - (big ? 12 : 8)), C + sn * (R - (big ? 12 : 8))); g.lineTo(C + cs * (R - 2), C + sn * (R - 2)); g.stroke();
+    }
+    g.lineWidth = 1;
+  }
+  // метры
+  if (o.dist) {
+    g.globalAlpha = .75; g.fillStyle = c['r-txt']; g.font = '9px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle';
+    [1, 2, 3].forEach(m => { const r = R * m / 3 * Math.SQRT1_2; g.fillText(m + 'M', C - r - 9, C + r + 2); });
+  }
+  g.globalAlpha = 1;
+  // развёртка
+  if (o.sweep) {
+    const a = ((now / 1000) * Math.PI / 2) % (Math.PI * 2) - Math.PI / 2, steps = 24, span = Math.PI / 3;
+    g.fillStyle = c['r-grid'];
+    for (let k = 0; k < steps; k++) {
+      g.globalAlpha = .16 * (1 - k / steps);
+      g.beginPath(); g.moveTo(C, C); g.arc(C, C, R, a - span * (k + 1) / steps, a - span * k / steps); g.closePath(); g.fill();
+    }
+    g.globalAlpha = .7; g.strokeStyle = c['r-grid']; g.beginPath(); g.moveTo(C, C); g.lineTo(C + Math.cos(a) * R, C + Math.sin(a) * R); g.stroke();
+    g.globalAlpha = 1;
+  }
+  const px = C + S.pos.x * R, py = C + S.pos.y * R, dist = Math.hypot(px - C, py - C);
+  const pc = S.locked ? c['r-lock'] : c['r-acc'];
+  if (O.on) {
+    const f = SHAPES[O.shape];
+    g.save(); g.strokeStyle = c['r-acc']; g.globalAlpha = .3; g.lineWidth = 1.2; g.setLineDash([3, 4]); g.beginPath();
+    for (let i = 0; i <= 160; i++) { const p = f(i / 160), x = C + p.x * O.size * R, y = C + p.y * O.size * R; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke(); g.setLineDash([]); g.fillStyle = pc;
+    O.trail.forEach((p, i) => { const k = i / O.trail.length; g.globalAlpha = k * .55; g.beginPath(); g.arc(C + p.x * R, C + p.y * R, 1 + k * 4, 0, TAU); g.fill(); });
+    g.restore();
+  }
+  // луч
+  if (o.beam !== 'none' && dist > 26) {
+    const ux = (px - C) / dist, uy = (py - C) / dist;
+    const gr = g.createLinearGradient(C, C, px, py); gr.addColorStop(0, c['r-acc2']); gr.addColorStop(1, pc);
+    g.save(); g.strokeStyle = gr; g.lineWidth = o.beam === 'dashed' ? 2 : 2.5; g.shadowColor = c['r-acc2']; g.shadowBlur = 10;
+    if (o.beam === 'dashed') { g.setLineDash([6, 5]); g.lineDashOffset = -(now / 40) % 11; }
+    g.beginPath(); g.moveTo(C + ux * 16, C + uy * 16); g.lineTo(px - ux * 18, py - uy * 18); g.stroke(); g.restore();
+  }
+  // голова
+  g.save(); g.shadowColor = c['r-acc2']; g.shadowBlur = 8; g.strokeStyle = c['r-acc2']; g.fillStyle = c['r-acc2'];
+  if (o.head === 'dot') {
+    g.beginPath(); g.arc(C, C, 6, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.moveTo(C, C - 15); g.lineTo(C - 4, C - 9); g.lineTo(C + 4, C - 9); g.fill();
+  } else {
+    g.lineWidth = 1.5; g.beginPath(); g.arc(C, C, 12, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.moveTo(C, C - 22); g.lineTo(C - 4.5, C - 16); g.lineTo(C + 4.5, C - 16); g.fill();
+    g.shadowBlur = 0; g.beginPath(); g.arc(C, C - 3, 3.6, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(C, C + 8, 6.5, Math.PI, 0); g.fill();
+  }
+  g.restore();
+  if (o.you) { g.fillStyle = c['r-txt']; g.font = '9px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t('you').toUpperCase(), C, C + 21); }
+  // попугай (вектор), смотрит на голову
+  const flip = px > C + 1 ? -1 : 1, sc = 0.3;
+  g.save(); g.translate(px, py); g.scale(sc * flip, sc); g.translate(-55, -48);
+  g.shadowColor = pc; g.shadowBlur = 14; g.lineWidth = 1.8 / sc; g.strokeStyle = pc; g.fillStyle = c['r-bg'];
+  g.fill(PARROT); g.stroke(PARROT); g.shadowBlur = 0; g.globalAlpha = .7; g.lineWidth = 1.3 / sc; g.stroke(PARROT2); g.globalAlpha = 1;
+  g.fillStyle = pc; g.beginPath(); g.arc(57, 25, 3, 0, Math.PI * 2); g.fill();
+  g.restore();
+  // прицел
+  if (o.reticle) {
+    const s = 21, k = 6; g.strokeStyle = pc; g.lineWidth = 1.5; g.globalAlpha = .9;
+    g.beginPath();
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
+      g.moveTo(px + sx * s, py + sy * (s - k)); g.lineTo(px + sx * s, py + sy * s); g.lineTo(px + sx * (s - k), py + sy * s);
+    });
+    g.stroke(); g.globalAlpha = 1;
+  }
+  // подпись
+  if (o.label !== false && dist > 3) {
+    const pi = posInfo(); const nd = Math.hypot(S.pos.x, S.pos.y);
+    const lines = o.reticle ? ['AZM ' + pi.degS, 'RNG ' + pi.dist.toUpperCase()] : [pi.dist + ' · ' + pi.deg + '°'];
+    g.font = (o.reticle ? '600 10px ' : 'bold 11px ') + mono; g.fillStyle = pc; g.textBaseline = 'middle';
+    let lx, ly, al;
+    if (nd > 0.45) { const r = px > C; al = r ? 'right' : 'left'; lx = r ? px - 28 : px + 28; ly = py < 40 ? py + 30 : py - 26; }
+    else {
+      const ux = S.pos.x / nd, uy = S.pos.y / nd;
+      if (Math.abs(ux) >= 0.5) { al = ux > 0 ? 'left' : 'right'; lx = px + (ux > 0 ? 28 : -28); ly = py + 4; }
+      else { al = 'center'; lx = px; ly = py + (uy < 0 ? -36 : 36); }
+    }
+    g.textAlign = al;
+    lines.forEach((s, i) => g.fillText(s, lx, ly + (i - (lines.length - 1) / 2) * 12));
+  }
+}
+
+// ---------------- Волна / спектр ----------------
+const peaks = [];
+function makeViz(el) {
+  const cv = document.createElement('canvas'); el.innerHTML = ''; el.appendChild(cv);
+  return { el, cv, g: cv.getContext('2d') };
+}
+function sizeViz(v) { const r = v.el.getBoundingClientRect(); if (r.width) { v.cv.width = Math.round(r.width * dpr); v.cv.height = Math.round(r.height * dpr); } }
+function drawViz(v) {
+  const g = v.g; if (!g || !v.cv.width) return;
+  const w = v.cv.width, h = v.cv.height, type = skin.viz || 'bars';
+  g.clearRect(0, 0, w, h);
+  const live = analyser && !audioEl.paused;
+  const gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, colors['v-a']); gr.addColorStop(1, colors['v-b']);
+  if (type === 'wave') {
+    if (live) analyser.getByteTimeDomainData(wave);
+    g.save(); g.strokeStyle = gr; g.lineWidth = 1.6 * dpr; g.shadowColor = colors['v-a']; g.shadowBlur = 8 * dpr;
+    g.globalAlpha = .25; g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke(); g.globalAlpha = 1;
+    g.beginPath();
+    const n = wave ? wave.length : 2;
+    for (let i = 0; i < n; i++) {
+      const y = live ? (wave[i] / 255) * h : h / 2 + Math.sin(i / 6 + performance.now() / 600) * h * 0.03;
+      const x = i / (n - 1) * w; i ? g.lineTo(x, y) : g.moveTo(x, y);
+    }
+    g.stroke(); g.restore();
+    return;
+  }
+  if (live) analyser.getByteFrequencyData(freq);
+  const bins = freq ? freq.length : 1;
+  if (type === 'blocks') {
+    const n = 24, bw = w / n, rows = Math.max(6, Math.floor(h / (4 * dpr))), bh = h / rows;
+    for (let i = 0; i < n; i++) {
+      const v2 = live ? freq[Math.min(bins - 1, Math.floor(Math.pow(i / n, 1.6) * bins * 0.8))] / 255 : 0;
+      const lit = Math.round(v2 * rows);
+      peaks[i] = Math.max(lit, (peaks[i] || 0) - 0.25);
+      for (let r = 0; r < lit; r++) {
+        g.fillStyle = r > rows * .8 ? colors['v-b'] : r > rows * .55 ? '#e6e600' : colors['v-a'];
+        g.fillRect(i * bw + 1 * dpr, h - (r + 1) * bh + 1 * dpr, bw - 2 * dpr, bh - 2 * dpr);
+      }
+      if (peaks[i] > 0) { g.fillStyle = '#d0d0d0'; g.fillRect(i * bw + 1 * dpr, h - Math.ceil(peaks[i]) * bh, bw - 2 * dpr, Math.max(1, dpr)); }
+    }
+    return;
+  }
+  const n = Math.max(12, Math.floor(w / (5 * dpr))), bw = w / n;
+  g.fillStyle = gr; g.globalAlpha = live ? 1 : .3;
+  for (let i = 0; i < n; i++) {
+    const c = Math.abs(i - (n - 1) / 2) / ((n - 1) / 2);
+    const v2 = live ? freq[Math.min(bins - 1, Math.floor(c * bins * 0.6))] / 255 : 0;
+    const bh = Math.max(2 * dpr, v2 * h * 0.95);
+    g.fillRect(i * bw + bw * 0.2, (h - bh) / 2, bw * 0.6, bh);
+  }
+  g.globalAlpha = 1;
+}
+
+// ---------------- Цикл анимации ----------------
+let rafOn = false, lastFrame = 0, drawPending = false;
+function frame(ts) {
+  if (document.hidden) { rafOn = false; return; }
+  if (ts - lastFrame >= 32 || drawPending) {
+    lastFrame = ts; drawPending = false;
+    W.radar.forEach(r => drawRadar(r.g, ts));
+    W.viz.forEach(drawViz);
+  }
+  const animated = !M().paused || O.on || (skin && skin.radar && (skin.radar.sweep || skin.radar.beam === 'dashed'));
+  if (animated) requestAnimationFrame(frame); else rafOn = false;
+}
+function requestDraw() { drawPending = true; if (!rafOn) { rafOn = true; requestAnimationFrame(frame); } }
+function resizeAll() { W.viz.forEach(sizeViz); }
+window.addEventListener('resize', () => { resizeAll(); requestDraw(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) savePos(); else requestDraw(); });
+
+// ---------------- Книга ----------------
+let lastSave = 0;
+const keyOf = f => 'pp_t_' + f.name + '_' + f.size;
+function savePos() { if (S.cur < 0 || !S.tracks[S.cur] || !S.ready) return; store.set(keyOf(S.tracks[S.cur]), { t: audioEl.currentTime, at: Date.now() }); }
+function renderList() {
+  W.list.forEach(box => {
+    box.innerHTML = '';
+    S.tracks.forEach((f, i) => {
+      const s = store.get(keyOf(f), null);
+      const row = document.createElement('div');
+      row.className = 'li' + (i === S.cur ? ' cur' : '');
+      row.innerHTML = '<span class="n"></span><span class="t"></span>';
+      row.querySelector('.n').textContent = (i + 1) + '. ' + stripExt(f.name);
+      row.querySelector('.t').textContent = s && s.t > 0 ? fmt(s.t) : '';
+      row.addEventListener('click', () => load(i));
+      box.appendChild(row);
+    });
+  });
+}
+function load(i) {
+  if (i < 0 || i >= S.tracks.length) return;
+  stopRadio();
+  savePos(); S.cur = i; S.ready = false;
+  const f = S.tracks[i], saved = store.get(keyOf(f), null);
+  if (audioEl.src) URL.revokeObjectURL(audioEl.src);
+  audioEl.src = URL.createObjectURL(f);
+  audioEl.onloadedmetadata = () => {
+    audioEl.playbackRate = S.speed;
+    if (saved && saved.t > 0 && saved.t < audioEl.duration - 5) audioEl.currentTime = saved.t;
+    S.ready = true; render();
+  };
+  audioEl.play().catch(() => {});
+  setupMediaSession(f.name); renderList(); render(); resizeAll(); requestDraw();
+}
+const AUDIO_RE = /\.(mp3|m4a|m4b|aac|ogg|oga|opus|wav|flac|webm|mka)$/i;
+function takeFiles(e) {
+  const files = [...e.target.files].filter(f => (f.type || '').startsWith('audio/') || AUDIO_RE.test(f.name));
+  e.target.value = '';
+  if (!files.length) { if (e.target.id === 'dirInput') alert(t('noAudio')); return; }
+  initAudio(); savePos();
+  const path = f => f.webkitRelativePath || f.name;
+  files.sort((a, b) => path(a).localeCompare(path(b), undefined, { numeric: true }));
+  S.tracks = files; S.cur = -1;
+  let best = 0, bestAt = -1;
+  files.forEach((f, i) => { const s = store.get(keyOf(f), null); if (s && s.at > bestAt) { bestAt = s.at; best = i; } });
+  load(best);
+}
+$('fileInput').addEventListener('change', takeFiles);
+$('dirInput').addEventListener('change', takeFiles);
+audioEl.addEventListener('timeupdate', () => { render(); if (Date.now() - lastSave > 5000) { lastSave = Date.now(); savePos(); } });
+audioEl.addEventListener('play', () => { render(); requestDraw(); });
+audioEl.addEventListener('pause', () => { render(); savePos(); requestDraw(); });
+audioEl.addEventListener('ended', () => {
+  if (S.cur >= 0) store.set(keyOf(S.tracks[S.cur]), { t: 0, at: Date.now() });
+  S.ready = false; if (S.cur < S.tracks.length - 1) load(S.cur + 1);
+});
+window.addEventListener('pagehide', savePos);
+function skip(sec) {
+  if (S.radio) return; // в прямом эфире перематывать некуда
+  const max = isFinite(audioEl.duration) ? audioEl.duration : Infinity; audioEl.currentTime = Math.min(max, Math.max(0, audioEl.currentTime + sec)); }
+function setupMediaSession(title) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({ title: stripExt(title), artist: 'Wisp · ' + t('tagline') });
+  const h = { play: () => M().play(), pause: () => M().pause(), seekbackward: () => skip(-30), seekforward: () => skip(30),
+    previoustrack: () => S.radio ? stepStation(-1) : load(S.cur - 1), nexttrack: () => S.radio ? stepStation(1) : load(S.cur + 1) };
+  for (const k in h) { try { navigator.mediaSession.setActionHandler(k, h[k]); } catch (e) {} }
+}
+function setSpeed(v) { S.speed = v; if (!S.radio) audioEl.playbackRate = v; store.set('pp_speed', v); render(); }
+
+// ---------------- Радио ----------------
+const DEFAULT_ST = [
+  { name: 'Радио Фантастики', url: 'https://myradio24.org/55699' },
+  { name: 'Радио Фантастики · 32k', url: 'https://myradio24.org/55699_32' }
+];
+let stations = store.get('pp_stations', DEFAULT_ST);
+let radioTry = 0;
+function toast(msg) {
+  const el = $('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+function stopRadio() {
+  if (!S.radio) return;
+  S.radio = null; S.plain = false;
+  audioEl.onplaying = audioEl.onerror = null;
+  audioPlain.pause(); audioPlain.removeAttribute('src'); audioPlain.load();
+  audioEl.pause(); audioEl.removeAttribute('crossorigin');
+}
+function playStation(st) {
+  savePos();
+  if (S.radio) stopRadio(); else { audioEl.pause(); if (audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src); }
+  S.tracks = []; S.cur = -1; S.ready = false; renderList();
+  S.radio = st; S.plain = false;
+  const my = ++radioTry;
+  initAudio();
+  // Просим поток с разрешением на обработку. Не дал разрешения — поток не откроется, и мы переключимся на стерео.
+  audioEl.crossOrigin = 'anonymous';
+  audioEl.onloadedmetadata = null;
+  audioEl.playbackRate = 1;
+  audioEl.src = st.url;
+  let started = false;
+  audioEl.onplaying = () => { if (my !== radioTry) return; if (!started) { started = true; mark(st, true); } };
+  audioEl.onerror = () => {
+    if (my !== radioTry || S.plain) return;
+    if (!started) startPlain(st, my);                                   // скорее всего, станция не разрешает 3D
+    else setTimeout(() => { if (my === radioTry && S.radio === st) { audioEl.src = st.url; audioEl.play().catch(() => {}); } }, 2000); // обрыв — переподключаемся
+  };
+  audioEl.play().catch(() => {});
+  setupMediaSession(st.name); render(); requestDraw();
+}
+function startPlain(st, my) {
+  audioEl.onerror = null; audioEl.removeAttribute('src'); audioEl.load();
+  S.plain = true;
+  audioPlain.src = st.url;
+  audioPlain.onplaying = () => { if (my === radioTry) { mark(st, false); toast(t('no3d')); } audioPlain.onplaying = null; };
+  audioPlain.onerror = () => { if (my === radioTry && S.radio === st) { toast(t('streamFail')); stopRadio(); render(); } };
+  audioPlain.play().catch(() => {});
+  render(); requestDraw();
+}
+function mark(st, d3) {
+  const s = stations.find(x => x.url === st.url); if (s && s.d3 !== d3) { s.d3 = d3; store.set('pp_stations', stations); }
+  renderStations();
+}
+function stepStation(k) {
+  if (!stations.length) return;
+  const i = stations.findIndex(x => S.radio && x.url === S.radio.url);
+  playStation(stations[((i < 0 ? 0 : i + k) % stations.length + stations.length) % stations.length]);
+}
+['play', 'pause', 'timeupdate'].forEach(ev => audioPlain.addEventListener(ev, () => { render(); requestDraw(); }));
+
+function renderStations() {
+  const box = $('stList'); if (!box) return; box.innerHTML = '';
+  stations.forEach((st, i) => {
+    const row = document.createElement('div'); row.className = 'st' + (S.radio && S.radio.url === st.url ? ' on' : '');
+    row.innerHTML = '<button class="sp"><b></b><small></small></button><span class="bd"></span><button class="del">✕</button>';
+    row.querySelector('b').textContent = st.name;
+    row.querySelector('small').textContent = st.url;
+    row.querySelector('.bd').textContent = st.d3 === true ? '3D' : st.d3 === false ? t('stereo') : '';
+    row.querySelector('.sp').addEventListener('click', () => { playStation(st); closeRadio(); });
+    row.querySelector('.del').addEventListener('click', () => { stations.splice(i, 1); store.set('pp_stations', stations); renderStations(); });
+    box.appendChild(row);
+  });
+}
+function readStation() {
+  const url = $('stUrl').value.trim();
+  if (!/^https:\/\/[^\s]+$/i.test(url)) { toast(t('badUrl')); return null; }
+  let name = $('stName').value.trim();
+  if (!name) { try { name = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { name = url; } }
+  return { name: name.slice(0, 60), url };
+}
+function addStation(st) {
+  if (!stations.some(x => x.url === st.url)) { stations.push(st); store.set('pp_stations', stations); }
+  $('stUrl').value = ''; $('stName').value = ''; renderStations();
+}
+$('stSave').addEventListener('click', () => { const st = readStation(); if (st) addStation(st); });
+$('stPlay').addEventListener('click', () => { const st = readStation(); if (st) { addStation(st); playStation(stations.find(x => x.url === st.url)); closeRadio(); } });
+function openRadio() { renderStations(); $('radioSheet').classList.remove('hidden'); }
+function closeRadio() { $('radioSheet').classList.add('hidden'); }
+$('radioClose').addEventListener('click', closeRadio);
+
+// ---------------- Таймер сна ----------------
+let sleepTick = null, fading = false;
+function setSleep(min) {
+  clearInterval(sleepTick); sleepTick = null; fading = false;
+  if (master) { master.gain.cancelScheduledValues(ac.currentTime); master.gain.setValueAtTime(1, ac.currentTime); }
+  S.sleepMin = min; S.sleepEnd = min ? Date.now() + min * 60000 : 0;
+  if (min) sleepTick = setInterval(() => {
+    const left = (S.sleepEnd - Date.now()) / 1000;
+    if (left <= 10 && !fading && master) { fading = true; master.gain.setTargetAtTime(0, ac.currentTime, 3); }
+    if (left <= 0) { M().pause(); setSleep(0); return; }
+    render();
+  }, 1000);
+  render();
+}
+setInterval(() => { if (W.txt.some(el => el.dataset.txt === 'clock')) render(); }, 15000);
+
+// ---------------- Скины: выбор, файл, проверка ----------------
+let custom = store.get('pp_custom', null);
+let skinId = store.get('pp_skin', SKINS[0].id);
+const allSkins = () => custom ? SKINS.concat([custom]) : SKINS;
+
+function useSkin(id) {
+  const sk = allSkins().find(s => s.id === id) || SKINS[0];
+  skinId = sk.id; store.set('pp_skin', skinId); mountSkin(sk); renderSkinList();
+}
+function renderSkinList() {
+  const box = $('skinList'); box.innerHTML = '';
+  allSkins().forEach(sk => {
+    const b = document.createElement('button'); b.className = 'sk' + (sk.id === skinId ? ' on' : '');
+    b.innerHTML = '<span class="pv"></span><span><b></b><small></small></span>';
+    b.querySelector('.pv').style.background = sk.preview || '#222';
+    b.querySelector('b').textContent = L(sk.name) || t('custom');
+    b.querySelector('small').textContent = L(sk.desc);
+    b.addEventListener('click', () => { useSkin(sk.id); closeMenu(); });
+    box.appendChild(b);
+  });
+}
+function openMenu() { renderSkinList(); $('menu').classList.remove('hidden'); }
+function closeMenu() { $('menu').classList.add('hidden'); }
+$('menuClose').addEventListener('click', closeMenu);
+$('langSel').innerHTML = LANGS.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
+$('langSel').addEventListener('change', e => { lang = e.target.value; store.set('pp_lang', lang); applyLang(); });
+
+// ---------------- Обратная связь ----------------
+const FEEDBACK_URL = 'https://t.me/WispPlayer_bot'; // отзывы — в Telegram-бота
+if (FEEDBACK_URL) $('fbLink').href = FEEDBACK_URL; else $('fbLink').classList.add('hidden');
+
+// ---------------- Своя статистика: тихие отметки в журнал сервера ----------------
+// Без cookies и без личных данных: только «что произошло» и язык. Каждая отметка — раз за запуск.
+const pinged = {};
+function ping(ev) {
+  if (pinged[ev] || location.protocol !== 'https:') return;
+  pinged[ev] = 1;
+  try {
+    const app = window.matchMedia && matchMedia('(display-mode: standalone)').matches ? 'app' : 'web';
+    fetch('/e/' + ev + '?l=' + lang + '&m=' + app, { cache: 'no-store', keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+ping('open');
+window.addEventListener('appinstalled', () => ping('install'));
+audioEl.addEventListener('play', () => ping(S.radio ? 'radio' : 'play'));
+audioPlain.addEventListener('play', () => ping('radio'));
+
+$('expSkin').addEventListener('click', () => {
+  const sk = allSkins().find(s => s.id === skinId) || SKINS[0];
+  const data = { parrotSkin: 2, name: sk.name, desc: sk.desc, preview: sk.preview, css: sk.css, html: sk.html, radar: sk.radar, viz: sk.viz };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+  a.download = 'wisp-skin-' + (typeof sk.name === 'string' ? sk.name : (sk.name.en || 'skin')).toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+
+// Чужой скин может менять вид, но не может выполнять код и ничего не грузит из сети
+const ACTS = ['play', 'open', 'openDir', 'radio', 'orbit', 'echo', 'prev', 'next', 'back', 'fwd', 'lock', 'fx', 'speed', 'sleep', 'menu'];
+function cleanHtml(html) {
+  const doc = new DOMParser().parseFromString('<div id="x">' + html + '</div>', 'text/html');
+  doc.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form,frame,frameset,template,audio,video,img,source').forEach(n => n.remove());
+  doc.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(a => {
+      const n = a.name.toLowerCase(), v = a.value.trim();
+      if (n.startsWith('on')) el.removeAttribute(a.name);
+      else if (['href', 'xlink:href', 'src', 'action', 'formaction', 'srcset', 'background'].includes(n) && !v.startsWith('#')) el.removeAttribute(a.name);
+      else if (n === 'style' && /url\s*\(|expression|@import/i.test(v)) el.removeAttribute(a.name);
+      else if (n === 'data-act' && !ACTS.includes(v)) el.removeAttribute(a.name);
+    });
+  });
+  return doc.getElementById('x').innerHTML;
+}
+function cleanCss(css) {
+  return String(css)
+    .replace(/@import[^;]*;?/gi, '')
+    .replace(/url\s*\(\s*(['"]?)\s*(?!data:image\/(png|jpeg|webp|gif|svg\+xml)[;,])[^)]*\)/gi, 'none')
+    .replace(/expression\s*\(/gi, '(')
+    .replace(/<\/?style/gi, '');
+}
+function cleanRadar(r) {
+  const o = {}, pick = (k, ok) => { if (r && ok(r[k])) o[k] = r[k]; };
+  pick('r', v => typeof v === 'number' && v >= 80 && v <= 140);
+  pick('pad', v => typeof v === 'number' && v >= 0 && v <= 20);
+  pick('rings', v => ['meters', 'dense', 'soft'].includes(v));
+  pick('ticks', v => ['deg', 'hours', 'none'].includes(v));
+  pick('beam', v => ['solid', 'dashed', 'none'].includes(v));
+  pick('head', v => ['vector', 'dot'].includes(v));
+  ['cross', 'diag', 'sweep', 'reticle', 'dist', 'you', 'label'].forEach(k => pick(k, v => typeof v === 'boolean'));
+  pick('font', v => typeof v === 'string' && /^[\w\s,'"-]{1,80}$/.test(v));
+  return o;
+}
+const cleanName = v => typeof v === 'string' ? v.slice(0, 40) : (v && typeof v === 'object') ? Object.fromEntries(Object.entries(v).filter(([k, s]) => /^[a-z]{2}$/.test(k) && typeof s === 'string').map(([k, s]) => [k, s.slice(0, 120)])) : '';
+$('skinFile').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > 1500000) { alert(t('big')); return; }
+  f.text().then(txt => {
+    const d = JSON.parse(txt);
+    if (!d || d.parrotSkin !== 2 || typeof d.html !== 'string' || typeof d.css !== 'string') throw 0;
+    const sk = { id: 'custom', name: cleanName(d.name) || t('custom'), desc: cleanName(d.desc),
+      preview: typeof d.preview === 'string' && !/url|expression|;/i.test(d.preview) ? d.preview.slice(0, 300) : '#333',
+      css: cleanCss(d.css), html: cleanHtml(d.html), radar: cleanRadar(d.radar), viz: ['bars', 'wave', 'blocks', 'none'].includes(d.viz) ? d.viz : 'bars' };
+    if (!store.set('pp_custom', sk)) { alert(t('big')); return; }
+    custom = sk; useSkin('custom'); closeMenu();
+  }).catch(() => alert(t('bad')));
+});
+
+// ---------------- Установка как приложение: работа без интернета ----------------
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+
+// ---------------- Старт ----------------
+useSkin(skinId);
+
+</script>
+</body>
+</html>

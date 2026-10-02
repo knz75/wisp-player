@@ -1,0 +1,17 @@
+{
+  "name": "Wisp — эхо на плече",
+  "short_name": "Wisp",
+  "description": "Плеер, в котором вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы.",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#02070a",
+  "theme_color": "#02070a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
