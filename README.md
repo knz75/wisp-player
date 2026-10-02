@@ -1,8 +1,8 @@
-# Wisp — echo on your shoulder
+# Wisp - echo on your shoulder
 
 **Wisp** is a free browser player where *you* decide where the sound lives: on your shoulder, ahead of you, far away — or flying around your head.
 
-👉 **Try it:** [wispplayer.com](https://wispplayer.com) — put on headphones, open an audiobook, music or a radio stream, and drag the parrot.
+👉 **Try it:** [wispplayer.com](https://wispplayer.com) - put on headphones, open an audiobook, music or a radio stream, and drag the parrot.
 
 ## Why
 
@@ -28,7 +28,7 @@ Let it fly in orbits, and it does the opposite: a gentle, living point that keep
 
 Everything runs in the browser with the built-in **Web Audio API**. No server processing: your files never leave your phone.
 
-1. Downmix to **mono** — a stereo track becomes a single point.
+1. Downmix to **mono** - a stereo track becomes a single point.
 2. Place the point with an **HRTF panner** (a generic model of how the head and ears shape sound from each direction).
 3. Add **distance**: lower volume, a low-pass filter (down to ~5 kHz at 3 m) and a short, dark reverb.
 4. Move **smoothly** (`setTargetAtTime`) to avoid clicks.
@@ -70,7 +70,7 @@ No accounts, no cookies, no trackers. The hosted version sends tiny anonymous pi
 
 ## Feedback
 
-Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) — bugs, ideas, translation fixes are very welcome.
+Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translation fixes are very welcome.
 
 ## License
 
@@ -80,8 +80,8 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) — bugs, ideas, transl
 
 ## По-русски
 
-**Wisp — эхо на плече.** Бесплатный плеер в браузере, где вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы. Попробовать: [wispplayer.com](https://wispplayer.com), в наушниках.
+**Wisp - эхо на плече.** Бесплатный плеер в браузере, где вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы. Попробовать: [wispplayer.com](https://wispplayer.com), в наушниках.
 
-Главная находка: если вывести звук из центра головы в сторону и немного вдаль, он перестаёт забирать всё внимание и работает как фон — как радио на подоконнике, пока вы работаете. А орбита, наоборот, превращает прогулку в ощущение: звук живёт вокруг вас, и взгляд остаётся на улице, а не в экране.
+Главная находка: если вывести звук из центра головы в сторону и немного вдаль, он перестаёт забирать всё внимание и работает как фон - как радио на подоконнике, пока вы работаете. А орбита, наоборот, превращает прогулку в ощущение: звук живёт вокруг вас, и взгляд остаётся на улице, а не в экране.
 
-Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Отзывы и идеи — в Telegram [@WispPlayer_bot](https://t.me/WispPlayer_bot).
+Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Отзывы и идеи - в Telegram [@WispPlayer_bot](https://t.me/WispPlayer_bot).
