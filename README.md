@@ -1,6 +1,6 @@
 # Wisp - echo on your shoulder
 
-**Wisp** is a free browser player where *you* decide where the sound lives: on your shoulder, ahead of you, far away — or flying around your head.
+**Wisp** is a free browser player where *you* decide where the sound lives: on your shoulder, ahead of you, far away - or flying around your head.
 
 👉 **Try it:** [wispplayer.com](https://wispplayer.com) - put on headphones, open an audiobook, music or a radio stream, and drag the parrot.
 
@@ -14,13 +14,13 @@ Let it fly in orbits, and it does the opposite: a gentle, living point that keep
 
 ## Features
 
-- **Radar** — drag the parrot to place the sound: shoulder, ahead, behind, up to 3 m away.
-- **Distance** — farther means quieter and duller, plus optional "room" ambience.
-- **Orbits** — circle, oval, square, triangle, star, figure 8, spiral, comet (Kepler-style), pendulum, wander. Speed, size and direction are adjustable.
-- **Audiobooks** — open files or a whole folder; the player remembers your position in every chapter.
-- **Internet radio** — add any direct `https://` stream. Stations that don't allow processing still play in plain stereo.
-- **Sleep timer, speed 1–1.5×, radar lock**, and a **3D off** switch to compare with normal stereo.
-- **Skins** that change the whole player (Drone HUD, Watch, Classic '99) — a skin is a JSON file you can save, edit and share.
+- **Radar** - drag the parrot to place the sound: shoulder, ahead, behind, up to 3 m away.
+- **Distance** - farther means quieter and duller, plus optional "room" ambience.
+- **Orbits** - circle, oval, square, triangle, star, figure 8, spiral, comet (Kepler-style), pendulum, wander. Speed, size and direction are adjustable.
+- **Audiobooks** - open files or a whole folder; the player remembers your position in every chapter.
+- **Internet radio** - add any direct `https://` stream. Stations that don't allow processing still play in plain stereo.
+- **Sleep timer, speed 1-1.5×, radar lock**, and a **3D off** switch to compare with normal stereo.
+- **Skins** that change the whole player (Drone HUD, Watch, Classic '99) - a skin is a JSON file you can save, edit and share.
 - **10 languages**, picked automatically from your device.
 - **Installable app (PWA)**, works offline for local files.
 
@@ -60,13 +60,13 @@ The whole player is one HTML file (`index.html`) plus a manifest, a small offlin
 
 - **Headphones required.**
 - **Everyone hears differently.** Left/right works for everyone; some people confuse ahead/behind with generic HRTF. Moving sources help, and it tends to get easier with practice.
-- **Head-locked by design.** The sound turns with your head — the companion is part of you, not part of the room.
+- **Head-locked by design.** The sound turns with your head - the companion is part of you, not part of the room.
 - **Radio:** 3D works only if the station allows cross-origin access (CORS); otherwise it plays in stereo.
 - **Fast orbits** can make some people slightly dizzy after a few minutes.
 
 ## Privacy
 
-No accounts, no cookies, no trackers. The hosted version sends tiny anonymous pings (`/e/open`, `/e/play`, `/e/orbit`…) with only the UI language and "app or web" — to count how the player is used. Your files, station names and positions are never sent anywhere.
+No accounts, no cookies, no trackers. The hosted version sends tiny anonymous pings (`/e/open`, `/e/play`, `/e/orbit`…) with only the UI language and "app or web" - to count how the player is used. Your files, station names and positions are never sent anywhere.
 
 ## Feedback
 
