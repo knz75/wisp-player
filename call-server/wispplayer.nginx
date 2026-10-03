@@ -1,0 +1,82 @@
+server {
+    server_name wispplayer.com www.wispplayer.com;
+
+    root /home/ubuntu/sites/wispplayer/static;
+    index index.html;
+
+    # Отдельный журнал Wisp — из него GoAccess строит статистику
+    access_log /var/log/nginx/wispplayer.access.log;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # Плеер не кэшируем надолго — после обновления люди сразу получают новую версию
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    # Страница звонка: wispplayer.com/call отдаёт call.html
+    location = /call {
+        try_files /call.html =404;
+        add_header Cache-Control "no-cache";
+    }
+
+    # Сигнальный сервер звонков (контейнер wisp-call, порт 8066) - WebSocket
+    location /call/ws/ {
+        proxy_pass http://127.0.0.1:8066;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        access_log off;
+    }
+
+    # Проверка сигнального сервера
+    location /call/api/ {
+        proxy_pass http://127.0.0.1:8066;
+        proxy_set_header Host $host;
+        access_log off;
+    }
+
+    # Отметки статистики из плеера: записываются в журнал, ответ пустой
+    location /e/ {
+        add_header Cache-Control "no-store";
+        return 204;
+    }
+
+    # Отчёт статистики — только по паролю, в журнал не пишется
+    location /stats/ {
+        alias /home/ubuntu/sites/wispplayer/stats/;
+        index index.html;
+        auth_basic "Wisp stats";
+        auth_basic_user_file /etc/nginx/.htpasswd-wisp;
+        access_log off;
+    }
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/wispplayer.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/wispplayer.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    if ($host = www.wispplayer.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    if ($host = wispplayer.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    listen [::]:80;
+    server_name wispplayer.com www.wispplayer.com;
+    return 404; # managed by Certbot
+}

@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#02070a">
-<meta name="description" content="Wisp — плеер, в котором вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы.">
+<meta name="description" content="Wisp - плеер, в котором вы сами решаете, где звучит звук: на плече, впереди, вдали или по орбите вокруг головы.">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wisp">
-<title>Wisp — эхо на плече</title>
+<title>Wisp - эхо на плече</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: #000; }
@@ -27,7 +27,7 @@
   #skin .need-track { visibility: hidden; }
   #skin.has-track .need-track { visibility: visible; }
   #skin.is-locked [data-widget="presets"] { opacity: .35; pointer-events: none; }
-  /* Заблокированный радар не держит палец — страница листается прямо по нему */
+  /* Заблокированный радар не держит палец - страница листается прямо по нему */
   #skin.is-locked [data-widget="radar"] canvas { touch-action: pan-y pinch-zoom; }
   #skin.is-radio [data-widget="seek"], #skin.is-radio .times { visibility: hidden; }
   #skin.is-plain [data-widget="radar"] canvas { opacity: .35; }
@@ -112,7 +112,7 @@
   <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h10"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
   <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 7.6-1.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-  <symbol id="i-parrot" viewBox="7 0 96 96"><path d="M46 16 C56 12 66 16 70 24 C76 28 76 38 70 43 C70 38 67 35 63 35 C64 47 62 58 56 68 L50 92 L46 70 C38 62 34 48 36 34 C37 24 40 18 46 16 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M62 24 C64.5 28 64.5 32 63 35 M44 40 C52 46 56 55 52 66 M46 16 C42 10 44 6 49 4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".8"/><circle cx="57" cy="25" r="3.5" fill="currentColor"/></symbol>
+  <symbol id="i-parrot" viewBox="-20 -20 682 1126"><g transform="translate(0,1086) scale(0.1,-0.1)" fill="currentColor"><path d="M4621 10694 c-27 -19 -109 -140 -148 -219 -128 -256 -138 -596 -25 -904 11 -30 -85 94 -126 164 -102 173 -162 379 -162 560 -1 127 -47 175 -78 80 -106 -323 -13 -727 241 -1043 64 -80 59 -80 -59 -1 -145 98 -316 284 -395 432 -25 47 -35 58 -52 55 -32 -4 -33 -38 -2 -137 66 -213 207 -434 367 -574 35 -30 77 -67 93 -81 l30 -27 -40 7 c-140 23 -303 103 -442 216 -89 71 -125 76 -109 13 7 -29 110 -167 162 -218 106 -105 270 -192 442 -237 90 -24 99 -28 71 -34 -58 -11 -189 -6 -254 10 -65 17 -95 11 -95 -19 0 -35 157 -106 273 -122 50 -8 56 -15 32 -35 -23 -19 -117 -174 -158 -261 -34 -72 -60 -136 -137 -339 -119 -313 -330 -592 -635 -842 -386 -316 -450 -383 -640 -673 -156 -238 -485 -871 -670 -1290 -123 -277 -163 -345 -257 -442 -95 -98 -474 -464 -818 -793 -233 -223 -496 -545 -515 -630 -8 -38 15 -77 50 -86 21 -5 232 89 280 126 13 9 108 60 270 145 72 37 177 92 234 122 57 30 104 53 106 51 1 -2 -69 -147 -157 -324 -175 -352 -187 -388 -143 -422 44 -35 25 -45 265 133 260 192 309 228 443 325 75 55 139 100 142 100 45 0 -349 -910 -550 -1270 -299 -536 -415 -730 -638 -1065 -190 -286 -341 -493 -539 -742 -123 -153 -137 -188 -97 -232 48 -51 161 0 394 178 160 122 494 479 666 711 169 228 216 295 329 464 68 102 126 184 128 182 13 -14 -227 -490 -358 -711 -160 -270 -159 -268 -114 -310 55 -51 106 -25 264 134 262 263 564 737 718 1127 20 49 20 49 70 46 68 -4 97 13 175 102 269 308 473 806 658 1606 38 164 40 167 126 213 65 35 157 85 235 130 21 11 39 19 41 16 2 -2 16 -38 31 -79 15 -41 35 -84 44 -95 35 -41 139 -118 192 -143 110 -49 125 -58 172 -95 26 -20 48 -44 48 -51 0 -22 -77 -52 -180 -70 -204 -37 -310 -139 -310 -298 0 -112 81 -136 125 -39 10 23 21 41 24 41 3 1 44 2 91 4 97 3 189 28 312 85 217 99 235 101 413 46 309 -96 441 -128 503 -122 58 6 61 4 96 -58 20 -36 25 -40 61 -40 54 0 68 27 61 115 -4 44 -1 79 9 108 32 92 -41 209 -170 272 -49 24 -57 25 -277 26 -126 0 -230 3 -233 6 -3 2 59 26 138 53 167 56 226 57 422 10 61 -14 153 -33 205 -42 52 -8 105 -17 117 -19 12 -2 25 -15 31 -32 41 -118 128 -71 120 63 -3 41 -1 75 4 75 23 0 82 -32 100 -55 49 -63 115 -21 105 66 -11 89 -52 144 -152 207 -89 55 -90 55 -390 56 -192 1 -288 5 -305 13 -14 6 -65 28 -115 49 -147 60 -188 83 -181 101 4 9 18 50 32 92 145 434 161 470 250 564 447 470 625 864 763 1698 13 80 15 443 2 520 -5 30 -14 88 -21 129 -7 41 -25 122 -40 180 -15 58 -31 123 -35 145 -3 22 -9 49 -11 61 -5 20 -2 21 74 16 99 -6 164 9 238 54 31 19 59 32 62 29 9 -9 3 -139 -9 -188 -34 -143 115 -74 237 109 150 228 154 537 9 765 -39 61 -42 70 -42 135 1 200 -100 364 -303 496 -121 79 -259 150 -278 144 -25 -8 -192 106 -276 188 -81 79 -123 146 -159 255 -29 86 -48 111 -71 91 -9 -7 -16 -24 -16 -38 0 -41 -17 -14 -34 54 -36 138 -10 267 82 412 72 115 -13 126 -123 16 -115 -115 -170 -265 -170 -466 0 -75 -4 -131 -8 -125 -223 329 -272 739 -123 1046 40 83 22 133 -33 95z m-116 -476 c0 -313 79 -522 318 -843 53 -71 97 -134 97 -138 0 -16 -222 110 -293 166 -138 108 -233 551 -173 807 19 81 46 180 50 180 0 0 1 -78 1 -172z m-371 -202 c99 -388 392 -698 839 -885 70 -30 63 -43 -25 -44 -90 -1 -324 60 -392 102 -17 11 -65 55 -107 98 -196 203 -298 410 -334 677 -25 187 -19 204 19 52z m797 -47 c-6 -18 -11 -80 -11 -139 0 -159 26 -232 177 -499 35 -62 63 -115 61 -117 -5 -5 -102 61 -175 119 -148 117 -180 431 -67 650 20 37 30 28 15 -14z m-924 -507 c209 -208 400 -315 748 -417 33 -10 64 -21 69 -26 29 -26 -254 -61 -331 -40 -140 38 -390 271 -507 474 -34 57 -29 59 21 9z m1243 -183 c3 -3 41 -32 84 -64 82 -60 90 -83 16 -45 -46 23 -112 85 -149 140 l-24 35 34 -30 c18 -16 36 -33 39 -36z m-124 -136 c-7 -7 -59 23 -81 47 -16 18 -9 16 33 -10 29 -18 51 -34 48 -37z m-981 -171 c138 -46 192 -55 395 -68 113 -7 107 -3 62 -39 -36 -29 -39 -30 -152 -29 -162 0 -323 61 -467 175 -80 64 -79 67 5 25 37 -18 108 -47 157 -64z m1207 10 c66 -43 145 -222 98 -222 -86 0 -143 26 -177 80 -19 30 -53 74 -76 97 -29 30 -36 44 -26 47 62 21 148 20 181 -2z m246 -49 c106 -136 145 -391 79 -523 l-27 -55 4 50 c6 70 -11 150 -45 215 -22 42 -29 68 -29 112 0 89 -18 158 -68 261 -11 23 60 -27 86 -60z m-532 -41 c108 -78 132 -136 79 -184 -61 -53 -62 -53 -118 -15 -54 37 -209 117 -227 117 -30 0 0 24 81 64 106 54 132 56 185 18z m761 -41 c108 -85 173 -206 173 -323 0 -33 -4 -38 -34 -48 -18 -6 -59 -26 -91 -45 -71 -43 -69 -46 -54 58 17 124 -1 245 -56 380 -11 27 9 20 62 -22z m-1002 -181 c169 -82 171 -88 28 -82 -73 3 -154 0 -204 -8 -170 -25 -165 -31 -61 73 91 91 84 91 237 17z m585 -109 c60 -43 64 -118 10 -173 -63 -62 -175 -22 -187 68 -14 103 91 165 177 105z m-681 -95 c-2 -3 -53 -21 -113 -41 -60 -21 -138 -50 -174 -66 -81 -37 -87 -36 -65 2 21 37 79 66 161 80 31 6 77 14 102 18 52 10 95 13 89 7z m307 -104 c12 -8 37 -52 32 -57 -2 -2 -31 -20 -66 -40 -78 -46 -163 -113 -222 -177 -25 -26 -48 -48 -51 -48 -18 0 -32 123 -19 178 25 116 44 131 175 142 118 10 139 10 151 2z m1041 -46 c100 -148 107 -374 17 -571 l-27 -60 -16 65 c-23 89 -33 104 -99 149 -101 69 -244 239 -226 269 28 46 279 207 309 199 6 -2 25 -25 42 -51z m-1482 -143 c0 -120 2 -131 28 -181 33 -65 33 -61 3 -125 -78 -171 -68 -162 -135 -113 -119 88 -241 245 -241 311 0 43 104 120 265 196 44 21 80 39 80 39 0 0 0 -57 0 -127z m975 39 c0 -4 -16 -31 -35 -59 -82 -121 -124 -243 -125 -355 0 -46 0 -46 -63 -53 -109 -12 -121 -7 -125 45 -6 78 29 205 88 321 17 33 24 37 82 46 35 6 86 22 113 36 56 28 65 31 65 19z m-385 -14 c30 -14 30 -13 4 -63 -38 -71 -69 -177 -82 -277 -6 -54 -14 -98 -18 -98 -40 0 -235 106 -272 148 -29 33 39 112 183 214 118 83 145 94 185 76z m603 -309 c81 -84 80 -96 -10 -134 -62 -25 -226 -12 -229 19 -6 73 23 193 62 256 l22 35 41 -50 c22 -27 74 -84 114 -126z m-1568 -21 c33 -56 137 -159 210 -208 32 -22 62 -45 65 -51 18 -28 -144 -209 -235 -262 -44 -25 -47 -26 -145 -16 -55 5 -125 7 -155 3 -30 -3 -72 -7 -92 -10 -48 -5 -49 -7 21 85 93 122 170 246 234 379 67 139 64 136 97 80z m572 -88 c67 -52 175 -105 257 -128 63 -18 63 -18 97 -101 18 -46 38 -89 45 -97 42 -50 -260 41 -421 128 -119 65 -118 62 -75 156 21 45 39 82 41 82 2 0 27 -18 56 -40z m631 -164 c3 -7 8 -35 12 -62 4 -27 13 -70 20 -96 14 -48 14 -48 -12 -48 -59 0 -140 66 -177 144 -27 58 -26 60 34 67 98 10 118 10 123 -5z m-720 -130 c229 -121 505 -193 754 -196 29 0 32 -3 42 -47 56 -241 53 -600 -5 -855 -92 -399 -177 -677 -215 -701 -49 -31 -284 90 -404 208 -129 126 -140 151 -110 254 76 259 92 452 54 629 -55 254 -178 401 -426 507 -1 0 33 37 76 82 43 44 89 99 101 122 29 51 32 51 133 -3z m-520 -307 c83 -13 83 -12 -5 -87 -40 -33 -134 -111 -208 -174 -74 -62 -182 -151 -240 -198 -58 -46 -197 -161 -310 -255 -113 -94 -222 -183 -243 -199 -38 -29 -63 -76 -214 -396 -20 -41 -105 -217 -190 -390 -86 -173 -162 -331 -172 -350 -15 -33 -16 -17 -19 340 l-2 375 86 160 c241 449 406 670 653 877 318 265 551 345 864 297z m269 -80 c202 -103 297 -401 228 -714 -96 -437 -280 -785 -637 -1202 -174 -202 -150 -189 -343 -202 -91 -7 -212 -16 -270 -21 -464 -41 -588 -52 -680 -60 -127 -12 -120 -12 -120 -1 0 6 40 92 89 193 48 101 109 226 134 278 25 52 78 163 117 245 40 83 108 224 151 315 44 91 87 181 97 200 18 36 41 55 417 365 302 248 640 528 700 581 58 50 62 51 117 23z m248 -1178 c0 -5 37 -47 83 -94 118 -121 243 -200 376 -238 79 -23 77 -19 51 -71 -140 -277 -425 -595 -767 -854 -123 -93 -157 -113 -150 -88 56 199 57 250 4 268 -59 21 -80 -15 -137 -244 -23 -91 -48 -183 -54 -205 -7 -22 -35 -122 -62 -223 l-49 -183 -89 -59 -89 -59 -56 43 c-80 62 -74 49 -142 291 -84 302 -86 305 -145 291 -52 -13 -58 -43 -28 -152 15 -55 29 -109 31 -121 4 -18 -9 -29 -89 -76 -245 -143 -639 -337 -683 -337 -12 0 22 201 36 213 8 7 531 402 553 417 11 8 140 104 284 213 203 151 270 197 291 195 39 -3 59 12 152 110 270 283 523 646 635 908 24 56 44 82 44 55z m-2240 -703 l0 -383 -93 -106 c-475 -546 -437 -509 -418 -398 5 30 15 86 21 124 26 162 56 241 220 590 29 61 63 135 77 165 39 88 186 390 190 390 2 0 3 -172 3 -382z m1149 -375 c0 -5 -12 -17 -27 -29 -51 -40 -759 -569 -823 -615 -35 -25 -188 -138 -340 -250 -152 -112 -317 -233 -365 -269 -121 -87 -498 -367 -609 -451 -49 -37 -91 -64 -93 -59 -6 15 149 310 182 348 28 32 145 132 407 346 74 61 349 289 814 676 358 300 281 263 615 290 80 6 154 13 165 14 43 7 75 6 74 -1z m-754 -72 c-6 -5 -51 -42 -100 -83 -50 -40 -129 -105 -175 -144 -180 -152 -458 -382 -530 -439 -41 -33 -97 -79 -124 -103 -74 -65 -67 -43 20 55 100 114 105 120 260 303 197 232 323 377 336 388 25 20 334 43 313 23z m1705 -364 c-79 -239 -66 -216 -141 -254 -78 -39 -99 -40 -138 -8 -52 45 -74 89 -66 138 11 64 16 69 137 145 62 39 147 95 188 125 41 31 77 53 79 51 3 -2 -24 -91 -59 -197z m-2715 101 c-5 -45 -43 -303 -61 -416 -8 -50 -147 -191 -227 -231 -34 -17 -98 -50 -142 -74 -44 -24 -152 -81 -240 -126 -88 -46 -164 -87 -170 -91 -23 -17 -265 -140 -265 -135 0 8 77 111 135 180 27 33 55 66 60 72 6 7 116 113 245 235 129 122 294 279 365 348 72 69 166 160 210 201 44 40 81 77 83 82 10 21 13 1 7 -45z m2878 -487 c184 -71 251 -93 382 -122 246 -55 270 -63 270 -84 0 -25 -61 -24 -180 5 -315 75 -368 78 -518 21 -169 -63 -279 -90 -306 -72 -19 13 -4 19 101 42 240 52 282 124 120 204 -84 41 -94 50 -64 58 34 9 45 6 195 -52z m-522 16 c38 -33 96 -57 137 -57 11 0 46 -10 77 -22 l56 -21 -71 -18 c-39 -10 -98 -31 -132 -47 l-60 -29 -34 30 c-54 47 -58 60 -38 133 20 75 15 73 65 31z m1317 -107 c23 -10 42 -23 42 -28 0 -18 -60 -19 -99 -1 -21 9 -57 20 -81 24 -30 5 -38 10 -29 16 25 16 122 9 167 -11z m-2938 -39 c0 -17 -68 -273 -105 -396 -88 -291 -261 -674 -464 -1029 -50 -87 -91 -160 -91 -162 0 -2 -15 -28 -34 -57 -18 -28 -76 -122 -128 -207 -110 -180 -199 -317 -293 -450 -36 -52 -94 -135 -128 -185 -247 -364 -565 -733 -796 -926 -105 -88 -123 -94 -64 -22 65 79 375 511 448 623 37 58 101 155 141 216 254 389 623 1059 779 1414 15 36 43 97 60 135 40 86 156 382 225 570 28 77 58 159 67 182 13 36 32 55 117 117 55 41 135 99 176 130 76 56 90 63 90 47z m1563 -140 c181 -158 200 -166 692 -301 108 -30 139 -48 133 -80 -5 -22 -62 -15 -203 27 -491 144 -485 143 -710 38 -200 -94 -315 -121 -332 -79 -9 25 17 40 92 53 193 34 335 107 335 170 0 45 -62 114 -170 191 -38 27 -38 33 3 53 49 24 52 23 160 -72z m-1143 27 c0 -21 -96 -394 -141 -553 -35 -120 -121 -367 -150 -433 -16 -34 -29 -65 -29 -68 0 -47 -247 -464 -327 -551 l-34 -38 6 40 c4 22 22 85 40 140 62 185 114 379 189 695 55 235 55 229 20 259 -25 20 -30 30 -23 46 4 11 22 67 39 125 69 230 50 203 170 250 47 19 114 49 150 66 71 36 90 40 90 22z m1999 -232 c19 -12 12 -27 -11 -22 -13 3 -52 10 -87 17 -42 8 -58 15 -47 19 20 7 128 -4 145 -14z m-2599 -652 c-131 -604 -434 -1279 -784 -1747 -149 -200 -191 -239 -117 -107 23 39 41 74 41 76 0 2 11 22 24 42 66 105 300 600 386 817 15 39 43 108 62 155 20 47 38 96 42 110 8 29 349 710 354 706 1 -2 -2 -25 -8 -52z"/></g><circle cx="534" cy="234" r="30" fill="#fff" opacity=".9"/></symbol>
 </svg>
 
 <div id="skin"></div>
@@ -129,6 +129,7 @@
     <button class="mb" id="expSkin" data-i="expSkin"></button>
     <label class="mb" for="skinFile" data-i="impSkin"></label>
   </div>
+  <div class="row2"><a class="mb" href="/call.html" data-i="callLink"></a><a class="mb" href="/ai.html" data-i="aiLink"></a></div>
   <a class="mb" id="fbLink" href="#" target="_blank" rel="noopener" data-i="feedback"></a>
   <h3 data-i="lang"></h3>
   <select id="langSel" class="tin"></select>
@@ -150,7 +151,7 @@
 
 <script>
 // ======================================================================
-//  Встроенные скины. Каждый — полностью своя разметка и стиль.
+//  Встроенные скины. Каждый - полностью своя разметка и стиль.
 // ======================================================================
 const SKINS = [];
 
@@ -179,7 +180,7 @@ SKINS.push({
   background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); mix-blend-mode:multiply; }
 #skin .hud { max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:10px; position:relative; z-index:2; }
 #skin .top { display:flex; align-items:center; gap:10px; }
-#skin .logo { width:40px; height:40px; color:var(--c2); filter:drop-shadow(0 0 6px var(--c2)); flex-shrink:0; }
+#skin .logo { width:40px; height:40px; color:var(--c); filter:drop-shadow(0 0 5px var(--c)); flex-shrink:0; }
 #skin .logo svg { width:100%; height:100%; }
 #skin .brand { flex:1; min-width:0; line-height:1.15; }
 #skin .brand b { font-size:1.05rem; letter-spacing:4px; white-space:nowrap; color:#fff; text-shadow:0 0 10px rgba(62,240,255,.6); }
@@ -267,7 +268,7 @@ SKINS.push({
   html: `
 <div class="hud">
   <header class="top">
-    <div class="logo"><svg viewBox="7 0 96 96"><use href="#i-parrot"/></svg></div>
+    <div class="logo"><svg viewBox="-20 -20 682 1126"><use href="#i-parrot"/></svg></div>
     <div class="brand"><b>WISP<i>//</i></b><div class="st" data-txt="state"></div></div>
     <button class="sq" data-act="menu"><svg class="i"><use href="#i-menu"/></svg></button>
   </header>
@@ -536,7 +537,7 @@ SKINS.push({
 });
 
 // ======================================================================
-//  Wisp — ядро. Скин отвечает только за вид; всё поведение здесь.
+//  Wisp - ядро. Скин отвечает только за вид; всё поведение здесь.
 //  Скин = { id, name, desc, preview, css, html, radar, viz }
 //  В разметке скина: data-act="…" (кнопки), data-txt="…" (тексты),
 //  data-widget="…" (радар, волна, полоса и т.д.), data-i="…" (перевод).
@@ -553,7 +554,7 @@ const store = {
 
 // ---------------- Языки ----------------
 const T = {
-  ru: { src:'Источник', grid:'Пространство', ctrl:'Управление', chapters:'Главы', chapter:'Глава', speed:'Скорость', fx:'3D звук', echo:'Простор', tagline:'эхо на плече', radio:'Радио', stations:'Станции', addSt:'Добавить станцию', stNamePh:'Название (можно не писать)', playNow:'Слушать', save:'Сохранить', live:'Эфир', stereo:'стерео', badUrl:'Нужна ссылка, которая начинается с https://', streamFail:'Станция не отвечает', no3d:'Эта станция не разрешает 3D — играет обычным стерео', radioNote:'Нужна прямая ссылка на поток, а не на страницу станции. Работают только адреса https://. Если станция не разрешает 3D, она играет обычным стерео.',
+  ru: { src:'Источник', grid:'Пространство', ctrl:'Управление', chapters:'Главы', chapter:'Глава', speed:'Скорость', fx:'3D звук', echo:'Простор', tagline:'эхо на плече', radio:'Радио', stations:'Станции', addSt:'Добавить станцию', stNamePh:'Название (можно не писать)', playNow:'Слушать', save:'Сохранить', live:'Эфир', stereo:'стерео', badUrl:'Нужна ссылка, которая начинается с https://', streamFail:'Станция не отвечает', no3d:'Эта станция не разрешает 3D - играет обычным стерео', radioNote:'Нужна прямая ссылка на поток, а не на страницу станции. Работают только адреса https://. Если станция не разрешает 3D, она играет обычным стерео.',
     on:'Вкл', off:'Выкл', lock:'Замок', unlocked:'Открыт', locked:'Закрыт', sleep:'Таймер сна', min:'мин',
     lsh:'Левое плечо', rsh:'Правое плечо', ahead:'Впереди', center:'В голове', you:'ты',
     st_play:'Играет', st_pause:'Пауза', st_idle:'Ожидание', open:'Открыть книгу или музыку', phones:'Наденьте наушники',
@@ -562,7 +563,7 @@ const T = {
     files:'Файлы', folder:'Папка', noAudio:'В папке нет аудиофайлов', orbit:'Орбита', pace:'Круг за', size:'Размер', stop:'Стоп',
     sh_circle:'Круг', sh_oval:'Овал', sh_square:'Квадрат', sh_triangle:'Треугольник', sh_star:'Звезда', sh_eight:'Восьмёрка',
     sh_spiral:'Спираль', sh_comet:'Комета', sh_pendulum:'Маятник', sh_wander:'Блуждание' },
-  pl: { src:'Źródło', grid:'Przestrzeń', ctrl:'Sterowanie', chapters:'Rozdziały', chapter:'Rozdział', speed:'Prędkość', fx:'Dźwięk 3D', echo:'Pogłos', tagline:'echo na ramieniu', radio:'Radio', stations:'Stacje', addSt:'Dodaj stację', stNamePh:'Nazwa (opcjonalnie)', playNow:'Słuchaj', save:'Zapisz', live:'Na żywo', stereo:'stereo', badUrl:'Potrzebny link zaczynający się od https://', streamFail:'Stacja nie odpowiada', no3d:'Ta stacja nie pozwala na 3D — gra w zwykłym stereo', radioNote:'Potrzebny bezpośredni link do strumienia, a nie do strony stacji. Działają tylko adresy https://. Jeśli stacja nie pozwala na 3D, gra w zwykłym stereo.',
+  pl: { src:'Źródło', grid:'Przestrzeń', ctrl:'Sterowanie', chapters:'Rozdziały', chapter:'Rozdział', speed:'Prędkość', fx:'Dźwięk 3D', echo:'Pogłos', tagline:'echo na ramieniu', radio:'Radio', stations:'Stacje', addSt:'Dodaj stację', stNamePh:'Nazwa (opcjonalnie)', playNow:'Słuchaj', save:'Zapisz', live:'Na żywo', stereo:'stereo', badUrl:'Potrzebny link zaczynający się od https://', streamFail:'Stacja nie odpowiada', no3d:'Ta stacja nie pozwala na 3D - gra w zwykłym stereo', radioNote:'Potrzebny bezpośredni link do strumienia, a nie do strony stacji. Działają tylko adresy https://. Jeśli stacja nie pozwala na 3D, gra w zwykłym stereo.',
     on:'Wł.', off:'Wył.', lock:'Blokada', unlocked:'Otwarta', locked:'Zamknięta', sleep:'Wyłącznik', min:'min',
     lsh:'Lewe ramię', rsh:'Prawe ramię', ahead:'Z przodu', center:'W głowie', you:'ty',
     st_play:'Gra', st_pause:'Pauza', st_idle:'Gotowy', open:'Otwórz audiobook lub muzykę', phones:'Załóż słuchawki',
@@ -571,7 +572,7 @@ const T = {
     files:'Pliki', folder:'Folder', noAudio:'W folderze nie ma plików audio', orbit:'Orbita', pace:'Okrążenie', size:'Rozmiar', stop:'Stop',
     sh_circle:'Koło', sh_oval:'Owal', sh_square:'Kwadrat', sh_triangle:'Trójkąt', sh_star:'Gwiazda', sh_eight:'Ósemka',
     sh_spiral:'Spirala', sh_comet:'Kometa', sh_pendulum:'Wahadło', sh_wander:'Błądzenie' },
-  en: { src:'Source', grid:'Space', ctrl:'Controls', chapters:'Chapters', chapter:'Chapter', speed:'Speed', fx:'3D sound', echo:'Room', tagline:'echo on your shoulder', radio:'Radio', stations:'Stations', addSt:'Add a station', stNamePh:'Name (optional)', playNow:'Listen', save:'Save', live:'Live', stereo:'stereo', badUrl:'The link must start with https://', streamFail:'Station is not responding', no3d:'This station does not allow 3D — playing plain stereo', radioNote:'You need a direct stream link, not the station web page. Only https:// addresses work. If a station does not allow 3D, it plays plain stereo.',
+  en: { src:'Source', grid:'Space', ctrl:'Controls', chapters:'Chapters', chapter:'Chapter', speed:'Speed', fx:'3D sound', echo:'Room', tagline:'echo on your shoulder', radio:'Radio', stations:'Stations', addSt:'Add a station', stNamePh:'Name (optional)', playNow:'Listen', save:'Save', live:'Live', stereo:'stereo', badUrl:'The link must start with https://', streamFail:'Station is not responding', no3d:'This station does not allow 3D - playing plain stereo', radioNote:'You need a direct stream link, not the station web page. Only https:// addresses work. If a station does not allow 3D, it plays plain stereo.',
     on:'On', off:'Off', lock:'Lock', unlocked:'Unlocked', locked:'Locked', sleep:'Sleep', min:'min',
     lsh:'Left shoulder', rsh:'Right shoulder', ahead:'Ahead', center:'In your head', you:'you',
     st_play:'Playing', st_pause:'Paused', st_idle:'Standby', open:'Open an audiobook or music', phones:'Put on headphones',
@@ -583,89 +584,90 @@ const T = {
 };
 const HELP = {
   ru: `<p><b>Нужны наушники.</b> Без них пространства не будет.</p>
-<p><b>Файлы / Папка.</b> Можно выбрать несколько глав или сразу всю папку — плеер помнит, где вы остановились в каждой.</p>
-<p><b>Радар.</b> В центре — вы. Тяните попугая Wisp — звук переедет туда. Ближе — громче и чище, дальше — тише и глуше.</p>
-<p><b>Орбита.</b> Попугай летает сам по выбранной фигуре. Хорошо тренирует слух: со временем «впереди» и «сзади» различаются всё лучше. Для работы попробуйте поставить звук далеко впереди-сбоку — он не будет мешать думать.</p>
-<p><b>3D звук: Выкл</b> — обычное стерео, чтобы сравнить. <b>Замок</b> — чтобы в кармане ничего не сдвинулось. <b>Таймер сна</b> — в конце звук плавно затихает. <b>Простор</b> — ощущение дали; для книг его можно выключить.</p>
-<p><b>Скины</b> меняют весь вид плеера, а не только цвета. Скин — это файл: его можно сохранить, переделать и отправить другу.</p>
-<p>Лево и право слышат все. «Впереди» и «сзади» некоторые путают — это нормально для наушников.</p>`,
+<p><b>Файлы / Папка.</b> Можно выбрать несколько глав или сразу всю папку - плеер помнит, где вы остановились в каждой.</p>
+<p><b>Радар.</b> В центре - вы. Тяните попугая Wisp - звук переедет туда. Ближе - громче и чище, дальше - тише и глуше.</p>
+<p><b>Орбита.</b> Попугай летает сам по выбранной фигуре. Хорошо тренирует слух: со временем «впереди» и «сзади» различаются всё лучше. Для работы попробуйте поставить звук далеко впереди-сбоку - он не будет мешать думать.</p>
+<p><b>3D звук: Выкл</b> - обычное стерео, чтобы сравнить. <b>Замок</b> - чтобы в кармане ничего не сдвинулось. <b>Таймер сна</b> - в конце звук плавно затихает. <b>Простор</b> - ощущение дали; для книг его можно выключить.</p>
+<p><b>Скины</b> меняют весь вид плеера, а не только цвета. Скин - это файл: его можно сохранить, переделать и отправить другу.</p>
+<p>Лево и право слышат все. «Впереди» и «сзади» некоторые путают - это нормально для наушников.</p>`,
   pl: `<p><b>Potrzebne słuchawki.</b> Bez nich nie będzie przestrzeni.</p>
-<p><b>Pliki / Folder.</b> Można wybrać kilka rozdziałów albo cały folder — odtwarzacz pamięta, gdzie skończyłeś w każdym.</p>
-<p><b>Radar.</b> W środku jesteś ty. Przeciągnij papugę Wisp — dźwięk przeniesie się tam. Bliżej — głośniej i czyściej, dalej — ciszej i głucho.</p>
-<p><b>Orbita.</b> Papuga lata sama po wybranej figurze. Dobrze trenuje słuch: z czasem „z przodu” i „z tyłu” rozróżnia się coraz lepiej. Do pracy postaw dźwięk daleko z przodu z boku — nie będzie przeszkadzał myśleć.</p>
-<p><b>Dźwięk 3D: Wył.</b> — zwykłe stereo do porównania. <b>Blokada</b> — żeby w kieszeni nic się nie przesunęło. <b>Wyłącznik</b> — na końcu dźwięk łagodnie cichnie. <b>Pogłos</b> — wrażenie oddalenia; przy audiobookach można je wyłączyć.</p>
+<p><b>Pliki / Folder.</b> Można wybrać kilka rozdziałów albo cały folder - odtwarzacz pamięta, gdzie skończyłeś w każdym.</p>
+<p><b>Radar.</b> W środku jesteś ty. Przeciągnij papugę Wisp - dźwięk przeniesie się tam. Bliżej - głośniej i czyściej, dalej - ciszej i głucho.</p>
+<p><b>Orbita.</b> Papuga lata sama po wybranej figurze. Dobrze trenuje słuch: z czasem „z przodu” i „z tyłu” rozróżnia się coraz lepiej. Do pracy postaw dźwięk daleko z przodu z boku - nie będzie przeszkadzał myśleć.</p>
+<p><b>Dźwięk 3D: Wył.</b> - zwykłe stereo do porównania. <b>Blokada</b> - żeby w kieszeni nic się nie przesunęło. <b>Wyłącznik</b> - na końcu dźwięk łagodnie cichnie. <b>Pogłos</b> - wrażenie oddalenia; przy audiobookach można je wyłączyć.</p>
 <p><b>Skórki</b> zmieniają cały wygląd odtwarzacza, nie tylko kolory. Skórka to plik: można ją zapisać, przerobić i wysłać znajomemu.</p>
-<p>Lewo i prawo słyszy każdy. „Z przodu” i „z tyłu” niektórym się mylą — to normalne w słuchawkach.</p>`,
+<p>Lewo i prawo słyszy każdy. „Z przodu” i „z tyłu” niektórym się mylą - to normalne w słuchawkach.</p>`,
   en: `<p><b>Headphones needed.</b> Without them there is no space.</p>
-<p><b>Files / Folder.</b> Pick several chapters or a whole folder — the player remembers where you stopped in each.</p>
+<p><b>Files / Folder.</b> Pick several chapters or a whole folder - the player remembers where you stopped in each.</p>
 <p><b>Radar.</b> You are in the middle. Drag Wisp the parrot and the sound moves there. Closer is louder and clearer, farther is quieter and duller.</p>
-<p><b>Orbit.</b> The parrot flies by itself along the chosen shape. Great ear training: over time “ahead” and “behind” get easier to tell apart. For work, put the sound far ahead to one side — it won't get in the way of thinking.</p>
-<p><b>3D sound: Off</b> — plain stereo to compare. <b>Lock</b> — so nothing moves in your pocket. <b>Sleep</b> — the sound fades out gently at the end. <b>Room</b> — a sense of distance; turn it off for audiobooks.</p>
+<p><b>Orbit.</b> The parrot flies by itself along the chosen shape. Great ear training: over time “ahead” and “behind” get easier to tell apart. For work, put the sound far ahead to one side - it won't get in the way of thinking.</p>
+<p><b>3D sound: Off</b> - plain stereo to compare. <b>Lock</b> - so nothing moves in your pocket. <b>Sleep</b> - the sound fades out gently at the end. <b>Room</b> - a sense of distance; turn it off for audiobooks.</p>
 <p><b>Skins</b> change the whole player, not just colors. A skin is a file: save it, rework it, send it to a friend.</p>
-<p>Everyone hears left and right. Some people mix up “ahead” and “behind” — that is normal with headphones.</p>`
+<p>Everyone hears left and right. Some people mix up “ahead” and “behind” - that is normal with headphones.</p>`
 };
 // ---------------- Ещё языки ----------------
-T.ru.feedback = 'Написать автору'; T.pl.feedback = 'Napisz do autora'; T.en.feedback = 'Write to the author';
+T.ru.feedback = 'Написать автору'; T.ru.skipBad = 'Не играет, пропускаю'; T.pl.skipBad = 'Nie odtwarza się, pomijam'; T.en.skipBad = 'Can’t play, skipping'; T.pl.feedback = 'Napisz do autora'; T.en.feedback = 'Write to the author';
 Object.assign(T, {
-  uk: { src:'Джерело', grid:'Простір', ctrl:'Керування', chapters:'Розділи', chapter:'Розділ', speed:'Швидкість', fx:'3D звук', echo:'Кімната', tagline:'ехо на плечі', radio:'Радіо', stations:'Станції', addSt:'Додати станцію', stNamePh:'Назва (необов’язково)', playNow:'Слухати', save:'Зберегти', live:'Ефір', stereo:'стерео', badUrl:'Потрібне посилання, що починається з https://', streamFail:'Станція не відповідає', no3d:'Ця станція не дозволяє 3D — грає звичайним стерео', radioNote:'Потрібне пряме посилання на потік, а не на сторінку станції. Працюють лише адреси https://. Якщо станція не дозволяє 3D, вона грає звичайним стерео.', on:'Увімк.', off:'Вимк.', lock:'Замок', unlocked:'Відкрито', locked:'Закрито', sleep:'Таймер сну', min:'хв', lsh:'Ліве плече', rsh:'Праве плече', ahead:'Попереду', center:'У голові', you:'ти', st_play:'Грає', st_pause:'Пауза', st_idle:'Очікування', open:'Відкрити книгу або музику', phones:'Надягніть навушники', menu:'Меню', skins:'Скіни', expSkin:'Зберегти скін', impSkin:'Завантажити скін', lang:'Мова', help:'Довідка', bad:'Файл скіна не підійшов', big:'Скін завеликий', custom:'Завантажений скін', playlist:'Плейлист', files:'Файли', folder:'Папка', noAudio:'У папці немає аудіофайлів', orbit:'Орбіта', pace:'Час кола', size:'Розмір', stop:'Стоп', sh_circle:'Коло', sh_oval:'Овал', sh_square:'Квадрат', sh_triangle:'Трикутник', sh_star:'Зірка', sh_eight:'Вісімка', sh_spiral:'Спіраль', sh_comet:'Комета', sh_pendulum:'Маятник', sh_wander:'Блукання', feedback:'Написати автору' },
-  de: { src:'Quelle', grid:'Raum', ctrl:'Steuerung', chapters:'Kapitel', chapter:'Kapitel', speed:'Tempo', fx:'3D-Klang', echo:'Hall', tagline:'Echo auf deiner Schulter', radio:'Radio', stations:'Sender', addSt:'Sender hinzufügen', stNamePh:'Name (optional)', playNow:'Anhören', save:'Speichern', live:'Live', stereo:'Stereo', badUrl:'Der Link muss mit https:// beginnen', streamFail:'Sender antwortet nicht', no3d:'Dieser Sender erlaubt kein 3D — Wiedergabe in normalem Stereo', radioNote:'Du brauchst einen direkten Stream-Link, nicht die Webseite des Senders. Nur https://-Adressen funktionieren. Erlaubt ein Sender kein 3D, läuft er in normalem Stereo.', on:'An', off:'Aus', lock:'Sperre', unlocked:'Offen', locked:'Gesperrt', sleep:'Schlaftimer', min:'Min', lsh:'Linke Schulter', rsh:'Rechte Schulter', ahead:'Vorne', center:'Im Kopf', you:'du', st_play:'Läuft', st_pause:'Pause', st_idle:'Bereit', open:'Hörbuch oder Musik öffnen', phones:'Kopfhörer aufsetzen', menu:'Menü', skins:'Skins', expSkin:'Skin speichern', impSkin:'Skin laden', lang:'Sprache', help:'Hilfe', bad:'Ungültige Skin-Datei', big:'Skin ist zu groß', custom:'Geladener Skin', playlist:'Playlist', files:'Dateien', folder:'Ordner', noAudio:'Keine Audiodateien in diesem Ordner', orbit:'Orbit', pace:'Rundenzeit', size:'Größe', stop:'Stopp', sh_circle:'Kreis', sh_oval:'Oval', sh_square:'Quadrat', sh_triangle:'Dreieck', sh_star:'Stern', sh_eight:'Acht', sh_spiral:'Spirale', sh_comet:'Komet', sh_pendulum:'Pendel', sh_wander:'Streifzug', feedback:'Dem Autor schreiben' },
-  es: { src:'Fuente', grid:'Espacio', ctrl:'Controles', chapters:'Capítulos', chapter:'Capítulo', speed:'Velocidad', fx:'Sonido 3D', echo:'Sala', tagline:'eco en tu hombro', radio:'Radio', stations:'Emisoras', addSt:'Añadir emisora', stNamePh:'Nombre (opcional)', playNow:'Escuchar', save:'Guardar', live:'En directo', stereo:'estéreo', badUrl:'El enlace debe empezar por https://', streamFail:'La emisora no responde', no3d:'Esta emisora no permite 3D: suena en estéreo normal', radioNote:'Necesitas un enlace directo al stream, no la web de la emisora. Solo funcionan direcciones https://. Si una emisora no permite 3D, suena en estéreo normal.', on:'Sí', off:'No', lock:'Bloqueo', unlocked:'Abierto', locked:'Bloqueado', sleep:'Temporizador', min:'min', lsh:'Hombro izquierdo', rsh:'Hombro derecho', ahead:'Delante', center:'En la cabeza', you:'tú', st_play:'Sonando', st_pause:'Pausa', st_idle:'En espera', open:'Abrir audiolibro o música', phones:'Ponte los auriculares', menu:'Menú', skins:'Skins', expSkin:'Guardar skin', impSkin:'Cargar skin', lang:'Idioma', help:'Ayuda', bad:'Archivo de skin no válido', big:'La skin es demasiado grande', custom:'Skin cargada', playlist:'Lista', files:'Archivos', folder:'Carpeta', noAudio:'No hay audio en esta carpeta', orbit:'Órbita', pace:'Tiempo de vuelta', size:'Tamaño', stop:'Parar', sh_circle:'Círculo', sh_oval:'Óvalo', sh_square:'Cuadrado', sh_triangle:'Triángulo', sh_star:'Estrella', sh_eight:'Ocho', sh_spiral:'Espiral', sh_comet:'Cometa', sh_pendulum:'Péndulo', sh_wander:'Deriva', feedback:'Escribir al autor' },
-  fr: { src:'Source', grid:'Espace', ctrl:'Commandes', chapters:'Chapitres', chapter:'Chapitre', speed:'Vitesse', fx:'Son 3D', echo:'Pièce', tagline:'l’écho sur ton épaule', radio:'Radio', stations:'Stations', addSt:'Ajouter une station', stNamePh:'Nom (facultatif)', playNow:'Écouter', save:'Enregistrer', live:'En direct', stereo:'stéréo', badUrl:'Le lien doit commencer par https://', streamFail:'La station ne répond pas', no3d:'Cette station n’autorise pas la 3D — lecture en stéréo normale', radioNote:'Il faut un lien direct vers le flux, pas la page web de la station. Seules les adresses https:// fonctionnent. Si une station n’autorise pas la 3D, elle joue en stéréo normale.', on:'Oui', off:'Non', lock:'Verrou', unlocked:'Ouvert', locked:'Verrouillé', sleep:'Minuterie', min:'min', lsh:'Épaule gauche', rsh:'Épaule droite', ahead:'Devant', center:'Dans la tête', you:'toi', st_play:'Lecture', st_pause:'Pause', st_idle:'En attente', open:'Ouvrir un livre audio ou de la musique', phones:'Mets tes écouteurs', menu:'Menu', skins:'Skins', expSkin:'Enregistrer le skin', impSkin:'Charger un skin', lang:'Langue', help:'Aide', bad:'Fichier de skin invalide', big:'Skin trop volumineux', custom:'Skin chargé', playlist:'Playlist', files:'Fichiers', folder:'Dossier', noAudio:'Aucun fichier audio dans ce dossier', orbit:'Orbite', pace:'Durée du tour', size:'Taille', stop:'Stop', sh_circle:'Cercle', sh_oval:'Ovale', sh_square:'Carré', sh_triangle:'Triangle', sh_star:'Étoile', sh_eight:'Huit', sh_spiral:'Spirale', sh_comet:'Comète', sh_pendulum:'Pendule', sh_wander:'Errance', feedback:'Écrire à l’auteur' },
-  it: { src:'Sorgente', grid:'Spazio', ctrl:'Comandi', chapters:'Capitoli', chapter:'Capitolo', speed:'Velocità', fx:'Suono 3D', echo:'Stanza', tagline:'eco sulla tua spalla', radio:'Radio', stations:'Stazioni', addSt:'Aggiungi stazione', stNamePh:'Nome (facoltativo)', playNow:'Ascolta', save:'Salva', live:'In diretta', stereo:'stereo', badUrl:'Il link deve iniziare con https://', streamFail:'La stazione non risponde', no3d:'Questa stazione non consente il 3D — suona in stereo normale', radioNote:'Serve un link diretto allo stream, non la pagina web della stazione. Funzionano solo indirizzi https://. Se una stazione non consente il 3D, suona in stereo normale.', on:'Sì', off:'No', lock:'Blocco', unlocked:'Sbloccato', locked:'Bloccato', sleep:'Timer', min:'min', lsh:'Spalla sinistra', rsh:'Spalla destra', ahead:'Davanti', center:'In testa', you:'tu', st_play:'In riproduzione', st_pause:'Pausa', st_idle:'In attesa', open:'Apri audiolibro o musica', phones:'Indossa le cuffie', menu:'Menu', skins:'Skin', expSkin:'Salva skin', impSkin:'Carica skin', lang:'Lingua', help:'Aiuto', bad:'File skin non valido', big:'Skin troppo grande', custom:'Skin caricata', playlist:'Playlist', files:'File', folder:'Cartella', noAudio:'Nessun file audio in questa cartella', orbit:'Orbita', pace:'Tempo giro', size:'Dimensione', stop:'Stop', sh_circle:'Cerchio', sh_oval:'Ovale', sh_square:'Quadrato', sh_triangle:'Triangolo', sh_star:'Stella', sh_eight:'Otto', sh_spiral:'Spirale', sh_comet:'Cometa', sh_pendulum:'Pendolo', sh_wander:'Vagare', feedback:'Scrivi all’autore' },
-  pt: { src:'Fonte', grid:'Espaço', ctrl:'Controles', chapters:'Capítulos', chapter:'Capítulo', speed:'Velocidade', fx:'Som 3D', echo:'Sala', tagline:'eco no seu ombro', radio:'Rádio', stations:'Estações', addSt:'Adicionar estação', stNamePh:'Nome (opcional)', playNow:'Ouvir', save:'Salvar', live:'Ao vivo', stereo:'estéreo', badUrl:'O link deve começar com https://', streamFail:'A estação não responde', no3d:'Esta estação não permite 3D — tocando em estéreo normal', radioNote:'É preciso um link direto para o stream, não a página da estação. Só endereços https:// funcionam. Se uma estação não permitir 3D, ela toca em estéreo normal.', on:'Lig.', off:'Desl.', lock:'Trava', unlocked:'Destravado', locked:'Travado', sleep:'Timer', min:'min', lsh:'Ombro esquerdo', rsh:'Ombro direito', ahead:'À frente', center:'Na cabeça', you:'você', st_play:'Tocando', st_pause:'Pausa', st_idle:'Em espera', open:'Abrir audiolivro ou música', phones:'Coloque os fones', menu:'Menu', skins:'Skins', expSkin:'Salvar skin', impSkin:'Carregar skin', lang:'Idioma', help:'Ajuda', bad:'Arquivo de skin inválido', big:'Skin grande demais', custom:'Skin carregada', playlist:'Playlist', files:'Arquivos', folder:'Pasta', noAudio:'Nenhum áudio nesta pasta', orbit:'Órbita', pace:'Tempo da volta', size:'Tamanho', stop:'Parar', sh_circle:'Círculo', sh_oval:'Oval', sh_square:'Quadrado', sh_triangle:'Triângulo', sh_star:'Estrela', sh_eight:'Oito', sh_spiral:'Espiral', sh_comet:'Cometa', sh_pendulum:'Pêndulo', sh_wander:'Deriva', feedback:'Escrever ao autor' },
-  tr: { src:'Kaynak', grid:'Alan', ctrl:'Kontroller', chapters:'Bölümler', chapter:'Bölüm', speed:'Hız', fx:'3D ses', echo:'Oda', tagline:'omzundaki yankı', radio:'Radyo', stations:'İstasyonlar', addSt:'İstasyon ekle', stNamePh:'Ad (isteğe bağlı)', playNow:'Dinle', save:'Kaydet', live:'Canlı', stereo:'stereo', badUrl:'Bağlantı https:// ile başlamalı', streamFail:'İstasyon yanıt vermiyor', no3d:'Bu istasyon 3D’ye izin vermiyor — normal stereo çalıyor', radioNote:'İstasyonun web sayfası değil, akışın doğrudan bağlantısı gerekir. Yalnızca https:// adresleri çalışır. İstasyon 3D’ye izin vermezse normal stereo çalar.', on:'Açık', off:'Kapalı', lock:'Kilit', unlocked:'Açık', locked:'Kilitli', sleep:'Uyku', min:'dk', lsh:'Sol omuz', rsh:'Sağ omuz', ahead:'Önde', center:'Kafanın içinde', you:'sen', st_play:'Çalıyor', st_pause:'Duraklatıldı', st_idle:'Hazır', open:'Sesli kitap veya müzik aç', phones:'Kulaklığını tak', menu:'Menü', skins:'Temalar', expSkin:'Temayı kaydet', impSkin:'Tema yükle', lang:'Dil', help:'Yardım', bad:'Geçersiz tema dosyası', big:'Tema çok büyük', custom:'Yüklenen tema', playlist:'Çalma listesi', files:'Dosyalar', folder:'Klasör', noAudio:'Bu klasörde ses dosyası yok', orbit:'Yörünge', pace:'Tur süresi', size:'Boyut', stop:'Dur', sh_circle:'Daire', sh_oval:'Oval', sh_square:'Kare', sh_triangle:'Üçgen', sh_star:'Yıldız', sh_eight:'Sekiz', sh_spiral:'Spiral', sh_comet:'Kuyruklu yıldız', sh_pendulum:'Sarkaç', sh_wander:'Gezinme', feedback:'Yazara yaz' }
+  uk: { skipBad:'Не грає, пропускаю', src:'Джерело', grid:'Простір', ctrl:'Керування', chapters:'Розділи', chapter:'Розділ', speed:'Швидкість', fx:'3D звук', echo:'Кімната', tagline:'ехо на плечі', radio:'Радіо', stations:'Станції', addSt:'Додати станцію', stNamePh:'Назва (необов’язково)', playNow:'Слухати', save:'Зберегти', live:'Ефір', stereo:'стерео', badUrl:'Потрібне посилання, що починається з https://', streamFail:'Станція не відповідає', no3d:'Ця станція не дозволяє 3D - грає звичайним стерео', radioNote:'Потрібне пряме посилання на потік, а не на сторінку станції. Працюють лише адреси https://. Якщо станція не дозволяє 3D, вона грає звичайним стерео.', on:'Увімк.', off:'Вимк.', lock:'Замок', unlocked:'Відкрито', locked:'Закрито', sleep:'Таймер сну', min:'хв', lsh:'Ліве плече', rsh:'Праве плече', ahead:'Попереду', center:'У голові', you:'ти', st_play:'Грає', st_pause:'Пауза', st_idle:'Очікування', open:'Відкрити книгу або музику', phones:'Надягніть навушники', menu:'Меню', skins:'Скіни', expSkin:'Зберегти скін', impSkin:'Завантажити скін', lang:'Мова', help:'Довідка', bad:'Файл скіна не підійшов', big:'Скін завеликий', custom:'Завантажений скін', playlist:'Плейлист', files:'Файли', folder:'Папка', noAudio:'У папці немає аудіофайлів', orbit:'Орбіта', pace:'Час кола', size:'Розмір', stop:'Стоп', sh_circle:'Коло', sh_oval:'Овал', sh_square:'Квадрат', sh_triangle:'Трикутник', sh_star:'Зірка', sh_eight:'Вісімка', sh_spiral:'Спіраль', sh_comet:'Комета', sh_pendulum:'Маятник', sh_wander:'Блукання', feedback:'Написати автору' },
+  de: { skipBad:'Nicht abspielbar, übersprungen', src:'Quelle', grid:'Raum', ctrl:'Steuerung', chapters:'Kapitel', chapter:'Kapitel', speed:'Tempo', fx:'3D-Klang', echo:'Hall', tagline:'Echo auf deiner Schulter', radio:'Radio', stations:'Sender', addSt:'Sender hinzufügen', stNamePh:'Name (optional)', playNow:'Anhören', save:'Speichern', live:'Live', stereo:'Stereo', badUrl:'Der Link muss mit https:// beginnen', streamFail:'Sender antwortet nicht', no3d:'Dieser Sender erlaubt kein 3D - Wiedergabe in normalem Stereo', radioNote:'Du brauchst einen direkten Stream-Link, nicht die Webseite des Senders. Nur https://-Adressen funktionieren. Erlaubt ein Sender kein 3D, läuft er in normalem Stereo.', on:'An', off:'Aus', lock:'Sperre', unlocked:'Offen', locked:'Gesperrt', sleep:'Schlaftimer', min:'Min', lsh:'Linke Schulter', rsh:'Rechte Schulter', ahead:'Vorne', center:'Im Kopf', you:'du', st_play:'Läuft', st_pause:'Pause', st_idle:'Bereit', open:'Hörbuch oder Musik öffnen', phones:'Kopfhörer aufsetzen', menu:'Menü', skins:'Skins', expSkin:'Skin speichern', impSkin:'Skin laden', lang:'Sprache', help:'Hilfe', bad:'Ungültige Skin-Datei', big:'Skin ist zu groß', custom:'Geladener Skin', playlist:'Playlist', files:'Dateien', folder:'Ordner', noAudio:'Keine Audiodateien in diesem Ordner', orbit:'Orbit', pace:'Rundenzeit', size:'Größe', stop:'Stopp', sh_circle:'Kreis', sh_oval:'Oval', sh_square:'Quadrat', sh_triangle:'Dreieck', sh_star:'Stern', sh_eight:'Acht', sh_spiral:'Spirale', sh_comet:'Komet', sh_pendulum:'Pendel', sh_wander:'Streifzug', feedback:'Dem Autor schreiben' },
+  es: { skipBad:'No se puede reproducir, saltando', src:'Fuente', grid:'Espacio', ctrl:'Controles', chapters:'Capítulos', chapter:'Capítulo', speed:'Velocidad', fx:'Sonido 3D', echo:'Sala', tagline:'eco en tu hombro', radio:'Radio', stations:'Emisoras', addSt:'Añadir emisora', stNamePh:'Nombre (opcional)', playNow:'Escuchar', save:'Guardar', live:'En directo', stereo:'estéreo', badUrl:'El enlace debe empezar por https://', streamFail:'La emisora no responde', no3d:'Esta emisora no permite 3D: suena en estéreo normal', radioNote:'Necesitas un enlace directo al stream, no la web de la emisora. Solo funcionan direcciones https://. Si una emisora no permite 3D, suena en estéreo normal.', on:'Sí', off:'No', lock:'Bloqueo', unlocked:'Abierto', locked:'Bloqueado', sleep:'Temporizador', min:'min', lsh:'Hombro izquierdo', rsh:'Hombro derecho', ahead:'Delante', center:'En la cabeza', you:'tú', st_play:'Sonando', st_pause:'Pausa', st_idle:'En espera', open:'Abrir audiolibro o música', phones:'Ponte los auriculares', menu:'Menú', skins:'Skins', expSkin:'Guardar skin', impSkin:'Cargar skin', lang:'Idioma', help:'Ayuda', bad:'Archivo de skin no válido', big:'La skin es demasiado grande', custom:'Skin cargada', playlist:'Lista', files:'Archivos', folder:'Carpeta', noAudio:'No hay audio en esta carpeta', orbit:'Órbita', pace:'Tiempo de vuelta', size:'Tamaño', stop:'Parar', sh_circle:'Círculo', sh_oval:'Óvalo', sh_square:'Cuadrado', sh_triangle:'Triángulo', sh_star:'Estrella', sh_eight:'Ocho', sh_spiral:'Espiral', sh_comet:'Cometa', sh_pendulum:'Péndulo', sh_wander:'Deriva', feedback:'Escribir al autor' },
+  fr: { skipBad:'Illisible, je passe', src:'Source', grid:'Espace', ctrl:'Commandes', chapters:'Chapitres', chapter:'Chapitre', speed:'Vitesse', fx:'Son 3D', echo:'Pièce', tagline:'l’écho sur ton épaule', radio:'Radio', stations:'Stations', addSt:'Ajouter une station', stNamePh:'Nom (facultatif)', playNow:'Écouter', save:'Enregistrer', live:'En direct', stereo:'stéréo', badUrl:'Le lien doit commencer par https://', streamFail:'La station ne répond pas', no3d:'Cette station n’autorise pas la 3D - lecture en stéréo normale', radioNote:'Il faut un lien direct vers le flux, pas la page web de la station. Seules les adresses https:// fonctionnent. Si une station n’autorise pas la 3D, elle joue en stéréo normale.', on:'Oui', off:'Non', lock:'Verrou', unlocked:'Ouvert', locked:'Verrouillé', sleep:'Minuterie', min:'min', lsh:'Épaule gauche', rsh:'Épaule droite', ahead:'Devant', center:'Dans la tête', you:'toi', st_play:'Lecture', st_pause:'Pause', st_idle:'En attente', open:'Ouvrir un livre audio ou de la musique', phones:'Mets tes écouteurs', menu:'Menu', skins:'Skins', expSkin:'Enregistrer le skin', impSkin:'Charger un skin', lang:'Langue', help:'Aide', bad:'Fichier de skin invalide', big:'Skin trop volumineux', custom:'Skin chargé', playlist:'Playlist', files:'Fichiers', folder:'Dossier', noAudio:'Aucun fichier audio dans ce dossier', orbit:'Orbite', pace:'Durée du tour', size:'Taille', stop:'Stop', sh_circle:'Cercle', sh_oval:'Ovale', sh_square:'Carré', sh_triangle:'Triangle', sh_star:'Étoile', sh_eight:'Huit', sh_spiral:'Spirale', sh_comet:'Comète', sh_pendulum:'Pendule', sh_wander:'Errance', feedback:'Écrire à l’auteur' },
+  it: { skipBad:'Non riproducibile, salto', src:'Sorgente', grid:'Spazio', ctrl:'Comandi', chapters:'Capitoli', chapter:'Capitolo', speed:'Velocità', fx:'Suono 3D', echo:'Stanza', tagline:'eco sulla tua spalla', radio:'Radio', stations:'Stazioni', addSt:'Aggiungi stazione', stNamePh:'Nome (facoltativo)', playNow:'Ascolta', save:'Salva', live:'In diretta', stereo:'stereo', badUrl:'Il link deve iniziare con https://', streamFail:'La stazione non risponde', no3d:'Questa stazione non consente il 3D - suona in stereo normale', radioNote:'Serve un link diretto allo stream, non la pagina web della stazione. Funzionano solo indirizzi https://. Se una stazione non consente il 3D, suona in stereo normale.', on:'Sì', off:'No', lock:'Blocco', unlocked:'Sbloccato', locked:'Bloccato', sleep:'Timer', min:'min', lsh:'Spalla sinistra', rsh:'Spalla destra', ahead:'Davanti', center:'In testa', you:'tu', st_play:'In riproduzione', st_pause:'Pausa', st_idle:'In attesa', open:'Apri audiolibro o musica', phones:'Indossa le cuffie', menu:'Menu', skins:'Skin', expSkin:'Salva skin', impSkin:'Carica skin', lang:'Lingua', help:'Aiuto', bad:'File skin non valido', big:'Skin troppo grande', custom:'Skin caricata', playlist:'Playlist', files:'File', folder:'Cartella', noAudio:'Nessun file audio in questa cartella', orbit:'Orbita', pace:'Tempo giro', size:'Dimensione', stop:'Stop', sh_circle:'Cerchio', sh_oval:'Ovale', sh_square:'Quadrato', sh_triangle:'Triangolo', sh_star:'Stella', sh_eight:'Otto', sh_spiral:'Spirale', sh_comet:'Cometa', sh_pendulum:'Pendolo', sh_wander:'Vagare', feedback:'Scrivi all’autore' },
+  pt: { skipBad:'Não toca, pulando', src:'Fonte', grid:'Espaço', ctrl:'Controles', chapters:'Capítulos', chapter:'Capítulo', speed:'Velocidade', fx:'Som 3D', echo:'Sala', tagline:'eco no seu ombro', radio:'Rádio', stations:'Estações', addSt:'Adicionar estação', stNamePh:'Nome (opcional)', playNow:'Ouvir', save:'Salvar', live:'Ao vivo', stereo:'estéreo', badUrl:'O link deve começar com https://', streamFail:'A estação não responde', no3d:'Esta estação não permite 3D - tocando em estéreo normal', radioNote:'É preciso um link direto para o stream, não a página da estação. Só endereços https:// funcionam. Se uma estação não permitir 3D, ela toca em estéreo normal.', on:'Lig.', off:'Desl.', lock:'Trava', unlocked:'Destravado', locked:'Travado', sleep:'Timer', min:'min', lsh:'Ombro esquerdo', rsh:'Ombro direito', ahead:'À frente', center:'Na cabeça', you:'você', st_play:'Tocando', st_pause:'Pausa', st_idle:'Em espera', open:'Abrir audiolivro ou música', phones:'Coloque os fones', menu:'Menu', skins:'Skins', expSkin:'Salvar skin', impSkin:'Carregar skin', lang:'Idioma', help:'Ajuda', bad:'Arquivo de skin inválido', big:'Skin grande demais', custom:'Skin carregada', playlist:'Playlist', files:'Arquivos', folder:'Pasta', noAudio:'Nenhum áudio nesta pasta', orbit:'Órbita', pace:'Tempo da volta', size:'Tamanho', stop:'Parar', sh_circle:'Círculo', sh_oval:'Oval', sh_square:'Quadrado', sh_triangle:'Triângulo', sh_star:'Estrela', sh_eight:'Oito', sh_spiral:'Espiral', sh_comet:'Cometa', sh_pendulum:'Pêndulo', sh_wander:'Deriva', feedback:'Escrever ao autor' },
+  tr: { skipBad:'Çalınamıyor, atlanıyor', src:'Kaynak', grid:'Alan', ctrl:'Kontroller', chapters:'Bölümler', chapter:'Bölüm', speed:'Hız', fx:'3D ses', echo:'Oda', tagline:'omzundaki yankı', radio:'Radyo', stations:'İstasyonlar', addSt:'İstasyon ekle', stNamePh:'Ad (isteğe bağlı)', playNow:'Dinle', save:'Kaydet', live:'Canlı', stereo:'stereo', badUrl:'Bağlantı https:// ile başlamalı', streamFail:'İstasyon yanıt vermiyor', no3d:'Bu istasyon 3D’ye izin vermiyor - normal stereo çalıyor', radioNote:'İstasyonun web sayfası değil, akışın doğrudan bağlantısı gerekir. Yalnızca https:// adresleri çalışır. İstasyon 3D’ye izin vermezse normal stereo çalar.', on:'Açık', off:'Kapalı', lock:'Kilit', unlocked:'Açık', locked:'Kilitli', sleep:'Uyku', min:'dk', lsh:'Sol omuz', rsh:'Sağ omuz', ahead:'Önde', center:'Kafanın içinde', you:'sen', st_play:'Çalıyor', st_pause:'Duraklatıldı', st_idle:'Hazır', open:'Sesli kitap veya müzik aç', phones:'Kulaklığını tak', menu:'Menü', skins:'Temalar', expSkin:'Temayı kaydet', impSkin:'Tema yükle', lang:'Dil', help:'Yardım', bad:'Geçersiz tema dosyası', big:'Tema çok büyük', custom:'Yüklenen tema', playlist:'Çalma listesi', files:'Dosyalar', folder:'Klasör', noAudio:'Bu klasörde ses dosyası yok', orbit:'Yörünge', pace:'Tur süresi', size:'Boyut', stop:'Dur', sh_circle:'Daire', sh_oval:'Oval', sh_square:'Kare', sh_triangle:'Üçgen', sh_star:'Yıldız', sh_eight:'Sekiz', sh_spiral:'Spiral', sh_comet:'Kuyruklu yıldız', sh_pendulum:'Sarkaç', sh_wander:'Gezinme', feedback:'Yazara yaz' }
 });
 Object.assign(HELP, {
   uk: `<p><b>Потрібні навушники.</b> Без них простору не буде.</p>
-<p><b>Файли / Папка.</b> Можна вибрати кілька розділів або цілу папку — плеєр пам’ятає, де ви зупинилися в кожному.</p>
-<p><b>Радар.</b> У центрі — ви. Тягніть папугу Wisp — і звук переїде туди. Ближче — гучніше й чистіше, далі — тихіше й глухіше.</p>
-<p><b>Орбіта.</b> Папуга сам літає обраною фігурою. Добре тренує слух: з часом «попереду» і «позаду» розрізняти легше. Для роботи поставте звук далеко попереду збоку — він не заважатиме думати.</p>
-<p><b>3D звук: Вимк.</b> — звичайне стерео, щоб порівняти. <b>Замок</b> — щоб у кишені нічого не зрушило. <b>Таймер сну</b> — наприкінці звук плавно стихає. <b>Кімната</b> — відчуття відстані; для книжок її можна вимкнути.</p>
-<p><b>Скіни</b> змінюють увесь вигляд плеєра, а не лише кольори. Скін — це файл: його можна зберегти, переробити й надіслати другові.</p>
-<p>Ліво й право чують усі. «Попереду» і «позаду» дехто плутає — це нормально для навушників.</p>`,
+<p><b>Файли / Папка.</b> Можна вибрати кілька розділів або цілу папку - плеєр пам’ятає, де ви зупинилися в кожному.</p>
+<p><b>Радар.</b> У центрі - ви. Тягніть папугу Wisp - і звук переїде туди. Ближче - гучніше й чистіше, далі - тихіше й глухіше.</p>
+<p><b>Орбіта.</b> Папуга сам літає обраною фігурою. Добре тренує слух: з часом «попереду» і «позаду» розрізняти легше. Для роботи поставте звук далеко попереду збоку - він не заважатиме думати.</p>
+<p><b>3D звук: Вимк.</b> - звичайне стерео, щоб порівняти. <b>Замок</b> - щоб у кишені нічого не зрушило. <b>Таймер сну</b> - наприкінці звук плавно стихає. <b>Кімната</b> - відчуття відстані; для книжок її можна вимкнути.</p>
+<p><b>Скіни</b> змінюють увесь вигляд плеєра, а не лише кольори. Скін - це файл: його можна зберегти, переробити й надіслати другові.</p>
+<p>Ліво й право чують усі. «Попереду» і «позаду» дехто плутає - це нормально для навушників.</p>`,
   de: `<p><b>Kopfhörer nötig.</b> Ohne sie gibt es keinen Raum.</p>
-<p><b>Dateien / Ordner.</b> Wähle mehrere Kapitel oder einen ganzen Ordner — der Player merkt sich, wo du in jedem aufgehört hast.</p>
+<p><b>Dateien / Ordner.</b> Wähle mehrere Kapitel oder einen ganzen Ordner - der Player merkt sich, wo du in jedem aufgehört hast.</p>
 <p><b>Radar.</b> Du bist in der Mitte. Zieh den Papagei Wisp, und der Klang wandert dorthin. Näher ist lauter und klarer, weiter weg leiser und dumpfer.</p>
-<p><b>Orbit.</b> Der Papagei fliegt von selbst die gewählte Figur. Gutes Hörtraining: Mit der Zeit lassen sich „vorne“ und „hinten“ leichter unterscheiden. Zum Arbeiten den Klang weit nach vorne zur Seite setzen — er stört das Denken nicht.</p>
-<p><b>3D-Klang: Aus</b> — normales Stereo zum Vergleich. <b>Sperre</b> — damit sich in der Tasche nichts verschiebt. <b>Schlaftimer</b> — am Ende wird der Ton sanft leiser. <b>Hall</b> — Gefühl von Entfernung; für Hörbücher abschalten.</p>
+<p><b>Orbit.</b> Der Papagei fliegt von selbst die gewählte Figur. Gutes Hörtraining: Mit der Zeit lassen sich „vorne“ und „hinten“ leichter unterscheiden. Zum Arbeiten den Klang weit nach vorne zur Seite setzen - er stört das Denken nicht.</p>
+<p><b>3D-Klang: Aus</b> - normales Stereo zum Vergleich. <b>Sperre</b> - damit sich in der Tasche nichts verschiebt. <b>Schlaftimer</b> - am Ende wird der Ton sanft leiser. <b>Hall</b> - Gefühl von Entfernung; für Hörbücher abschalten.</p>
 <p><b>Skins</b> ändern den ganzen Player, nicht nur die Farben. Ein Skin ist eine Datei: speichern, umbauen, an Freunde schicken.</p>
-<p>Links und rechts hört jeder. „Vorne“ und „hinten“ verwechseln manche — das ist bei Kopfhörern normal.</p>`,
+<p>Links und rechts hört jeder. „Vorne“ und „hinten“ verwechseln manche - das ist bei Kopfhörern normal.</p>`,
   es: `<p><b>Necesitas auriculares.</b> Sin ellos no hay espacio.</p>
 <p><b>Archivos / Carpeta.</b> Elige varios capítulos o una carpeta entera: el reproductor recuerda dónde te quedaste en cada uno.</p>
 <p><b>Radar.</b> Tú estás en el centro. Arrastra al loro Wisp y el sonido se moverá allí. Más cerca suena más fuerte y claro; más lejos, más bajo y apagado.</p>
 <p><b>Órbita.</b> El loro vuela solo siguiendo la figura elegida. Buen entrenamiento auditivo: con el tiempo cuesta menos distinguir «delante» y «detrás». Para trabajar, pon el sonido lejos, delante y a un lado: no te molestará al pensar.</p>
-<p><b>Sonido 3D: No</b> — estéreo normal para comparar. <b>Bloqueo</b> — para que nada se mueva en el bolsillo. <b>Temporizador</b> — al final el sonido se apaga suavemente. <b>Sala</b> — sensación de distancia; desactívala para audiolibros.</p>
+<p><b>Sonido 3D: No</b> - estéreo normal para comparar. <b>Bloqueo</b> - para que nada se mueva en el bolsillo. <b>Temporizador</b> - al final el sonido se apaga suavemente. <b>Sala</b> - sensación de distancia; desactívala para audiolibros.</p>
 <p><b>Las skins</b> cambian todo el reproductor, no solo los colores. Una skin es un archivo: guárdala, modifícala, envíasela a un amigo.</p>
 <p>Izquierda y derecha las oye todo el mundo. «Delante» y «detrás» a veces se confunden: es normal con auriculares.</p>`,
   fr: `<p><b>Écouteurs indispensables.</b> Sans eux, pas d’espace.</p>
-<p><b>Fichiers / Dossier.</b> Choisis plusieurs chapitres ou un dossier entier — le lecteur se souvient où tu t’es arrêté dans chacun.</p>
+<p><b>Fichiers / Dossier.</b> Choisis plusieurs chapitres ou un dossier entier - le lecteur se souvient où tu t’es arrêté dans chacun.</p>
 <p><b>Radar.</b> Tu es au centre. Fais glisser le perroquet Wisp et le son s’y déplace. Plus près, c’est plus fort et plus net ; plus loin, plus doux et plus sourd.</p>
-<p><b>Orbite.</b> Le perroquet vole seul selon la figure choisie. Bon entraînement de l’oreille : avec le temps, « devant » et « derrière » se distinguent mieux. Pour travailler, place le son loin devant, sur le côté — il ne gênera pas ta réflexion.</p>
-<p><b>Son 3D : Non</b> — stéréo normale pour comparer. <b>Verrou</b> — pour que rien ne bouge dans la poche. <b>Minuterie</b> — à la fin, le son baisse doucement. <b>Pièce</b> — sensation de distance ; à couper pour les livres audio.</p>
+<p><b>Orbite.</b> Le perroquet vole seul selon la figure choisie. Bon entraînement de l’oreille : avec le temps, « devant » et « derrière » se distinguent mieux. Pour travailler, place le son loin devant, sur le côté - il ne gênera pas ta réflexion.</p>
+<p><b>Son 3D : Non</b> - stéréo normale pour comparer. <b>Verrou</b> - pour que rien ne bouge dans la poche. <b>Minuterie</b> - à la fin, le son baisse doucement. <b>Pièce</b> - sensation de distance ; à couper pour les livres audio.</p>
 <p><b>Les skins</b> changent tout le lecteur, pas seulement les couleurs. Un skin est un fichier : enregistre-le, modifie-le, envoie-le à un ami.</p>
-<p>Tout le monde entend la gauche et la droite. Certains confondent « devant » et « derrière » — c’est normal au casque.</p>`,
+<p>Tout le monde entend la gauche et la droite. Certains confondent « devant » et « derrière » - c’est normal au casque.</p>`,
   it: `<p><b>Servono le cuffie.</b> Senza, lo spazio non c’è.</p>
 <p><b>File / Cartella.</b> Scegli più capitoli o un’intera cartella: il player ricorda dove ti sei fermato in ognuno.</p>
 <p><b>Radar.</b> Tu sei al centro. Trascina il pappagallo Wisp e il suono si sposta lì. Più vicino è più forte e nitido, più lontano più piano e ovattato.</p>
 <p><b>Orbita.</b> Il pappagallo vola da solo lungo la figura scelta. Ottimo allenamento dell’udito: col tempo distinguere «davanti» e «dietro» diventa più facile. Per lavorare, metti il suono lontano, davanti e di lato: non disturberà i pensieri.</p>
-<p><b>Suono 3D: No</b> — stereo normale per confrontare. <b>Blocco</b> — così in tasca non si sposta nulla. <b>Timer</b> — alla fine il suono si spegne dolcemente. <b>Stanza</b> — senso di distanza; per gli audiolibri si può disattivare.</p>
+<p><b>Suono 3D: No</b> - stereo normale per confrontare. <b>Blocco</b> - così in tasca non si sposta nulla. <b>Timer</b> - alla fine il suono si spegne dolcemente. <b>Stanza</b> - senso di distanza; per gli audiolibri si può disattivare.</p>
 <p><b>Le skin</b> cambiano tutto il player, non solo i colori. Una skin è un file: salvala, modificala, mandala a un amico.</p>
 <p>Sinistra e destra le sentono tutti. Qualcuno confonde «davanti» e «dietro»: con le cuffie è normale.</p>`,
   pt: `<p><b>Precisa de fones.</b> Sem eles não há espaço.</p>
-<p><b>Arquivos / Pasta.</b> Escolha vários capítulos ou uma pasta inteira — o player lembra onde você parou em cada um.</p>
+<p><b>Arquivos / Pasta.</b> Escolha vários capítulos ou uma pasta inteira - o player lembra onde você parou em cada um.</p>
 <p><b>Radar.</b> Você está no centro. Arraste o papagaio Wisp e o som vai para lá. Mais perto fica mais alto e nítido; mais longe, mais baixo e abafado.</p>
-<p><b>Órbita.</b> O papagaio voa sozinho pela figura escolhida. Ótimo treino para o ouvido: com o tempo fica mais fácil distinguir “frente” e “trás”. Para trabalhar, coloque o som longe, à frente e de lado — ele não atrapalha o pensamento.</p>
-<p><b>Som 3D: Desl.</b> — estéreo normal para comparar. <b>Trava</b> — para nada mudar no bolso. <b>Timer</b> — no fim o som diminui suavemente. <b>Sala</b> — sensação de distância; desligue para audiolivros.</p>
+<p><b>Órbita.</b> O papagaio voa sozinho pela figura escolhida. Ótimo treino para o ouvido: com o tempo fica mais fácil distinguir “frente” e “trás”. Para trabalhar, coloque o som longe, à frente e de lado - ele não atrapalha o pensamento.</p>
+<p><b>Som 3D: Desl.</b> - estéreo normal para comparar. <b>Trava</b> - para nada mudar no bolso. <b>Timer</b> - no fim o som diminui suavemente. <b>Sala</b> - sensação de distância; desligue para audiolivros.</p>
 <p><b>As skins</b> mudam o player inteiro, não só as cores. Uma skin é um arquivo: salve, modifique, envie para um amigo.</p>
-<p>Todo mundo ouve esquerda e direita. Algumas pessoas confundem “frente” e “trás” — é normal com fones.</p>`,
+<p>Todo mundo ouve esquerda e direita. Algumas pessoas confundem “frente” e “trás” - é normal com fones.</p>`,
   tr: `<p><b>Kulaklık gerekli.</b> Kulaklık olmadan alan hissi olmaz.</p>
-<p><b>Dosyalar / Klasör.</b> Birden çok bölüm ya da bütün bir klasör seçebilirsin — oynatıcı her birinde nerede kaldığını hatırlar.</p>
+<p><b>Dosyalar / Klasör.</b> Birden çok bölüm ya da bütün bir klasör seçebilirsin - oynatıcı her birinde nerede kaldığını hatırlar.</p>
 <p><b>Radar.</b> Ortadaki sensin. Papağan Wisp’i sürükle, ses oraya taşınır. Yakında daha yüksek ve net, uzakta daha kısık ve boğuk.</p>
-<p><b>Yörünge.</b> Papağan seçilen şekil boyunca kendi kendine uçar. İyi bir kulak egzersizi: zamanla «önde» ve «arkada»yı ayırt etmek kolaylaşır. Çalışırken sesi uzağa, öne ve yana koy — düşünmeni engellemez.</p>
-<p><b>3D ses: Kapalı</b> — karşılaştırmak için normal stereo. <b>Kilit</b> — cepte hiçbir şey kaymasın diye. <b>Uyku</b> — sonunda ses yavaşça kısılır. <b>Oda</b> — uzaklık hissi; sesli kitaplar için kapatabilirsin.</p>
+<p><b>Yörünge.</b> Papağan seçilen şekil boyunca kendi kendine uçar. İyi bir kulak egzersizi: zamanla «önde» ve «arkada»yı ayırt etmek kolaylaşır. Çalışırken sesi uzağa, öne ve yana koy - düşünmeni engellemez.</p>
+<p><b>3D ses: Kapalı</b> - karşılaştırmak için normal stereo. <b>Kilit</b> - cepte hiçbir şey kaymasın diye. <b>Uyku</b> - sonunda ses yavaşça kısılır. <b>Oda</b> - uzaklık hissi; sesli kitaplar için kapatabilirsin.</p>
 <p><b>Temalar</b> oynatıcının tüm görünümünü değiştirir, sadece renkleri değil. Tema bir dosyadır: kaydet, değiştir, arkadaşına gönder.</p>
-<p>Sol ve sağı herkes duyar. Bazıları «önde» ve «arkada»yı karıştırır — kulaklıkla bu normaldir.</p>`
+<p>Sol ve sağı herkes duyar. Bazıları «önde» ve «arkada»yı karıştırır - kulaklıkla bu normaldir.</p>`
 });
+T.ru.callLink = 'Звонок'; T.ru.aiLink = 'Попутчик'; T.pl.callLink = 'Rozmowa'; T.pl.aiLink = 'Towarzysz'; T.en.callLink = 'Call'; T.en.aiLink = 'Companion'; T.uk.callLink = 'Дзвінок'; T.uk.aiLink = 'Попутник'; T.de.callLink = 'Anruf'; T.de.aiLink = 'Begleiter'; T.es.callLink = 'Llamada'; T.es.aiLink = 'Compañero'; T.fr.callLink = 'Appel'; T.fr.aiLink = 'Compagnon'; T.it.callLink = 'Chiamata'; T.it.aiLink = 'Compagno'; T.pt.callLink = 'Chamada'; T.pt.aiLink = 'Companheiro'; T.tr.callLink = 'Arama'; T.tr.aiLink = 'Yol arkadaşı';
 const LANGS = [['en','English'],['ru','Русский'],['uk','Українська'],['pl','Polski'],['de','Deutsch'],['es','Español'],['fr','Français'],['it','Italiano'],['pt','Português'],['tr','Türkçe']];
 
 // Язык: сохранённый выбор, иначе язык телефона/браузера, иначе английский
@@ -691,7 +693,7 @@ const METERS = 3, SIZE = 300, C = 150;
 // ---------------- Звук ----------------
 let ac = null, panner, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave;
 // Мягкое «комнатное» эхо: шум, который со временем темнеет (как в настоящей комнате),
-// плюс 18 мс тишины в начале. Резкого белого шума с верхами больше нет — он и давал «писк».
+// плюс 18 мс тишины в начале. Резкого белого шума с верхами больше нет - он и давал «писк».
 function makeImpulse(sec) {
   const sr = ac.sampleRate, pre = Math.floor(sr * 0.018), len = Math.floor(sr * sec), b = ac.createBuffer(2, len, sr);
   for (let ch = 0; ch < 2; ch++) {
@@ -706,7 +708,8 @@ function makeImpulse(sec) {
 }
 function initAudio() {
   if (!ac) {
-    ac = new (window.AudioContext || window.webkitAudioContext)();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { ac = new AC({ latencyHint: 'playback' }); } catch (e) { ac = new AC(); } // большой буфер: плеер, а не игра - меньше треска
     const src = ac.createMediaElementSource(audioEl);
     const mono = ac.createGain(); mono.channelCount = 1; mono.channelCountMode = 'explicit'; mono.channelInterpretation = 'speakers';
     lowpass = ac.createBiquadFilter(); lowpass.type = 'lowpass'; lowpass.Q.value = 0.5;
@@ -751,7 +754,7 @@ function poly(pts) {
 }
 const starPts = []; for (let k = 0; k < 10; k++) { const r = k % 2 ? 0.42 : 1, a = k * TAU / 10; starPts.push([r * Math.sin(a), -r * Math.cos(a)]); }
 function kepler(u, e) { const M = TAU * u; let E = M; for (let i = 0; i < 8; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E)); return E; }
-// Все фигуры: u от 0 до 1 → точка в круге радиуса 1 (край радара = 3 м). Начало — впереди.
+// Все фигуры: u от 0 до 1 → точка в круге радиуса 1 (край радара = 3 м). Начало - впереди.
 const SHAPES = {
   circle:   u => ({ x: Math.sin(TAU * u), y: -Math.cos(TAU * u) }),
   oval:     u => ({ x: 0.5 * Math.sin(TAU * u), y: -Math.cos(TAU * u) }),
@@ -760,7 +763,7 @@ const SHAPES = {
   star:     poly(starPts),
   eight:    u => ({ x: Math.sin(TAU * u), y: -0.55 * Math.sin(2 * TAU * u) }),
   spiral:   u => { const r = 0.12 + 0.88 * (0.5 - 0.5 * Math.cos(TAU * u)), a = TAU * u * 3; return { x: r * Math.sin(a), y: -r * Math.cos(a) }; },
-  // Комета: летит по вытянутому эллипсу, голова в фокусе — вдали медленно, у головы резко проносится мимо
+  // Комета: летит по вытянутому эллипсу, голова в фокусе - вдали медленно, у головы резко проносится мимо
   comet:    u => { const e = 0.8, a = 1 / (1 + e), b = a * Math.sqrt(1 - e * e), E = kepler((u + 0.5) % 1, e); return { x: b * Math.sin(E), y: a * (Math.cos(E) - e) }; },
   pendulum: u => { const th = 1.35 * Math.sin(TAU * u); return { x: Math.sin(th), y: -Math.cos(th) }; },
   wander:   u => { const a = TAU * u; let x = 0.55 * Math.sin(a) + 0.3 * Math.sin(3 * a + 1) + 0.12 * Math.sin(7 * a + 2), y = -0.55 * Math.cos(2 * a) + 0.3 * Math.sin(5 * a + 0.5) - 0.1 * Math.cos(a);
@@ -979,8 +982,8 @@ function applyLang() {
 }
 
 // ---------------- Радар ----------------
-const PARROT = new Path2D('M46 16 C56 12 66 16 70 24 C76 28 76 38 70 43 C70 38 67 35 63 35 C64 47 62 58 56 68 L50 92 L46 70 C38 62 34 48 36 34 C37 24 40 18 46 16 Z'); // силуэт попугая, рамка 100×100
-const PARROT2 = new Path2D('M62 24 C64.5 28 64.5 32 63 35 M44 40 C52 46 56 55 52 66 M46 16 C42 10 44 6 49 4');
+const PARROT = new Path2D('M8 3L13 2L16 4L19 6L18 9L16 8L15 12L13 17L10 23L9 18L6 14L6 8Z');
+const PARROT2 = new Path2D('M8 9L12 12L11 17M13 2L15 12');
 function makeRadar(el) {
   const cv = document.createElement('canvas'); el.innerHTML = ''; el.appendChild(cv);
   cv.width = cv.height = SIZE * dpr;
@@ -1097,21 +1100,24 @@ function drawRadar(g, now) {
   }
   g.restore();
   if (o.you) { g.fillStyle = c['r-txt']; g.font = '9px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t('you').toUpperCase(), C, C + 21); }
-  // попугай (вектор), смотрит на голову
-  const flip = px > C + 1 ? -1 : 1, sc = 0.3;
-  g.save(); g.translate(px, py); g.scale(sc * flip, sc); g.translate(-55, -48);
-  g.shadowColor = pc; g.shadowBlur = 14; g.lineWidth = 1.8 / sc; g.strokeStyle = pc; g.fillStyle = c['r-bg'];
-  g.fill(PARROT); g.stroke(PARROT); g.shadowBlur = 0; g.globalAlpha = .7; g.lineWidth = 1.3 / sc; g.stroke(PARROT2); g.globalAlpha = 1;
-  g.fillStyle = pc; g.beginPath(); g.arc(57, 25, 3, 0, Math.PI * 2); g.fill();
-  g.restore();
-  // прицел
-  if (o.reticle) {
-    const s = 21, k = 6; g.strokeStyle = pc; g.lineWidth = 1.5; g.globalAlpha = .9;
+  // Wisp - светлячок: светящаяся точка, над ней крылья «V», которые чуть машут
+  {
+    const flap = Math.sin(now / 260) * 1.6;
+    const halo = g.createRadialGradient(px, py, 0, px, py, 18);
+    halo.addColorStop(0, pc); halo.addColorStop(0.25, pc); halo.addColorStop(1, 'rgba(0,0,0,0)');
+    g.save();
+    g.globalAlpha = .35; g.fillStyle = halo; g.beginPath(); g.arc(px, py, 18, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1; g.shadowColor = pc; g.shadowBlur = 14;
+    g.fillStyle = pc; g.beginPath(); g.arc(px, py, 4.5, 0, Math.PI * 2); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.globalAlpha = .85; g.beginPath(); g.arc(px, py, 1.8, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1; g.strokeStyle = pc; g.lineWidth = 2.2; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.shadowColor = pc; g.shadowBlur = 8;
     g.beginPath();
-    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
-      g.moveTo(px + sx * s, py + sy * (s - k)); g.lineTo(px + sx * s, py + sy * s); g.lineTo(px + sx * (s - k), py + sy * s);
-    });
-    g.stroke(); g.globalAlpha = 1;
+    g.moveTo(px - 10, py - 12 - flap);
+    g.quadraticCurveTo(px - 5, py - 9 + flap * 0.3, px, py - 8);
+    g.quadraticCurveTo(px + 5, py - 9 + flap * 0.3, px + 10, py - 12 - flap);
+    g.stroke();
+    g.restore();
   }
   // подпись
   if (o.label !== false && dist > 3) {
@@ -1231,9 +1237,24 @@ function load(i) {
     if (saved && saved.t > 0 && saved.t < audioEl.duration - 5) audioEl.currentTime = saved.t;
     S.ready = true; render();
   };
-  audioEl.play().catch(() => {});
+  startPlay();
   setupMediaSession(f.name); renderList(); render(); resizeAll(); requestDraw();
 }
+// Запуск с повтором: если браузер не дал начать сразу (экран погашен, файл ещё не прочитан) - пробуем, когда файл готов
+function startPlay() {
+  audioEl.play().catch(() => {
+    audioEl.addEventListener('canplay', function again() { audioEl.removeEventListener('canplay', again); if (!S.radio) audioEl.play().catch(() => {}); });
+  });
+}
+// Битый или неподдерживаемый файл: не останавливаемся, а идём дальше (но не больше 5 подряд)
+let badInRow = 0;
+audioEl.addEventListener('error', () => {
+  if (S.radio || S.cur < 0) return;
+  badInRow++;
+  toast(t('skipBad') + ': ' + stripExt(S.tracks[S.cur].name));
+  if (badInRow <= 5 && S.cur < S.tracks.length - 1) load(S.cur + 1);
+});
+audioEl.addEventListener('playing', () => { badInRow = 0; if (ac && ac.state !== 'running') ac.resume(); });
 const AUDIO_RE = /\.(mp3|m4a|m4b|aac|ogg|oga|opus|wav|flac|webm|mka)$/i;
 function takeFiles(e) {
   const files = [...e.target.files].filter(f => (f.type || '').startsWith('audio/') || AUDIO_RE.test(f.name));
@@ -1250,13 +1271,20 @@ function takeFiles(e) {
 $('fileInput').addEventListener('change', takeFiles);
 $('dirInput').addEventListener('change', takeFiles);
 audioEl.addEventListener('timeupdate', () => { render(); if (Date.now() - lastSave > 5000) { lastSave = Date.now(); savePos(); } });
-audioEl.addEventListener('play', () => { render(); requestDraw(); });
-audioEl.addEventListener('pause', () => { render(); savePos(); requestDraw(); });
+audioEl.addEventListener('play', () => { render(); requestDraw(); try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {} });
+audioEl.addEventListener('pause', () => { render(); savePos(); requestDraw(); try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {} });
 audioEl.addEventListener('ended', () => {
   if (S.cur >= 0) store.set(keyOf(S.tracks[S.cur]), { t: 0, at: Date.now() });
   S.ready = false; if (S.cur < S.tracks.length - 1) load(S.cur + 1);
 });
 window.addEventListener('pagehide', savePos);
+// Сторож: играет, но время стоит 10 секунд - пинаем плеер
+let lastT = -1, stuckFor = 0;
+setInterval(() => {
+  if (S.radio || S.cur < 0 || audioEl.paused || audioEl.ended) { stuckFor = 0; return; }
+  if (audioEl.currentTime === lastT) { stuckFor++; if (stuckFor >= 5) { stuckFor = 0; if (ac && ac.state !== 'running') ac.resume(); audioEl.play().catch(() => {}); } }
+  else { stuckFor = 0; lastT = audioEl.currentTime; }
+}, 2000);
 function skip(sec) {
   if (S.radio) return; // в прямом эфире перематывать некуда
   const max = isFinite(audioEl.duration) ? audioEl.duration : Infinity; audioEl.currentTime = Math.min(max, Math.max(0, audioEl.currentTime + sec)); }
@@ -1294,7 +1322,7 @@ function playStation(st) {
   S.radio = st; S.plain = false;
   const my = ++radioTry;
   initAudio();
-  // Просим поток с разрешением на обработку. Не дал разрешения — поток не откроется, и мы переключимся на стерео.
+  // Просим поток с разрешением на обработку. Не дал разрешения - поток не откроется, и мы переключимся на стерео.
   audioEl.crossOrigin = 'anonymous';
   audioEl.onloadedmetadata = null;
   audioEl.playbackRate = 1;
@@ -1304,7 +1332,7 @@ function playStation(st) {
   audioEl.onerror = () => {
     if (my !== radioTry || S.plain) return;
     if (!started) startPlain(st, my);                                   // скорее всего, станция не разрешает 3D
-    else setTimeout(() => { if (my === radioTry && S.radio === st) { audioEl.src = st.url; audioEl.play().catch(() => {}); } }, 2000); // обрыв — переподключаемся
+    else setTimeout(() => { if (my === radioTry && S.radio === st) { audioEl.src = st.url; audioEl.play().catch(() => {}); } }, 2000); // обрыв - переподключаемся
   };
   audioEl.play().catch(() => {});
   setupMediaSession(st.name); render(); requestDraw();
@@ -1403,11 +1431,11 @@ $('langSel').innerHTML = LANGS.map(([k, n]) => `<option value="${k}">${n}</optio
 $('langSel').addEventListener('change', e => { lang = e.target.value; store.set('pp_lang', lang); applyLang(); });
 
 // ---------------- Обратная связь ----------------
-const FEEDBACK_URL = 'https://t.me/WispPlayer_bot'; // отзывы — в Telegram-бота
+const FEEDBACK_URL = 'https://t.me/WispPlayer_bot'; // отзывы - в Telegram-бота
 if (FEEDBACK_URL) $('fbLink').href = FEEDBACK_URL; else $('fbLink').classList.add('hidden');
 
 // ---------------- Своя статистика: тихие отметки в журнал сервера ----------------
-// Без cookies и без личных данных: только «что произошло» и язык. Каждая отметка — раз за запуск.
+// Без cookies и без личных данных: только «что произошло» и язык. Каждая отметка - раз за запуск.
 const pinged = {};
 function ping(ev) {
   if (pinged[ev] || location.protocol !== 'https:') return;

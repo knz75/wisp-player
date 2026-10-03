@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#02070a">
+<title>Wisp - помощник</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#02070a}
+:root{--c:#3ef0ff;--c2:#7dff9a;--w:#ffb020;--bad:#ff6b6b;--pn:rgba(6,22,28,.62);--ln:rgba(62,240,255,.24);--tx:#cdeff6;--dm:#5b8792}
+body{min-height:100vh;color:var(--tx);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(18px + env(safe-area-inset-bottom,0px));
+  background:
+    radial-gradient(ellipse 90% 45% at 50% -5%,rgba(62,240,255,.20),transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100% 100%,rgba(125,255,154,.08),transparent 70%),
+    repeating-linear-gradient(0deg,rgba(62,240,255,.045) 0 1px,transparent 1px 28px),
+    repeating-linear-gradient(90deg,rgba(62,240,255,.045) 0 1px,transparent 1px 28px),#02070a}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.hud{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:10px;position:relative;z-index:2}
+.top{display:flex;align-items:center;gap:10px}
+.brand{flex:1;min-width:0;line-height:1.15}
+.brand b{font-size:1.05rem;letter-spacing:4px;white-space:nowrap;color:#fff;text-shadow:0 0 10px rgba(62,240,255,.6)}
+.brand b i{font-style:normal;color:var(--c)}
+.st{font-size:.62rem;letter-spacing:2px;color:var(--dm);text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--dm);flex-shrink:0}
+.st.live{color:var(--c2)} .st.live::before{background:var(--c2);box-shadow:0 0 8px var(--c2);animation:blink 1.2s steps(2) infinite}
+.st.talk{color:var(--w)} .st.talk::before{background:var(--w);box-shadow:0 0 8px var(--w)}
+.st.bad{color:var(--bad);white-space:normal} .st.bad::before{background:var(--bad)}
+@keyframes blink{50%{opacity:.2}}
+.pn{position:relative;padding:10px;border:1px solid var(--ln);
+  background:
+   linear-gradient(var(--c),var(--c)) top left/14px 2px no-repeat,linear-gradient(var(--c),var(--c)) top left/2px 14px no-repeat,
+   linear-gradient(var(--c),var(--c)) top right/14px 2px no-repeat,linear-gradient(var(--c),var(--c)) top right/2px 14px no-repeat,
+   linear-gradient(var(--c),var(--c)) bottom left/14px 2px no-repeat,linear-gradient(var(--c),var(--c)) bottom left/2px 14px no-repeat,
+   linear-gradient(var(--c),var(--c)) bottom right/14px 2px no-repeat,linear-gradient(var(--c),var(--c)) bottom right/2px 14px no-repeat,
+   var(--pn);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ph{display:flex;justify-content:space-between;gap:8px;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--c);margin-bottom:8px}
+.ph span:first-child::before{content:'▸ '}
+.ph[data-fold]{cursor:pointer}
+.ph[data-fold] span:first-child::before{content:'▾ '}
+.folded .ph[data-fold] span:first-child::before{content:'▸ '}
+.folded .ph{margin-bottom:0}
+.folded>:not(.ph){display:none!important}
+.ph .r{color:var(--dm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb,.wb{height:40px;border:1px solid var(--ln);background:rgba(62,240,255,.05);color:var(--c);font:inherit;font-size:.7rem;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;
+  white-space:nowrap;overflow:hidden;padding:0 4px;width:100%;
+  clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
+.hb:active,.wb:active{background:rgba(62,240,255,.18)}
+.wb.on{background:var(--c);color:#001218;box-shadow:0 0 14px rgba(62,240,255,.5);font-weight:700}
+.hb:disabled{opacity:.4}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.talk{height:56px;border:1px solid var(--c2);color:var(--c2);background:rgba(125,255,154,.08);font:inherit;font-size:.86rem;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 0 14px rgba(125,255,154,.25),inset 0 0 12px rgba(125,255,154,.15);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.talk.end{border-color:var(--w);color:var(--w);background:rgba(255,176,32,.08);box-shadow:0 0 14px rgba(255,176,32,.25),inset 0 0 12px rgba(255,176,32,.12)}
+.talk:disabled{opacity:.5}
+.ctl{display:grid;grid-template-columns:1fr;gap:6px}
+.lvl{height:3px;background:rgba(62,240,255,.15);margin-top:8px}
+.lvl i{display:block;height:100%;width:0;background:var(--c2);box-shadow:0 0 6px var(--c2)}
+.rbox{width:100%;max-width:340px;margin:0 auto}
+.rbox canvas{display:block;width:100%;aspect-ratio:1/1}
+.ro{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.ro div{border:1px solid var(--ln);padding:5px 6px;background:rgba(0,0,0,.25);min-width:0}
+.ro small{display:block;font-size:.55rem;letter-spacing:2px;color:var(--dm)}
+.ro b{display:block;font-size:.85rem;color:var(--c);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shapes{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.shapes .wb{height:44px;padding:0;color:var(--dm)}
+.shapes .wb.on{color:#001218}
+.shapes svg{width:26px;height:26px;display:block}
+.mem{margin-top:6px;border:1px solid var(--ln);background:rgba(0,0,0,.25);padding:6px 8px;display:flex;gap:8px;align-items:flex-start}
+.mem div{flex:1;min-width:0;font-size:.68rem;line-height:1.45;color:var(--tx);word-break:break-word}
+.mem small{display:block;color:var(--dm);font-size:.58rem;letter-spacing:1px;margin-bottom:2px}
+.mem i{font-style:normal;color:var(--c)}
+.mem button{flex:none;width:28px;height:28px;border:1px solid var(--ln);background:transparent;color:var(--dm);font:inherit;cursor:pointer}
+.empty{font-size:.62rem;color:var(--dm);margin-top:6px}
+.ob-hint{margin:8px 0 0;font-size:.62rem;color:var(--dm);letter-spacing:1px}
+.sep{grid-column:1/-1;font-size:.55rem;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin:6px 0 1px}
+.ob-row{display:grid;grid-template-columns:1fr 52px;gap:5px;margin-top:6px}
+.ob-name{color:var(--c)}
+.ob-dir{font-size:1.15rem}
+.ob-l{display:flex;justify-content:space-between;align-items:baseline;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--dm);margin-top:10px}
+.ob-l b{font-variant-numeric:tabular-nums;font-size:.75rem;color:var(--c)}
+.w-seek{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0;touch-action:none;display:block}
+.w-seek::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--c) var(--p,0%),rgba(62,240,255,.15) var(--p,0%))}
+.w-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:2px;background:var(--c);border:none;box-shadow:0 0 8px var(--c)}
+.w-seek::-moz-range-track{height:3px;background:rgba(62,240,255,.15)}
+.w-seek::-moz-range-progress{height:3px;background:var(--c)}
+.w-seek::-moz-range-thumb{width:14px;height:14px;border-radius:2px;background:var(--c);border:none}
+.fl{display:block;font-size:.58rem;letter-spacing:2px;color:var(--dm);text-transform:uppercase;margin:10px 0 4px}
+.in{display:block;width:100%;border:1px solid var(--ln);background:rgba(0,0,0,.35);color:var(--tx);font:inherit;font-size:.8rem;padding:9px 8px;border-radius:0}
+select.in{height:40px;padding:0 8px}
+textarea.in{min-height:110px;resize:vertical;line-height:1.4}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:.72rem;color:var(--tx);margin-top:12px;line-height:1.4}
+.chk input{width:18px;height:18px;flex:none;margin:0;accent-color:var(--c)}
+#pocket{position:fixed;inset:0;z-index:100;background:#000;display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));touch-action:none;user-select:none;-webkit-user-select:none}
+#pocket.on{display:flex}
+#pocket p{margin:0;color:#1d2a2e;font-size:.7rem;letter-spacing:1px;text-align:center;line-height:1.6}
+#pocket .bar{display:block;height:2px;width:0;background:#2a4a52;margin:10px auto 0}
+.heard{margin-top:6px;font-size:.62rem;color:var(--dm);line-height:1.4;min-height:1.4em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.heard b{color:var(--c);font-weight:400}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:.62rem;color:var(--dm);max-height:180px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="hud">
+  <header class="top">
+    <div class="brand"><b>WISP<i>//</i>AI</b><div class="st" id="st">Не подключено</div></div>
+  </header>
+
+  <section class="pn">
+    <div class="ph"><span>Спутник</span><span class="r" id="vst">-</span></div>
+    <div class="ctl">
+      <button class="talk" id="bTalk">▶ Поговорить</button>
+      <button class="hb" id="bMute" disabled>Пауза микрофона</button>
+      <button class="hb" id="bPocket">Карманный режим</button>
+    </div>
+    <div class="lvl"><i id="lvl"></i></div>
+    <div class="heard" id="heard"></div>
+  </section>
+
+  <section class="pn" id="pPlace">
+    <div class="ph"><span>Место</span><span class="r" id="placeName"></span></div>
+    <div class="shapes" id="zones"></div>
+  </section>
+
+  <section class="pn folded" id="pOrbit">
+    <div class="ph" data-fold><span>Орбиты</span><span class="r" id="orbitName"></span></div>
+    <div class="shapes" id="orbits"></div>
+    <p class="ob-hint" id="obHint">Нажмите фигуру - спутник будет кружить по ней</p>
+    <div id="obCtl">
+      <div class="ob-row"><div class="hb ob-name" id="obName"></div><button class="hb ob-dir" id="obDir"></button></div>
+      <div class="ob-l"><span>Круг за</span><b id="pv"></b></div><input type="range" class="w-seek" id="pace" min="0" max="100">
+      <div class="ob-l"><span>Размер</span><b id="sv"></b></div><input type="range" class="w-seek" id="size" min="15" max="100">
+    </div>
+  </section>
+
+  <section class="pn folded" id="pMem">
+    <div class="ph" data-fold><span>Память</span><span class="r" id="memSum"></span></div>
+    <label class="chk" style="margin-top:0"><input type="checkbox" id="memOn"> Помнить разговоры - после «Закончить» спутник запишет короткую выжимку</label>
+    <label class="fl" for="profile">О себе - имя, кто вы, чем занимаетесь, что интересно</label>
+    <textarea class="in" id="profile" placeholder="Меня зовут ..."></textarea>
+    <label class="fl">Что спутник узнал о вас</label>
+    <div id="factList"></div>
+    <label class="fl">Прошлые разговоры</label>
+    <div id="memList"></div>
+    <button class="hb" id="bForget" style="margin-top:10px">Забыть все разговоры и факты</button>
+  </section>
+
+  <section class="pn folded" id="pSet">
+    <div class="ph" data-fold><span>Настройки</span><span class="r" id="setSum"></span></div>
+    <label class="fl" for="key">Ключ Gemini API - хранится только в этом браузере</label>
+    <input class="in" id="key" type="password" autocomplete="off" placeholder="AIza...">
+    <label class="fl" for="voice">Голос</label>
+    <select class="in" id="voice">
+      <option>Puck</option><option>Charon</option><option>Fenrir</option><option>Orus</option>
+      <option>Kore</option><option>Aoede</option><option>Leda</option><option>Zephyr</option>
+    </select>
+    <label class="fl" for="modelSel">Модель</label>
+    <select class="in" id="modelSel"></select>
+    <input class="in" id="model" autocomplete="off" placeholder="название модели" style="margin-top:6px">
+    <button class="hb" id="bTest" style="margin-top:8px">Проверить все модели</button>
+    <pre id="mtest" style="margin-top:8px"></pre>
+    <label class="fl" for="persona">Характер помощника</label>
+    <textarea class="in" id="persona"></textarea>
+    <label class="fl" for="patience">Терпение - сколько тишины ждать, прежде чем ответить</label>
+    <select class="in" id="patience">
+      <option value="800">Обычное</option>
+      <option value="1500">Терпеливое - 1.5 с</option>
+      <option value="2500">Очень терпеливое - 2.5 с</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="search"> Поиск Google - свежие события и новости (на бесплатном ключе есть не у всех моделей)</label>
+    <label class="chk"><input type="checkbox" id="geo"> Сообщать, где я - город и район (по GPS)</label>
+    <label class="chk"><input type="checkbox" id="echo"> Простор - лёгкое эхо, как в плеере</label>
+    <label class="chk"><input type="checkbox" id="proc"> Эхоподавление - только для колонок; с наушниками на телефоне выключите</label>
+    <button class="hb" id="bReset" style="margin-top:12px">Вернуть настройки по умолчанию</button>
+  </section>
+
+  <section class="pn folded">
+    <div class="ph" data-fold><span>Журнал</span><span class="r"></span></div>
+    <pre id="log"></pre>
+  </section>
+
+  <section class="pn folded" id="pRadar">
+    <div class="ph" data-fold><span>Радар</span><span class="r">3 M / HRTF</span></div>
+    <div class="rbox"><canvas id="radar" width="300" height="300"></canvas></div>
+    <div class="ro">
+      <div><small>AZM</small><b id="azm">---°</b></div>
+      <div><small>RNG</small><b id="rng">0.0 m</b></div>
+      <div><small>МЕСТО</small><b id="rmode">-</b></div>
+    </div>
+  </section>
+</div>
+
+<div id="pocket"><div><p>Карманный режим<br>удерживайте 2 секунды, чтобы выйти</p><i class="bar" id="pocketBar"></i></div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function ls(k, v){
+  try{ if(v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){ return null; }
+}
+document.querySelectorAll('[data-fold]').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('folded')));
+
+// ---------- настройки ----------
+const OLD = {model:'gemini-2.5-flash-native-audio-preview-12-2025',
+  persona:'Ты дружелюбный собеседник на прогулке, как друг, который идёт рядом. Говори по-русски, если собеседник сам не перейдёт на другой язык. Отвечай коротко и живо - одно-три предложения, без списков и перечислений. Если не расслышал - переспроси. Не торопись заканчивать разговор.'};
+const DEF = {
+  model: 'gemini-3.8-live',
+  voice: 'Puck',
+  persona: 'Ты умный и любознательный спутник на прогулке, как друг, который идёт рядом. ' +
+    'Говори по-русски, если собеседник сам не перейдёт на другой язык. ' +
+    'Отвечай по существу и конкретно: называй места, улицы, даты, факты - никаких общих слов вроде «есть парки и достопримечательности». ' +
+    'Для всего свежего и местного (события, погода, новости, часы работы, что рядом) обязательно ищи в Google. ' +
+    'Говори естественно, без списков и перечислений. Обычно 2-5 предложений, подробнее - если просят. ' +
+    'Собеседник говорит на ходу, речь может распознаться с ошибками - если смысл неясен, переспроси коротко.'
+};
+$('key').value = ls('wispAiKey') || '';
+const MODELS = [
+  ['gemini-3.8-live', '3.8 Live - новая'],
+  ['gemini-3.8-live-extended-thinking', '3.8 Live - думает дольше'],
+  ['gemini-3.1-flash-live-preview', '3.1 Flash Live (preview)'],
+  ['gemini-2.5-flash-native-audio-preview-12-2025', '2.5 Native Audio - работала']
+];
+$('modelSel').innerHTML = MODELS.map(m => '<option value="' + m[0] + '">' + m[1] + '</option>').join('') + '<option value="custom">Своя...</option>';
+function syncModelSel(){
+  const v = $('model').value.trim(), known = MODELS.some(m => m[0] === v);
+  $('modelSel').value = known ? v : 'custom';
+  $('model').style.display = known ? 'none' : '';
+}
+{ const m = ls('wispAiModel'); $('model').value = m || DEF.model; }
+syncModelSel();
+$('modelSel').onchange = () => {
+  if($('modelSel').value === 'custom'){ $('model').style.display = ''; $('model').focus(); return; }
+  $('model').value = $('modelSel').value; $('model').style.display = 'none';
+  ls('wispAiModel', $('model').value); searchFallback = false; restartSession('Меняю модель...');
+};
+$('voice').value = ls('wispAiVoice') || DEF.voice;
+{ const v = ls('wispAiPersona'); $('persona').value = (!v || v === OLD.persona) ? DEF.persona : v; }
+$('patience').value = ls('wispAiPatience') || '1500';
+$('patience').onchange = () => { ls('wispAiPatience', $('patience').value); restartSession('Меняю терпение...'); };
+$('geo').checked = ls('wispAiGeo') !== '0';
+$('search').checked = ls('wispAiSearch') !== '0';
+$('search').onchange = () => { ls('wispAiSearch', $('search').checked ? '1' : '0'); searchFallback = false; restartSession('Меняю поиск...'); };
+$('geo').onchange = () => ls('wispAiGeo', $('geo').checked ? '1' : '0');
+function setSum(){ $('setSum').textContent = ($('key').value ? '' : 'нет ключа · ') + $('voice').value; }
+$('key').onchange = () => { ls('wispAiKey', $('key').value.trim()); setSum(); };
+$('model').onchange = () => { ls('wispAiModel', $('model').value.trim()); restartSession('Меняю модель...'); };
+$('voice').onchange = () => { ls('wispAiVoice', $('voice').value); setSum(); restartSession('Меняю голос...'); };
+$('persona').onchange = () => { ls('wispAiPersona', $('persona').value); restartSession('Меняю характер...'); };
+$('bReset').onclick = () => {
+  $('model').value = DEF.model; syncModelSel(); $('voice').value = DEF.voice; $('persona').value = DEF.persona;
+  ls('wispAiModel', DEF.model); ls('wispAiVoice', DEF.voice); ls('wispAiPersona', DEF.persona); setSum();
+};
+if(!$('key').value) $('pSet').classList.remove('folded');
+setSum();
+
+let proc = !/Android/i.test(navigator.userAgent);
+{ const v = ls('wispAiProc'); if(v !== null) proc = v === '1'; }
+$('proc').checked = proc;
+$('proc').onchange = () => { proc = $('proc').checked; ls('wispAiProc', proc ? '1' : '0'); };
+let echoOn = ls('wispAiEcho') !== '0';
+$('echo').checked = echoOn;
+$('echo').onchange = () => { echoOn = $('echo').checked; ls('wispAiEcho', echoOn ? '1' : '0'); };
+
+function log(t){
+  const d = new Date().toTimeString().slice(0, 8);
+  $('log').textContent = (d + ' ' + t + '\n' + $('log').textContent).slice(0, 15000);
+}
+let stMsg = 'Не подключено', stCls = '';
+function setStatus(t, cls){ stMsg = t; stCls = cls || ''; $('st').textContent = t; $('st').className = 'st ' + stCls; }
+
+// ---------- орбиты (из плеера) и зоны (из звонка) ----------
+const TAU = Math.PI * 2, METERS = 3;
+function poly(pts){
+  const segs = []; let L = 0;
+  pts.forEach((a, i) => { const b = pts[(i + 1) % pts.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]); segs.push([a, b, l]); L += l; });
+  return u => { let d = u * L; for(const [a, b, l] of segs){ if(d <= l){ const k = d / l; return {x:a[0] + (b[0] - a[0]) * k, y:a[1] + (b[1] - a[1]) * k}; } d -= l; } return {x:pts[0][0], y:pts[0][1]}; };
+}
+const starPts = []; for(let k = 0; k < 10; k++){ const r = k % 2 ? 0.42 : 1, a = k * TAU / 10; starPts.push([r * Math.sin(a), -r * Math.cos(a)]); }
+function kepler(u, e){ const M = TAU * u; let E = M; for(let i = 0; i < 8; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E)); return E; }
+// u от 0 до 1 -> точка в круге радиуса 1 (край радара = 3 м), y < 0 - впереди
+const SHAPES = {
+  circle:   u => ({x:Math.sin(TAU * u), y:-Math.cos(TAU * u)}),
+  oval:     u => ({x:0.5 * Math.sin(TAU * u), y:-Math.cos(TAU * u)}),
+  square:   poly([[0,-0.7],[0.7,-0.7],[0.7,0.7],[-0.7,0.7],[-0.7,-0.7]]),
+  triangle: poly([[0,-1],[0.87,0.5],[-0.87,0.5]]),
+  star:     poly(starPts),
+  eight:    u => ({x:Math.sin(TAU * u), y:-0.55 * Math.sin(2 * TAU * u)}),
+  spiral:   u => { const r = 0.12 + 0.88 * (0.5 - 0.5 * Math.cos(TAU * u)), a = TAU * u * 3; return {x:r * Math.sin(a), y:-r * Math.cos(a)}; },
+  comet:    u => { const e = 0.8, a = 1 / (1 + e), b = a * Math.sqrt(1 - e * e), E = kepler((u + 0.5) % 1, e); return {x:b * Math.sin(E), y:a * (Math.cos(E) - e)}; },
+  pendulum: u => { const th = 1.35 * Math.sin(TAU * u); return {x:Math.sin(th), y:-Math.cos(th)}; },
+  wander:   u => { const a = TAU * u; let x = 0.55 * Math.sin(a) + 0.3 * Math.sin(3 * a + 1) + 0.12 * Math.sin(7 * a + 2), y = -0.55 * Math.cos(2 * a) + 0.3 * Math.sin(5 * a + 0.5) - 0.1 * Math.cos(a);
+    const d = Math.hypot(x, y); if(d > 1){ x /= d; y /= d; } return {x, y}; }
+};
+const SHAPE_NAMES = {circle:'Круг', oval:'Овал', square:'Квадрат', triangle:'Треугольник', star:'Звезда', eight:'Восьмёрка',
+  spiral:'Спираль', comet:'Комета', pendulum:'Маятник', wander:'Блуждание'};
+// Зоны: az - направление (0 впереди, 90 справа), spread - разброс в градусах, d - расстояние в метрах
+const ZONES = [
+  {id:'z-r',  name:'Рядом справа',   az:90,  spread:35, d:[0.9,1.3]},
+  {id:'z-l',  name:'Рядом слева',    az:-90, spread:35, d:[0.9,1.3]},
+  {id:'z-rf', name:'Справа впереди', az:45,  spread:25, d:[1.0,1.6]},
+  {id:'z-lf', name:'Слева впереди',  az:-45, spread:25, d:[1.0,1.6]},
+  {id:'z-b',  name:'Сзади',          az:180, spread:40, d:[1.0,1.5]},
+  {id:'z-rx', name:'Вдали справа',   az:70,  spread:25, d:[2.4,2.9]},
+  {id:'z-lx', name:'Вдали слева',    az:-70, spread:25, d:[2.4,2.9]},
+  {id:'z-rs', name:'Правое плечо',   az:95,  spread:0,  d:[0.45,0.45], h:-0.25},
+  {id:'z-ls', name:'Левое плечо',    az:-95, spread:0,  d:[0.45,0.45], h:-0.25}
+];
+
+function shapeIcon(id){
+  const f = SHAPES[id], pts = [];
+  for(let i = 0; i <= 120; i++){ const p = f(i / 120); pts.push(p.x.toFixed(3) + ',' + p.y.toFixed(3)); }
+  return '<svg viewBox="-1.2 -1.2 2.4 2.4"><polyline points="' + pts.join(' ') + '" fill="none" stroke="currentColor" stroke-width="0.13" stroke-linejoin="round"/><circle r="0.14" fill="currentColor" opacity=".6"/></svg>';
+}
+// иконка зоны: голова в центре, дуга - где гуляет голос
+function zoneIcon(z){
+  const r = Math.min(1, ((z.d[0] + z.d[1]) / 2) / 2.6 + 0.12), head = '<circle r="0.2" fill="currentColor" opacity=".6"/>';
+  if(!z.spread){
+    const a = z.az * Math.PI / 180;
+    return '<svg viewBox="-1.2 -1.2 2.4 2.4">' + head + '<circle cx="' + (0.55 * Math.sin(a)).toFixed(3) + '" cy="' + (-0.55 * Math.cos(a)).toFixed(3) + '" r="0.2" fill="currentColor"/></svg>';
+  }
+  const a1 = (z.az - z.spread) * Math.PI / 180, a2 = (z.az + z.spread) * Math.PI / 180;
+  const p = a => (r * Math.sin(a)).toFixed(3) + ' ' + (-r * Math.cos(a)).toFixed(3);
+  return '<svg viewBox="-1.2 -1.2 2.4 2.4">' + head + '<path d="M' + p(a1) + ' A' + r.toFixed(3) + ' ' + r.toFixed(3) + ' 0 0 1 ' + p(a2) +
+    '" fill="none" stroke="currentColor" stroke-width="0.3" stroke-linecap="round"/></svg>';
+}
+
+const PRESETS = [
+  ...Object.keys(SHAPES).map(id => ({id, kind:'orbit', name:SHAPE_NAMES[id], icon:shapeIcon(id)})),
+  ...ZONES.map(z => ({id:z.id, kind:'zone', name:z.name, icon:zoneIcon(z), z}))
+];
+const P = {preset: ls('wispAiPreset') || 'z-r', period: +ls('wispAiPace') || 40, size: +ls('wispAiSize') || 0.45,
+  dir: ls('wispAiDir') === '-1' ? -1 : 1, u:0, last:performance.now(), trail:[],
+  ph1:Math.random() * TAU, ph2:Math.random() * TAU, ph3:Math.random() * TAU};
+if(!PRESETS.find(p => p.id === P.preset)) P.preset = 'z-r';
+const pos = {x:0.4, y:0, h:0};
+const cur = () => PRESETS.find(p => p.id === P.preset);
+
+const btn = p => '<button class="wb" data-p="' + p.id + '" title="' + p.name + '" aria-label="' + p.name + '">' + p.icon + '</button>';
+$('zones').innerHTML = PRESETS.filter(p => p.kind === 'zone').map(btn).join('');
+$('orbits').innerHTML = PRESETS.filter(p => p.kind === 'orbit').map(btn).join('');
+document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
+  P.preset = b.dataset.p; P.u = 0; P.trail = []; ls('wispAiPreset', P.preset); renderPlace();
+});
+// «Круг за»: от 5 до 120 секунд, шкала логарифмическая
+const paceToV = p => Math.round(Math.log(p / 120) / Math.log(5 / 120) * 100);
+const vToPace = v => Math.round(120 * Math.pow(5 / 120, v / 100));
+$('pace').value = paceToV(P.period); $('size').value = Math.round(P.size * 100);
+$('pace').oninput = () => { P.period = vToPace(+$('pace').value); ls('wispAiPace', P.period); renderPlace(); };
+$('size').oninput = () => { P.size = +$('size').value / 100; P.trail = []; ls('wispAiSize', P.size); renderPlace(); };
+$('obDir').onclick = () => { P.dir = -P.dir; ls('wispAiDir', P.dir); renderPlace(); };
+function renderPlace(){
+  const c = cur();
+  document.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === P.preset));
+  $('placeName').textContent = c.kind === 'zone' ? c.name : 'орбита';
+  $('orbitName').textContent = c.kind === 'orbit' ? c.name : '';
+  $('obCtl').style.display = c.kind === 'orbit' ? '' : 'none';
+  $('obHint').style.display = c.kind === 'orbit' ? 'none' : '';
+  $('obName').textContent = '▸ ' + c.name;
+  $('obDir').textContent = P.dir > 0 ? '↻' : '↺';
+  $('pv').textContent = P.period + ' s'; $('sv').textContent = (P.size * METERS).toFixed(1) + ' m';
+  for(const r of [$('pace'), $('size')]) r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%');
+}
+renderPlace();
+
+// где сейчас голос - считается таймером, а не кадрами: работает и с погашенным экраном
+function moveTick(){
+  const now = performance.now(), dt = Math.min(0.2, (now - P.last) / 1000), t = now / 1000; P.last = now;
+  const c = cur();
+  if(c.kind === 'orbit'){
+    P.u = ((P.u + P.dir * dt / P.period) % 1 + 1) % 1;
+    const p = SHAPES[c.id](P.u);
+    pos.x = p.x * P.size; pos.y = p.y * P.size; pos.h = 0;
+  }else{
+    const z = c.z;
+    const w = 0.65 * Math.sin(TAU * t / 23 + P.ph1) + 0.35 * Math.sin(TAU * t / 37 + P.ph2);
+    const s = 0.5 + 0.5 * Math.sin(TAU * t / 31 + P.ph3);
+    const az = (z.az + z.spread * w) * Math.PI / 180, d = (z.d[0] + (z.d[1] - z.d[0]) * s) / METERS;
+    pos.x = d * Math.sin(az); pos.y = -d * Math.cos(az); pos.h = z.h || 0;
+  }
+  P.trail.push({x:pos.x, y:pos.y}); if(P.trail.length > 36) P.trail.shift();
+  applyPos();
+}
+
+// ---------- звук ----------
+let ctx, micStream, micSrc, micHP, micGain, capNode, voiceIn, panner, lowpass, wet, analyser, wave;
+let muted = false, playEnd = 0, sources = [];
+function speaking(){ return ctx && playEnd > ctx.currentTime; }
+function makeImpulse(sec){
+  const sr = ctx.sampleRate, pre = Math.floor(sr * 0.018), len = Math.floor(sr * sec), b = ctx.createBuffer(2, len, sr);
+  for(let ch = 0; ch < 2; ch++){
+    const d = b.getChannelData(ch); let y = 0;
+    for(let i = pre; i < len; i++){
+      const p = (i - pre) / (len - pre), k = 0.35 * Math.pow(1 - p, 2) + 0.03;
+      y += k * ((Math.random() * 2 - 1) - y);
+      d[i] = y * Math.pow(1 - p, 2.5);
+    }
+  }
+  return b;
+}
+function applyPos(){
+  if(!ctx) return;
+  const x = pos.x * METERS, z = pos.y * METERS, d = Math.hypot(x, z), now = ctx.currentTime;
+  panner.positionX.setTargetAtTime(x, now, 0.04);
+  panner.positionY.setTargetAtTime(pos.h, now, 0.04);
+  panner.positionZ.setTargetAtTime(z, now, 0.04);
+  // как в плеере: дальше - глуше; плюс за спиной верха мягче
+  const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7)));
+  const back = d > 0.01 ? Math.max(0, z / d) : 0;
+  lowpass.frequency.setTargetAtTime(Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * Math.pow(0.4, back)), now, 0.04);
+  wet.gain.setTargetAtTime(echoOn ? 0.015 + 0.07 * (d / METERS) : 0, now, 0.04);
+}
+
+const WORKLET = 'class Cap extends AudioWorkletProcessor{process(i){const c=i[0]&&i[0][0];if(c)this.port.postMessage(c.slice(0));return true}}registerProcessor("cap",Cap);';
+async function setupAudio(){
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  await ctx.resume();
+  const wUrl = URL.createObjectURL(new Blob([WORKLET], {type:'application/javascript'}));
+  try{ await ctx.audioWorklet.addModule(wUrl); }finally{ URL.revokeObjectURL(wUrl); }
+  // голос Gemini: вход -> срез верхов -> пространство (+ тихое эхо)
+  voiceIn = new GainNode(ctx, {gain:1.2});
+  lowpass = new BiquadFilterNode(ctx, {type:'lowpass', frequency:20000, Q:0.5});
+  panner = new PannerNode(ctx, {panningModel:'HRTF', distanceModel:'inverse', refDistance:1, rolloffFactor:1});
+  const verb = new ConvolverNode(ctx, {buffer:makeImpulse(0.6)});
+  const wetLP = new BiquadFilterNode(ctx, {type:'lowpass', frequency:2400, Q:0.3});
+  const wetHP = new BiquadFilterNode(ctx, {type:'highpass', frequency:280, Q:0.3});
+  wet = new GainNode(ctx, {gain:0});
+  analyser = new AnalyserNode(ctx, {fftSize:256}); wave = new Uint8Array(analyser.fftSize);
+  voiceIn.connect(analyser);
+  voiceIn.connect(lowpass); lowpass.connect(panner); panner.connect(ctx.destination);
+  lowpass.connect(verb); verb.connect(wetLP); wetLP.connect(wetHP); wetHP.connect(wet); wet.connect(ctx.destination);
+  // микрофон: срез низов -> пауза -> захват
+  micHP = new BiquadFilterNode(ctx, {type:'highpass', frequency:90, Q:0.7});
+  micGain = new GainNode(ctx, {gain:1});
+  capNode = new AudioWorkletNode(ctx, 'cap');
+  capNode.port.onmessage = e => onFrame(e.data);
+  const silent = new GainNode(ctx, {gain:0});
+  micHP.connect(micGain).connect(capNode).connect(silent).connect(ctx.destination);
+  const an = new AnalyserNode(ctx, {fftSize:512}); micGain.connect(an);
+  const arr = new Float32Array(an.fftSize);
+  setInterval(() => {
+    an.getFloatTimeDomainData(arr);
+    let m = 0; for(const v of arr) m = Math.max(m, Math.abs(v));
+    $('lvl').style.width = Math.min(100, m * 140) + '%';
+    if(live){
+      const sp = speaking();
+      $('vst').textContent = sp ? 'ГОВОРИТ' : 'СЛУШАЕТ';
+      $('vst').style.color = sp ? 'var(--w)' : 'var(--c2)';
+      setStatus(sp ? 'Говорит' : 'Слушаю', sp ? 'talk' : 'live');
+    }else{ $('vst').textContent = '-'; $('vst').style.color = ''; }
+  }, 100);
+  applyPos();
+}
+
+function openMic(id){
+  const a = {echoCancellation:proc, noiseSuppression:proc, autoGainControl:proc, channelCount:1};
+  if(id) a.deviceId = {exact:id};
+  return navigator.mediaDevices.getUserMedia({audio:a});
+}
+async function getMic(){
+  // как в звонке: встроенный микрофон телефона, чтобы BT-наушники остались в стерео
+  let s = await openMic(null);
+  const sp = (await navigator.mediaDevices.enumerateDevices())
+    .find(d => d.kind === 'audioinput' && /speakerphone/i.test(d.label));
+  if(sp && sp.deviceId && !proc){
+    s.getTracks().forEach(t => t.stop());
+    s = await openMic(sp.deviceId);
+  }
+  const tr = s.getAudioTracks()[0];
+  log('Микрофон: ' + tr.label);
+  tr.onmute = () => log('Android отключил микрофон');
+  tr.onunmute = () => log('Микрофон снова работает');
+  tr.onended = () => log('Микрофон закрыт системой');
+  return s;
+}
+
+// 100 мс звука -> 16 кГц, 16 бит -> Gemini
+let capBuf = [], capLen = 0;
+function onFrame(f){
+  if(!live) return;
+  capBuf.push(f); capLen += f.length;
+  if(capLen < Math.round(ctx.sampleRate * 0.1)) return;
+  const all = new Float32Array(capLen); let o = 0;
+  for(const b of capBuf){ all.set(b, o); o += b.length; }
+  capBuf = []; capLen = 0;
+  const ratio = ctx.sampleRate / 16000, n = Math.floor(all.length / ratio), out = new Int16Array(n);
+  for(let j = 0; j < n; j++){
+    const a = Math.floor(j * ratio), b = Math.max(a + 1, Math.min(all.length, Math.floor((j + 1) * ratio)));
+    let s = 0; for(let i = a; i < b; i++) s += all[i];
+    s /= (b - a);
+    out[j] = Math.max(-1, Math.min(1, s)) * 32767;
+  }
+  send({realtimeInput:{audio:{mimeType:'audio/pcm;rate=16000', data:b64(new Uint8Array(out.buffer))}}});
+}
+function b64(u8){
+  let s = '';
+  for(let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function playPcm(data, rate){
+  const bin = atob(data), n = bin.length >> 1;
+  const buf = ctx.createBuffer(1, n, rate), ch = buf.getChannelData(0);
+  for(let i = 0; i < n; i++){
+    let v = bin.charCodeAt(2 * i) | (bin.charCodeAt(2 * i + 1) << 8);
+    if(v >= 32768) v -= 65536;
+    ch[i] = v / 32768;
+  }
+  const src = new AudioBufferSourceNode(ctx, {buffer:buf});
+  src.connect(voiceIn);
+  const t = Math.max(ctx.currentTime + 0.05, playEnd);
+  src.start(t); playEnd = t + buf.duration;
+  sources.push(src);
+  src.onended = () => { sources = sources.filter(x => x !== src); };
+}
+function stopPlayback(){
+  for(const s of sources){ try{ s.stop(); }catch(e){} }
+  sources = []; playEnd = 0;
+}
+
+// ---------- радар (как в плеере, скин Drone HUD) ----------
+const cv = $('radar'), SIZE = 300, C = 150, R = 120, PAD = 22;
+const dpr = window.devicePixelRatio || 1;
+cv.width = cv.height = SIZE * dpr;
+const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+const COL = {bg:'rgba(1,10,14,.85)', grid:'#3ef0ff', acc:'#7dff9a', acc2:'#3ef0ff', txt:'#6fa9b6', talk:'#ffb020'};
+const MONO = 'ui-monospace, Menlo, Consolas, monospace';
+function drawRadar(now){
+  g.clearRect(0, 0, SIZE, SIZE);
+  g.lineCap = 'round'; g.lineJoin = 'round'; g.setLineDash([]);
+  g.beginPath(); g.arc(C, C, R + PAD, 0, TAU); g.fillStyle = COL.bg; g.fill();
+  g.strokeStyle = COL.grid; g.lineWidth = 1;
+  for(let i = 1; i <= 6; i++){
+    const major = i % 2 === 0;
+    g.globalAlpha = major ? .45 : .13; g.setLineDash(major ? [] : [2, 4]);
+    g.beginPath(); g.arc(C, C, R * i / 6, 0, TAU); g.stroke();
+  }
+  g.setLineDash([]);
+  g.globalAlpha = .28; g.beginPath(); g.moveTo(C, C - R); g.lineTo(C, C + R); g.moveTo(C - R, C); g.lineTo(C + R, C); g.stroke();
+  g.font = '9px ' + MONO; g.fillStyle = COL.txt; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for(let a = 0; a < 360; a += 5){
+    const rad = (a - 90) * Math.PI / 180, cs = Math.cos(rad), sn = Math.sin(rad);
+    const len = a % 30 === 0 ? 8 : a % 10 === 0 ? 5 : 2.5;
+    g.globalAlpha = a % 30 === 0 ? .8 : .45;
+    g.beginPath(); g.moveTo(C + cs * (R + 2), C + sn * (R + 2)); g.lineTo(C + cs * (R + 2 + len), C + sn * (R + 2 + len)); g.stroke();
+  }
+  g.globalAlpha = .85;
+  for(let a = 0; a < 360; a += 30){
+    const rad = (a - 90) * Math.PI / 180;
+    g.fillText(String(a).padStart(3, '0'), C + Math.cos(rad) * (R - 11), C + Math.sin(rad) * (R - 11));
+  }
+  g.globalAlpha = .75;
+  [1, 2, 3].forEach(m => { const r = R * m / 3 * Math.SQRT1_2; g.fillText(m + 'M', C - r - 9, C + r + 2); });
+  g.globalAlpha = 1;
+  // развёртка
+  { const a = ((now / 1000) * Math.PI / 2) % TAU - Math.PI / 2, steps = 24, span = Math.PI / 3;
+    g.fillStyle = COL.grid;
+    for(let k = 0; k < steps; k++){
+      g.globalAlpha = .16 * (1 - k / steps);
+      g.beginPath(); g.moveTo(C, C); g.arc(C, C, R, a - span * (k + 1) / steps, a - span * k / steps); g.closePath(); g.fill();
+    }
+    g.globalAlpha = .7; g.strokeStyle = COL.grid; g.beginPath(); g.moveTo(C, C); g.lineTo(C + Math.cos(a) * R, C + Math.sin(a) * R); g.stroke();
+    g.globalAlpha = 1; }
+  const sp = speaking(), pc = sp ? COL.talk : COL.acc;
+  const c = cur();
+  // путь орбиты или дуга зоны
+  g.save(); g.strokeStyle = COL.acc;
+  if(c.kind === 'orbit'){
+    const f = SHAPES[c.id];
+    g.globalAlpha = .3; g.lineWidth = 1.2; g.setLineDash([3, 4]); g.beginPath();
+    for(let i = 0; i <= 160; i++){ const p = f(i / 160), x = C + p.x * P.size * R, y = C + p.y * P.size * R; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke(); g.setLineDash([]);
+  }else if(c.z.spread){
+    const z = c.z, mid = (z.d[0] + z.d[1]) / 2 / METERS * R;
+    g.globalAlpha = .16; g.lineWidth = (z.d[1] - z.d[0]) / METERS * R + 10;
+    g.beginPath(); g.arc(C, C, mid, (z.az - z.spread - 90) * Math.PI / 180, (z.az + z.spread - 90) * Math.PI / 180); g.stroke();
+  }
+  g.fillStyle = pc;
+  P.trail.forEach((p, i) => { const k = i / P.trail.length; g.globalAlpha = k * .55; g.beginPath(); g.arc(C + p.x * R, C + p.y * R, 1 + k * 4, 0, TAU); g.fill(); });
+  g.restore();
+  const px = C + pos.x * R, py = C + pos.y * R, dist = Math.hypot(px - C, py - C);
+  // луч
+  if(dist > 26){
+    const ux = (px - C) / dist, uy = (py - C) / dist;
+    const gr = g.createLinearGradient(C, C, px, py); gr.addColorStop(0, COL.acc2); gr.addColorStop(1, pc);
+    g.save(); g.strokeStyle = gr; g.lineWidth = 2; g.shadowColor = COL.acc2; g.shadowBlur = 10;
+    g.setLineDash([6, 5]); g.lineDashOffset = -(now / 40) % 11;
+    g.beginPath(); g.moveTo(C + ux * 16, C + uy * 16); g.lineTo(px - ux * 18, py - uy * 18); g.stroke(); g.restore();
+  }
+  // голова
+  g.save(); g.shadowColor = COL.acc2; g.shadowBlur = 8; g.strokeStyle = COL.acc2; g.fillStyle = COL.acc2;
+  g.lineWidth = 1.5; g.beginPath(); g.arc(C, C, 12, 0, TAU); g.stroke();
+  g.beginPath(); g.moveTo(C, C - 22); g.lineTo(C - 4.5, C - 16); g.lineTo(C + 4.5, C - 16); g.fill();
+  g.shadowBlur = 0; g.beginPath(); g.arc(C, C - 3, 3.6, 0, TAU); g.fill();
+  g.beginPath(); g.arc(C, C + 8, 6.5, Math.PI, 0); g.fill();
+  g.restore();
+  // светлячок Wisp; пока говорит - светится сильнее
+  { let lvl = 0;
+    if(sp && analyser){ analyser.getByteTimeDomainData(wave); for(const v of wave) lvl = Math.max(lvl, Math.abs(v - 128) / 128); }
+    const flap = Math.sin(now / 260) * 1.6, hr = 18 + lvl * 22;
+    const halo = g.createRadialGradient(px, py, 0, px, py, hr);
+    halo.addColorStop(0, pc); halo.addColorStop(0.25, pc); halo.addColorStop(1, 'rgba(0,0,0,0)');
+    g.save();
+    g.globalAlpha = .35 + lvl * .4; g.fillStyle = halo; g.beginPath(); g.arc(px, py, hr, 0, TAU); g.fill();
+    g.globalAlpha = 1; g.shadowColor = pc; g.shadowBlur = 14;
+    g.fillStyle = pc; g.beginPath(); g.arc(px, py, 4.5, 0, TAU); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.globalAlpha = .85; g.beginPath(); g.arc(px, py, 1.8, 0, TAU); g.fill();
+    g.globalAlpha = 1; g.strokeStyle = pc; g.lineWidth = 2.2; g.shadowColor = pc; g.shadowBlur = 8;
+    g.beginPath();
+    g.moveTo(px - 10, py - 12 - flap);
+    g.quadraticCurveTo(px - 5, py - 9 + flap * 0.3, px, py - 8);
+    g.quadraticCurveTo(px + 5, py - 9 + flap * 0.3, px + 10, py - 12 - flap);
+    g.stroke(); g.restore(); }
+  const m = Math.hypot(pos.x, pos.y) * METERS, deg = (Math.round(Math.atan2(pos.x, -pos.y) * 180 / Math.PI) + 360) % 360;
+  $('azm').textContent = String(deg).padStart(3, '0') + '°';
+  $('rng').textContent = m.toFixed(1) + ' m';
+  $('rmode').textContent = cur().name;
+}
+setInterval(moveTick, 40);
+moveTick();
+(function frame(now){ if(!$('pRadar').classList.contains('folded')) drawRadar(now); requestAnimationFrame(frame); })(performance.now());
+
+// ---------- где я и когда ----------
+let placeCtx = '';
+function getPlace(){
+  return new Promise(res => {
+    if(!$('geo').checked || !navigator.geolocation) return res('');
+    navigator.geolocation.getCurrentPosition(async p => {
+      const lat = p.coords.latitude.toFixed(4), lon = p.coords.longitude.toFixed(4);
+      let name = '';
+      try{
+        const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&accept-language=ru&lat=' + lat + '&lon=' + lon);
+        const a = (await r.json()).address || {};
+        name = [a.road, a.suburb || a.neighbourhood || a.quarter, a.city || a.town || a.village, a.country].filter(Boolean).join(', ');
+      }catch(e){}
+      log('Место: ' + (name || lat + ', ' + lon));
+      res((name ? name + ' ' : '') + '(координаты ' + lat + ', ' + lon + ')');
+    }, e => { log('GPS недоступен: ' + e.message); res(''); }, {enableHighAccuracy:false, timeout:8000, maximumAge:300000});
+  });
+}
+// ---------- память ----------
+function lsJSON(k, def){ try{ return JSON.parse(ls(k) || '') || def; }catch(e){ return def; } }
+let MEM = lsJSON('wispAiMem', []), FACTS = lsJSON('wispAiFacts', []), convo = [];
+$('memOn').checked = ls('wispAiMemOn') !== '0';
+$('memOn').onchange = () => ls('wispAiMemOn', $('memOn').checked ? '1' : '0');
+$('profile').value = ls('wispAiProfile') || '';
+$('profile').onchange = () => ls('wispAiProfile', $('profile').value.trim());
+function saveMem(){ ls('wispAiMem', JSON.stringify(MEM)); ls('wispAiFacts', JSON.stringify(FACTS)); renderMem(); }
+function renderMem(){
+  $('memSum').textContent = MEM.length + ' разг. · ' + FACTS.length + ' факт.';
+  $('factList').innerHTML = FACTS.length ? FACTS.map((f, i) =>
+    '<div class="mem"><div>' + esc(f) + '</div><button data-f="' + i + '" aria-label="Удалить">×</button></div>').join('') : '<p class="empty">Пока ничего</p>';
+  $('memList').innerHTML = MEM.length ? MEM.slice().reverse().map((m, j) => { const i = MEM.length - 1 - j;
+    return '<div class="mem"><div><small>' + esc(m.d) + '</small>' + esc(m.s) + (m.t && m.t.length ? '<br><i>#' + m.t.map(esc).join(' #') + '</i>' : '') +
+      '</div><button data-m="' + i + '" aria-label="Удалить">×</button></div>'; }).join('') : '<p class="empty">Пока ничего</p>';
+  $('factList').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { FACTS.splice(+b.dataset.f, 1); saveMem(); });
+  $('memList').querySelectorAll('[data-m]').forEach(b => b.onclick = () => { MEM.splice(+b.dataset.m, 1); saveMem(); });
+}
+$('bForget').onclick = () => { if(confirm('Забыть все разговоры и факты? «О себе» останется.')){ MEM = []; FACTS = []; saveMem(); log('Память очищена'); } };
+
+function memoryText(){
+  let t = '';
+  const prof = $('profile').value.trim();
+  if(prof) t += '\n\nО собеседнике (он сам написал): ' + prof;
+  if(!$('memOn').checked) return t;
+  if(FACTS.length) t += '\n\nЧто ты узнал о нём раньше:\n- ' + FACTS.join('\n- ');
+  const last = MEM.slice(-10);
+  if(last.length) t += '\n\nВаши прошлые разговоры (свежие внизу):\n' + last.map(m => '[' + m.d + '] ' + m.s + (m.t && m.t.length ? ' (' + m.t.join(', ') + ')' : '')).join('\n');
+  if(t) t += '\n\nПользуйся этим естественно, как друг, который помнит: можно сослаться к месту, но не пересказывай всё без повода.';
+  return t;
+}
+
+// расшифровка разговора сохраняется по ходу - не пропадёт, даже если закрыть страницу
+function addConvo(who, text){
+  if(!text) return;
+  convo.push((who === 'u' ? 'Пользователь: ' : 'Спутник: ') + text);
+  ls('wispAiPending', JSON.stringify({d: new Date().toISOString(), lines: convo}));
+}
+const SUM_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.1-flash-lite-preview', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+async function summarize(){
+  const pend = lsJSON('wispAiPending', null);
+  if(!pend || !pend.lines || pend.lines.filter(l => l.startsWith('Пользователь')).length < 1) { ls('wispAiPending', ''); return; }
+  if(!$('memOn').checked){ ls('wispAiPending', ''); return; }
+  const key = $('key').value.trim(); if(!key) return;
+  const prompt = 'Это расшифровка голосового разговора пользователя с ИИ-спутником на прогулке. Распознавание речи могло ошибаться - восстанавливай смысл.\n\n' +
+    pend.lines.join('\n').slice(-12000) +
+    '\n\nВерни только JSON без пояснений: {"summary": "2-3 предложения по-русски: о чём говорили и что важного сказал пользователь", ' +
+    '"tags": ["3-6 коротких тегов по-русски"], "facts": ["устойчивые факты о пользователе, которые он сказал прямо: кто он, что любит, планы; если таких нет - пустой список"]}' +
+    (FACTS.length ? '\nУже известные факты (не повторяй их): ' + FACTS.join('; ') : '');
+  const order = [ls('wispAiSumModel'), ...SUM_MODELS].filter((m, i, a) => m && a.indexOf(m) === i);
+  for(const model of order){
+    try{
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({contents:[{role:'user', parts:[{text:prompt}]}], generationConfig:{responseMimeType:'application/json', temperature:0.3}})
+      });
+      const j = await r.json();
+      if(!r.ok){ log('Выжимка: ' + model + ' - ' + ((j.error && j.error.message) || r.status).toString().slice(0, 90)); continue; }
+      const txt = j.candidates[0].content.parts.map(x => x.text || '').join('').replace(/```json|```/g, '').trim();
+      const o = JSON.parse(txt);
+      const d = new Date(pend.d);
+      MEM.push({d: d.toLocaleDateString('ru-RU', {day:'numeric', month:'short'}) + ' ' + d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}),
+        s: String(o.summary || '').slice(0, 500), t: (o.tags || []).slice(0, 6).map(String)});
+      for(const f of (o.facts || []).map(String)) if(f && !FACTS.includes(f)) FACTS.push(f);
+      MEM = MEM.slice(-40); FACTS = FACTS.slice(-40);
+      ls('wispAiPending', ''); ls('wispAiSumModel', model); saveMem();
+      log('Разговор запомнен (' + model + ')');
+      return;
+    }catch(e){ log('Выжимка: ' + model + ' - ' + e.message); }
+  }
+  log('Не удалось сделать выжимку - попробую при следующем разговоре');
+}
+
+renderMem();
+
+function contextText(){
+  const now = new Date();
+  let t = 'Сейчас ' + now.toLocaleDateString('ru-RU', {weekday:'long', day:'numeric', month:'long', year:'numeric'}) +
+    ', ' + now.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}) + '.';
+  if(placeCtx) t += ' Собеседник сейчас гуляет здесь: ' + placeCtx + '. Используй это, когда речь о том, что рядом.';
+  return t + memoryText();
+}
+
+// ---------- Gemini Live ----------
+let ws = null, live = false, wanted = false, handle = null, retries = 0, gotSetup = false;
+function send(m){ if(ws && ws.readyState === 1) ws.send(JSON.stringify(m)); }
+let inTxt = '', outTxt = '';
+function esc(t){ return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function flushTxt(cut){
+  if(inTxt.trim()){ log('Вы: ' + inTxt.trim()); addConvo('u', inTxt.trim()); }
+  if(outTxt.trim()){ log('Gemini: ' + outTxt.trim() + (cut ? ' [перебит]' : '')); addConvo('a', outTxt.trim() + (cut ? ' [перебит]' : '')); }
+  inTxt = ''; outTxt = '';
+}
+
+const WS_URL = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=';
+let searchFallback = false;
+function buildSetup(model, h, noSearch){
+  const useSearch = $('search').checked && !noSearch;
+  const st = {
+    model: 'models/' + model,
+    generationConfig: {
+      responseModalities: ['AUDIO'],
+      speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName: $('voice').value}}}
+    },
+    systemInstruction: {parts: [{text: $('persona').value + '\n\n' + contextText()}]},
+    realtimeInputConfig: {automaticActivityDetection: {
+      endOfSpeechSensitivity: 'END_SENSITIVITY_LOW',
+      prefixPaddingMs: 300,
+      silenceDurationMs: +$('patience').value
+    }},
+    inputAudioTranscription: {},
+    outputAudioTranscription: {},
+    contextWindowCompression: {slidingWindow: {}},
+    sessionResumption: h ? {handle: h} : {}
+  };
+  if(useSearch) st.tools = [{googleSearch: {}}];
+  return st;
+}
+function minimalSetup(model){
+  return {model: 'models/' + model, generationConfig: {responseModalities: ['AUDIO']}};
+}
+
+// ---------- проверка моделей ----------
+function tryModel(model, mode){
+  return new Promise(res => {
+    let done = false, w;
+    const fin = r => { if(done) return; done = true; clearTimeout(tm); if(w){ w.onclose = null; try{ w.close(); }catch(e){} } res(r); };
+    const tm = setTimeout(() => fin('нет ответа за 10 с'), 10000);
+    try{ w = new WebSocket(WS_URL + encodeURIComponent($('key').value.trim())); }catch(e){ fin(e.message); return; }
+    w.onopen = () => w.send(JSON.stringify({setup: mode === 'min' ? minimalSetup(model) : buildSetup(model, null, mode === 'nosearch')}));
+    w.onmessage = async ev => {
+      let m; try{ m = JSON.parse(typeof ev.data === 'string' ? ev.data : await ev.data.text()); }catch(e){ return; }
+      if(m.setupComplete) fin('ok');
+    };
+    w.onclose = e => fin(e.reason || 'код ' + e.code);
+  });
+}
+$('bTest').onclick = async () => {
+  if(wanted){ $('mtest').textContent = 'Сначала закончите разговор - ключ даёт одно подключение за раз'; return; }
+  if(!$('key').value.trim()){ $('mtest').textContent = 'Сначала вставьте ключ'; return; }
+  $('bTest').disabled = true;
+  let out = '';
+  for(const [id, label] of MODELS){
+    $('mtest').textContent = out + '… ' + label + ' - проверяю';
+    const r = await tryModel(id, 'full');
+    if(r === 'ok') out += '✓ ' + label + ' - работает' + ($('search').checked ? ' с поиском' : '') + '\n';
+    else if($('search').checked && await tryModel(id, 'nosearch') === 'ok') out += '◐ ' + label + ' - работает, но без поиска Google\n';
+    else if(await tryModel(id, 'min') === 'ok') out += '✗ ' + label + ' - подключается только без настроек: ' + r.slice(0, 100) + '\n';
+    else out += '✗ ' + label + ' - ' + r.slice(0, 140) + '\n';
+    $('mtest').textContent = out;
+    await new Promise(z => setTimeout(z, 400));
+  }
+  log('Проверка моделей:\n' + out);
+  $('bTest').disabled = false;
+};
+
+function connect(){
+  const key = $('key').value.trim();
+  gotSetup = false;
+  ws = new WebSocket(WS_URL + encodeURIComponent(key));
+  ws.onopen = () => send({setup: buildSetup($('model').value.trim(), handle, searchFallback)});
+  ws.onmessage = async ev => {
+    let m;
+    try{ m = JSON.parse(typeof ev.data === 'string' ? ev.data : await ev.data.text()); }catch(e){ return; }
+    if(m.setupComplete){
+      gotSetup = true; live = true; retries = 0;
+      log(handle ? 'Продолжаем разговор' : 'Подключено');
+    }
+    if(m.sessionResumptionUpdate && m.sessionResumptionUpdate.newHandle) handle = m.sessionResumptionUpdate.newHandle;
+    if(m.goAway){ log('Google просит переподключиться'); reconnect(); }
+    const sc = m.serverContent;
+    if(sc){
+      if(sc.inputTranscription && sc.inputTranscription.text){
+        inTxt += sc.inputTranscription.text;
+        $('heard').innerHTML = '<b>Вы:</b> ' + esc(inTxt.trim());
+      }
+      if(sc.outputTranscription && sc.outputTranscription.text) outTxt += sc.outputTranscription.text;
+      if(sc.interrupted) stopPlayback();
+      if(sc.turnComplete || sc.interrupted) flushTxt(sc.interrupted);
+      const parts = (sc.modelTurn && sc.modelTurn.parts) || [];
+      for(const p of parts){
+        if(p.inlineData && /audio\/pcm/.test(p.inlineData.mimeType || '')){
+          const r = /rate=(\d+)/.exec(p.inlineData.mimeType);
+          playPcm(p.inlineData.data, r ? +r[1] : 24000);
+        }
+      }
+    }
+  };
+  ws.onclose = e => {
+    live = false;
+    if(!wanted) return;
+    if(!gotSetup){
+      // закрылось до начала - обычно неверный ключ, модель или лимит
+      log('Google закрыл соединение: ' + e.code + ' ' + (e.reason || ''));
+      if(/quota/i.test(e.reason || '') && $('search').checked && !searchFallback){
+        searchFallback = true;
+        log('Для этой модели поиск на бесплатном ключе недоступен - работаю без поиска');
+        setTimeout(connect, 500); return;
+      }
+      if(handle && retries < 2){ handle = null; retries++; setTimeout(connect, 800); return; }
+      stop(); setStatus('Ошибка: ' + (e.reason || 'код ' + e.code), 'bad');
+      return;
+    }
+    log('Соединение закрылось: ' + e.code + ' ' + (e.reason || ''));
+    reconnect();
+  };
+}
+// новые голос/характер/модель Google принимает только в начале сеанса - начинаем новый разговор
+function restartSession(msg){
+  if(!wanted) return;
+  handle = null; retries = 0; live = false;
+  const old = ws; ws = null;
+  if(old){ old.onclose = null; try{ old.close(); }catch(e){} }
+  stopPlayback();
+  setStatus(msg); log(msg + ' (' + $('voice').value + ')');
+  setTimeout(() => { if(wanted) connect(); }, 300);
+}
+function reconnect(){
+  if(!wanted) return;
+  if(retries >= 5){ stop(); setStatus('Связь потеряна - нажмите «Поговорить»', 'bad'); return; }
+  retries++;
+  live = false;
+  setStatus('Переподключаемся...');
+  const old = ws; ws = null;
+  if(old){ old.onclose = null; try{ old.close(); }catch(e){} }
+  setTimeout(() => { if(wanted) connect(); }, 500);
+}
+
+async function start(){
+  if(!$('key').value.trim()){ $('pSet').classList.remove('folded'); setStatus('Вставьте ключ в настройках', 'bad'); return; }
+  $('bTalk').disabled = true;
+  try{
+    if(!ctx) await setupAudio(); else await ctx.resume();
+    micStream = await getMic();
+    micSrc = ctx.createMediaStreamSource(micStream);
+    micSrc.connect(micHP);
+  }catch(e){
+    setStatus('Микрофон не включился: ' + e.name, 'bad'); log(e.name + ' ' + e.message);
+    $('bTalk').disabled = false; return;
+  }
+  wanted = true; handle = null; retries = 0; searchFallback = false;
+  setStatus('Подключаемся...');
+  if(ls('wispAiPending')){ setStatus('Запоминаю прошлый разговор...'); await summarize(); }
+  convo = [];
+  placeCtx = await getPlace();
+  connect();
+  $('bTalk').disabled = false;
+  $('bTalk').textContent = '■ Закончить'; $('bTalk').classList.add('end');
+  $('bMute').disabled = false;
+}
+function stop(){
+  const wasTalking = wanted;
+  if(wanted) flushTxt(false);
+  wanted = false; live = false;
+  if(ws){ ws.onclose = null; try{ ws.close(); }catch(e){} ws = null; }
+  stopPlayback();
+  if(micSrc){ micSrc.disconnect(); micSrc = null; }
+  if(micStream){ micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  capBuf = []; capLen = 0;
+  $('bTalk').textContent = '▶ Поговорить'; $('bTalk').classList.remove('end');
+  $('bMute').disabled = true;
+  if(muted) $('bMute').click();
+  setStatus('Не подключено');
+  if(wasTalking && convo.length) summarize();
+}
+$('bTalk').onclick = () => wanted ? stop() : start();
+$('bMute').onclick = () => {
+  muted = !muted;
+  micGain.gain.value = muted ? 0 : 1;
+  $('bMute').textContent = muted ? 'Включить микрофон' : 'Пауза микрофона';
+  $('bMute').classList.toggle('wb', muted); $('bMute').classList.toggle('on', muted);
+};
+
+// ---------- карманный режим: экран не гаснет, но полностью чёрный ----------
+let wakeLock = null, pocketOn = false, holdTimer = null, holdStart = 0, holdRaf = 0;
+async function lockScreen(){
+  try{
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  }catch(e){ log('Не удалось запретить экрану гаснуть: ' + e.name); }
+}
+async function pocketEnter(){
+  pocketOn = true;
+  $('pocket').classList.add('on');
+  try{ await document.documentElement.requestFullscreen({navigationUI:'hide'}); }catch(e){}
+  await lockScreen();
+  log('Карманный режим включён');
+}
+function pocketExit(){
+  pocketOn = false;
+  $('pocket').classList.remove('on');
+  if(wakeLock){ wakeLock.release().catch(() => {}); wakeLock = null; }
+  if(document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  log('Карманный режим выключен');
+}
+$('bPocket').onclick = () => {
+  if(!('wakeLock' in navigator)){ setStatus('Этот браузер не умеет держать экран включённым', 'bad'); return; }
+  pocketEnter();
+};
+// выход только долгим нажатием - случайные касания в кармане ничего не делают
+function holdEnd(){
+  clearTimeout(holdTimer); cancelAnimationFrame(holdRaf);
+  $('pocketBar').style.width = '0';
+}
+$('pocket').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  holdStart = performance.now();
+  holdTimer = setTimeout(() => { holdEnd(); pocketExit(); }, 2000);
+  (function grow(){
+    $('pocketBar').style.width = Math.min(160, (performance.now() - holdStart) / 2000 * 160) + 'px';
+    holdRaf = requestAnimationFrame(grow);
+  })();
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => $('pocket').addEventListener(t, holdEnd));
+// после разблокировки телефона запрет гаснуть снимается - ставим заново
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && pocketOn && !wakeLock) lockScreen();
+});
+</script>
+</body>
+</html>

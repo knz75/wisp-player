@@ -1,0 +1,18 @@
+services:
+  wisp-call:
+    build: .
+    container_name: wisp-call
+    restart: unless-stopped
+    environment:
+      - TURN_SECRET=${TURN_SECRET}
+    ports:
+      - "127.0.0.1:8066:8000"
+
+  coturn:
+    image: coturn/coturn:latest
+    container_name: wisp-coturn
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf", "--static-auth-secret=${TURN_SECRET}"]

@@ -8,7 +8,7 @@
 
 Almost all music, films and "3D audio" are made for a listener who sits still and gives the sound *all* of their attention. The sound scene is designed by the author; the listener only accepts it.
 
-Wisp flips that. Move the sound out of the center of your head — a little to the side and a bit further away — and it stops taking over. It becomes background, like a radio on a windowsill while you work. And because the "speaker" is tied to your head, it walks with you: around the room, down the street.
+Wisp flips that. Move the sound out of the center of your head - a little to the side and a bit further away - and it stops taking over. It becomes background, like a radio on a windowsill while you work. And because the "speaker" is tied to your head, it walks with you: around the room, down the street.
 
 Let it fly in orbits, and it does the opposite: a gentle, living point that keeps a small part of your attention outward, on the world around you, instead of down into a screen.
 
@@ -56,6 +56,13 @@ panner.positionZ.value = -0.2;
 
 The whole player is one HTML file (`index.html`) plus a manifest, a small offline service worker and icons. No build step, no frameworks.
 
+## Also inside: Call and Companion
+
+Two experiments built on the same sound engine as the player:
+
+- **Wisp Call** ([/call.html](https://wispplayer.com/call.html)) - voice calls by link, up to 4 people. Every voice gets its own place around your head and slowly wanders inside its zone, like someone walking next to you. No accounts. Built on WebRTC; the server in [`call-server/`](call-server/) only introduces the phones to each other and relays audio when a direct connection is impossible (coturn).
+- **Wisp Companion** ([/ai.html](https://wispplayer.com/ai.html)) - a personal voice AI on your shoulder, built on Gemini Live. You bring your own free Gemini API key: it is stored only in your browser and goes straight to Google. Pocket mode keeps the microphone alive while the screen is dark.
+
 ## Honest limitations
 
 - **Headphones required.**
@@ -66,7 +73,7 @@ The whole player is one HTML file (`index.html`) plus a manifest, a small offlin
 
 ## Privacy
 
-No accounts, no cookies, no trackers. The hosted version sends tiny anonymous pings (`/e/open`, `/e/play`, `/e/orbit`…) with only the UI language and "app or web" - to count how the player is used. Your files, station names and positions are never sent anywhere.
+No accounts, no cookies, no trackers. The hosted version sends tiny anonymous pings (`/e/open`, `/e/play`, `/e/orbit`…) with only the UI language and "app or web" - to count how the player is used. Your files, station names and positions are never sent anywhere. Calls go phone-to-phone (or through the relay) and are never recorded. Companion talks to Google directly with your own key.
 
 ## Feedback
 
@@ -74,7 +81,7 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translat
 
 ## License
 
-[MIT](LICENSE) © 2026 knz75. Use it, fork it, build on it — just keep the credit.
+[MIT](LICENSE) © 2026 knz75. Use it, fork it, build on it - just keep the credit.
 
 ---
 
@@ -84,4 +91,6 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translat
 
 Главная находка: если вывести звук из центра головы в сторону и немного вдаль, он перестаёт забирать всё внимание и работает как фон - как радио на подоконнике, пока вы работаете. А орбита, наоборот, превращает прогулку в ощущение: звук живёт вокруг вас, и взгляд остаётся на улице, а не в экране.
 
-Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Отзывы и идеи - в Telegram [@WispPlayer_bot](https://t.me/WispPlayer_bot).
+Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Внутри ещё два эксперимента на том же звуке: **Звонок** - разговор по ссылке, где у каждого собеседника своё место вокруг головы, и **Попутчик** - голосовой ИИ на плече (Gemini Live, со своим бесплатным ключом).
+
+Отзывы и идеи - в Telegram [@WispPlayer_bot](https://t.me/WispPlayer_bot).
