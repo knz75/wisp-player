@@ -840,8 +840,22 @@ function duckedPos(src) {
 const musicPos = () => duckedPos(SRCS.music);
 const drawPos = src => src.key === 'music' ? duckedPos(src) : livePosOf(src);
 const livePos = () => drawPos(CUR);
+// Книга - это речь, а две речи сразу не разобрать: пока говорят, книга встаёт на паузу,
+// а после 1.5 с тишины продолжает с отмоткой на 2 с. Музыка и радио - отходят и звучат тише.
+// Книгой считаем папку с главами или файл длиннее 20 минут.
+const isBook = () => !S.radio && S.cur >= 0 && (S.tracks.length > 1 || (isFinite(audioEl.duration) && audioEl.duration > 1200));
+let quietSince = 0, bookPaused = false, bookOverride = false;
+audioEl.addEventListener('play', () => { if (bookPaused) { bookPaused = false; bookOverride = true; } });
 setInterval(() => {
-  const target = S.duck && (AI.speaking() || CALL.speaking()) ? 1 : 0, was = duck;
+  const voices = S.duck && (AI.speaking() || CALL.speaking()), now = performance.now(), book = isBook();
+  if (voices) quietSince = 0; else if (!quietSince) quietSince = now;
+  if (!voices && now - quietSince > 1500) bookOverride = false;
+  if (book && voices && !audioEl.paused && !bookOverride) { bookPaused = true; audioEl.pause(); }
+  else if (bookPaused && (!book || (!voices && now - quietSince > 1500))) {
+    bookPaused = false;
+    if (book) { audioEl.currentTime = Math.max(0, audioEl.currentTime - 2); audioEl.play().catch(() => {}); }
+  }
+  const target = voices && !book ? 1 : 0, was = duck;
   duck += (target - duck) * 0.12; if (Math.abs(target - duck) < 0.005) duck = target;
   if (ac && duckG) duckG.gain.setTargetAtTime(1 - 0.45 * duck, ac.currentTime, 0.1);
   const moving = duck !== was, playing = !M().paused;
