@@ -16,10 +16,12 @@ Let it fly in orbits, and it does the opposite: a gentle, living point that keep
 
 - **Radar** - drag the parrot to place the sound: shoulder, ahead, behind, up to 3 m away.
 - **Distance** - farther means quieter and duller, plus optional "room" ambience.
-- **Orbits** - circle, oval, square, triangle, star, figure 8, spiral, comet (Kepler-style), pendulum, wander. Speed, size and direction are adjustable.
+- **Orbits** - five main shapes on screen (circle, behind, pendulum, wander, figure 8) and more under «⋯»: oval, square, triangle, star, spiral, comet (Kepler-style). Speed, size and direction are in the menu.
+- **Living point** - a sound that stands still slowly sways around its place (±20°, ±15% distance), so it never feels like a nail in the air.
+- **Behind sounds behind** - the further a sound goes behind your head, the softer its highs, the way your ears and the back of your head shape real sound.
 - **Audiobooks** - open files or a whole folder; the player remembers your position in every chapter.
 - **Internet radio** - add any direct `https://` stream. Stations that don't allow processing still play in plain stereo.
-- **Sleep timer, speed 1-1.5×, radar lock**, and a **3D off** switch to compare with normal stereo.
+- **Sleep timer, speed 1-1.5×, radar lock** (locked at start, so the page scrolls), and a **3D off** switch to compare with normal stereo.
 - **Skins** that change the whole player (Drone HUD, Watch, Classic '99) - a skin is a JSON file you can save, edit and share.
 - **10 languages**, picked automatically from your device.
 - **Installable app (PWA)**, works offline for local files.
@@ -56,12 +58,21 @@ panner.positionZ.value = -0.2;
 
 The whole player is one HTML file (`index.html`) plus a manifest, a small offline service worker and icons. No build step, no frameworks.
 
-## Also inside: Call and Companion
+## One radar, three voices: Player, Companion, Call
 
-Two experiments built on the same sound engine as the player:
+Wisp is not only a player. It is a small system that gives every sound stream its own place around your head. Three tabs switch only the top of the screen; the radar below is shared:
 
-- **Wisp Call** ([/call.html](https://wispplayer.com/call.html)) - voice calls by link, up to 4 people. Every voice gets its own place around your head and slowly wanders inside its zone, like someone walking next to you. No accounts. Built on WebRTC; the server in [`call-server/`](call-server/) only introduces the phones to each other and relays audio when a direct connection is impossible (coturn).
-- **Wisp Companion** ([/ai.html](https://wispplayer.com/ai.html)) - a personal voice AI on your shoulder, built on Gemini Live. You bring your own free Gemini API key: it is stored only in your browser and goes straight to Google. Pocket mode keeps the microphone alive while the screen is dark.
+- **Player** - music, audiobooks, radio.
+- **Companion** - a personal voice AI on your shoulder, built on Gemini Live. You bring your own free Gemini API key: it is stored only in your browser and goes straight to Google. It can search Google, knows the date and (if you allow) where you are, and remembers past conversations as short summaries kept on your device.
+- **Call** - voice calls by link (`wispplayer.com/?call=…`), up to 4 people, no accounts. Every voice is its own dot on the radar; tap a person and move their voice anywhere. Built on WebRTC; the server in [`call-server/`](call-server/) only introduces the phones to each other and relays audio when a direct connection is impossible (coturn).
+
+All of them can play at once, each as its own dot: radio orbiting behind you, the companion on your right shoulder, a friend ahead on the left.
+
+**Music yields to voices.** When the companion or someone in the call speaks, the music does not stop - it steps back (at least 2.5 m) and gets quieter, then returns when they are done. Like turning to a friend in a café instead of switching the café off.
+
+**Pocket mode** keeps the microphone alive for the companion and for calls: the screen stays on but fully black, touches are ignored, and you exit with a 2-second hold.
+
+The old addresses `/call.html` and `/ai.html` now simply redirect into the player.
 
 ## Honest limitations
 
@@ -70,6 +81,8 @@ Two experiments built on the same sound engine as the player:
 - **Head-locked by design.** The sound turns with your head - the companion is part of you, not part of the room.
 - **Radio:** 3D works only if the station allows cross-origin access (CORS); otherwise it plays in stereo.
 - **Fast orbits** can make some people slightly dizzy after a few minutes.
+- **Companion and call at the same time** both listen to your microphone, so the companion may answer what you say to your friend. A «talk to me» gesture (for example, a tap on the earbuds) is planned.
+- **Screen off:** music keeps playing, but Android takes the microphone away from a web page when the screen locks - that is what pocket mode is for.
 
 ## Privacy
 
@@ -91,6 +104,6 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translat
 
 Главная находка: если вывести звук из центра головы в сторону и немного вдаль, он перестаёт забирать всё внимание и работает как фон - как радио на подоконнике, пока вы работаете. А орбита, наоборот, превращает прогулку в ощущение: звук живёт вокруг вас, и взгляд остаётся на улице, а не в экране.
 
-Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Внутри ещё два эксперимента на том же звуке: **Звонок** - разговор по ссылке, где у каждого собеседника своё место вокруг головы, и **Попутчик** - голосовой ИИ на плече (Gemini Live, со своим бесплатным ключом).
+Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Wisp - это не только плеер, а система, где у каждого звука своё место на одном общем радаре. Три вкладки: **Плеер** (музыка, книги, радио), **Попутчик** - голосовой ИИ на плече (Gemini Live, со своим бесплатным ключом) и **Звонок** - разговор по ссылке, где каждый собеседник - своя точка вокруг головы. Всё может звучать одновременно, а когда кто-то говорит, музыка не выключается, а отходит назад и становится тише.
 
 Отзывы и идеи - в Telegram [@WispPlayer_bot](https://t.me/WispPlayer_bot).
