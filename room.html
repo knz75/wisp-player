@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wisp - белая комната</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--void:#F6F8F8;--fog:#DCE2E3;--ink:#2E3438;--soft:#7E888D;--wisp:#14A9A6;--dark:#1A1E21}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--void);color:var(--ink);font-family:Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+body.play canvas{cursor:grab}
+body.drag canvas{cursor:grabbing}
+#cap{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 8vh);padding:0 22px;text-align:center;pointer-events:none}
+#cap h1{font-weight:300;font-size:clamp(24px,6.4vw,46px);line-height:1.18;letter-spacing:-.01em;max-width:17em;margin:0 auto;transition:opacity .6s}
+#cap p{margin:12px auto 0;font-size:clamp(15px,3.9vw,19px);color:var(--soft);max-width:26em;line-height:1.45;transition:opacity .6s}
+#cap.fin h1{font-weight:600;font-size:clamp(56px,16vw,104px);letter-spacing:-.03em}
+#cap.fin p{font-size:clamp(17px,4.6vw,22px);color:var(--ink)}
+#cap a{pointer-events:auto;color:var(--wisp);text-decoration:none;font-weight:600;display:inline-block;margin-top:8px}
+.hide{opacity:0}
+#bar{position:fixed;left:0;right:0;bottom:0;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;flex-direction:column;align-items:center;gap:12px}
+#prog{display:flex;gap:4px;width:min(420px,100%)}
+#prog i{flex:1;height:2px;background:var(--fog);position:relative;overflow:hidden}
+#prog i b{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+#ctl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;font-size:15px;font-weight:500;color:var(--ink);background:rgba(255,255,255,.75);border:1px solid var(--fog);border-radius:22px;min-height:44px;padding:0 18px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--wisp);outline-offset:2px}
+#intro{position:fixed;inset:0;z-index:5;background:var(--dark);color:#E9EEEF;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;transition:background 1.8s ease,opacity 1.2s ease 1.4s}
+#intro h2{font-weight:300;font-size:clamp(26px,7vw,42px)}
+#intro p{color:#97A2A7;margin-top:12px;font-size:15px;max-width:21em;line-height:1.5}
+#intro .row{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+#intro button{background:transparent;color:#E9EEEF;border-color:#4A5358;padding:0 26px;min-width:140px}
+#intro.go{background:#fff;opacity:0;pointer-events:none}
+#intro.go h2,#intro.go p,#intro.go button{opacity:0;transition:opacity .4s}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="cap"><h1></h1><p></p></div>
+<div id="bar"><div id="prog"></div><div id="ctl">
+  <button id="bBack"></button><button id="bPause"></button><button id="bNext"></button>
+</div></div>
+<div id="intro"><h2></h2><p></p><div class="row"><button id="bWired"></button><button id="bBT"></button></div></div>
+
+<script>
+(function(){
+"use strict";
+// ---------- язык: русский, если в браузере есть ru или uk среди любых языков ----------
+const LANG=(()=>{const q=new URLSearchParams(location.search).get('lang');if(q)return q==='ru'?'ru':'en';
+  const ls=navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'en'];
+  return ls.some(l=>/^(ru|uk)/i.test(l))?'ru':'en';})();
+document.documentElement.lang=LANG;
+const TX={
+ru:{introH:'Наденьте наушники',introP:'Пространственный звук работает только в наушниках. Какие у вас? Bluetooth немного запаздывает - картинка подстроится. На iPhone выключите беззвучный режим.',wired:'Проводные',bt:'Bluetooth',
+  back:'Назад',pause:'Пауза',play:'Продолжить',next:'Вперёд',again:'Сначала',
+  lab:{click:'Звук',music:'Музыка',voice:'Голос',ping:'Уведомления'},
+  sc:{void:['Здесь пусто.','Только вы и тишина.'],front:['Появился звук.','Он прямо перед вами.'],
+   right:['Справа.',''],left:['Слева.',''],
+   mono:['Так звучит обычный телефон.','Музыка, голос и уведомления - всё в одной точке, внутри головы.'],
+   spread:['А теперь у каждого звука своё место.','Музыка справа, голос слева, уведомления впереди. Слушаешь одно - и не теряешь остальное.'],
+   shoulder:['Музыку можно посадить на плечо.','Близко и негромко. Второе ухо свободно для мира вокруг.'],
+   msg:['Пришло сообщение.','Музыка не выключается - она отходит назад, а голос подходит к плечу.'],
+   back:['Сообщение закончилось.','Музыка вернулась на место. Ничего не выключали - просто важное было ближе.'],
+   fin:['Wisp','Эхо на плече'],
+   you:['А теперь ты.','Перетаскивай шары - звук пойдёт за ними. Главное в Wisp: звуком управляешь ты.']}},
+en:{introH:'Put on your headphones',introP:'Spatial sound only works in headphones. Which ones do you have? Bluetooth lags a little - the picture will adjust. On iPhone, turn off silent mode.',wired:'Wired',bt:'Bluetooth',
+  back:'Back',pause:'Pause',play:'Resume',next:'Next',again:'Start over',
+  lab:{click:'Sound',music:'Music',voice:'Voice',ping:'Notifications'},
+  sc:{void:['It is empty here.','Just you and silence.'],front:['A sound appears.','It is right in front of you.'],
+   right:['Right.',''],left:['Left.',''],
+   mono:['This is how a normal phone sounds.','Music, voice and notifications - all in one spot, inside your head.'],
+   spread:['Now every sound has its own place.','Music on the right, voice on the left, notifications ahead. Focus on one without losing the rest.'],
+   shoulder:['Music can sit on your shoulder.','Close and quiet. The other ear stays free for the world around you.'],
+   msg:['A message arrives.','The music does not stop - it steps back, and the voice comes to your shoulder.'],
+   back:['The message is over.','The music is back in place. Nothing was switched off - the important thing was just closer.'],
+   fin:['Wisp','An echo on your shoulder'],
+   you:['Now it is your turn.','Drag the orbs - the sound follows them. That is the point of Wisp: you control the sound.']}}}[LANG];
+
+const $=id=>document.getElementById(id);
+$('intro').querySelector('h2').textContent=TX.introH;
+$('intro').querySelector('p').textContent=TX.introP;
+$('bWired').textContent=TX.wired;$('bBT').textContent=TX.bt;$('bBack').textContent=TX.back;$('bPause').textContent=TX.pause;$('bNext').textContent=TX.next;
+
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- звук ----------
+let ctx,master,revIn,noiseBuf;
+const SRC={};const LIST=[];
+
+function makeIR(sec){ // короткая «белая комната», ~0.8 с, без длинного эха
+  const sr=ctx.sampleRate,len=Math.floor(sr*sec),b=ctx.createBuffer(2,len,sr);
+  for(let c=0;c<2;c++){const d=b.getChannelData(c);let lp=0;
+    for(let i=0;i<len;i++){const t=i/sr;lp+=((Math.random()*2-1)-lp)*0.35;d[i]=t<0.008?0:lp*Math.exp(-t*8)*0.6;}}
+  return b;}
+
+function mkSource(key,color,vol,play){
+  const s={key,color,vol,play,on:false,offAt:-9,next:0,step:0,left:0,
+    pos:{x:0,y:0,z:-1.4},tgt:{x:0,y:0,z:-1.4},head:0,headT:0,vis:0,rms:0,free:false,last:{}};
+  s.level=ctx.createGain();s.level.gain.value=0;
+  s.out=ctx.createGain();s.level.connect(s.out);
+  s.pan=ctx.createPanner();
+  s.pan.panningModel='HRTF';s.pan.distanceModel='inverse';
+  s.pan.refDistance=0.5;s.pan.rolloffFactor=0.6;s.pan.maxDistance=50;
+  try{s.pan.channelCount=1;s.pan.channelCountMode='explicit';}catch(e){}
+  s.panG=ctx.createGain();s.headG=ctx.createGain();s.headG.gain.value=0;s.send=ctx.createGain();s.send.gain.value=0;
+  s.out.connect(s.panG);s.panG.connect(s.pan);s.pan.connect(master);   // путь «в пространстве»
+  s.out.connect(s.headG);s.headG.connect(master);                       // путь «внутри головы» (обычное моно)
+  s.out.connect(s.send);s.send.connect(revIn);                          // в комнату
+  s.an=ctx.createAnalyser();s.an.fftSize=512;s.buf=new Uint8Array(512);s.out.connect(s.an);
+  SRC[key]=s;LIST.push(s);return s;}
+
+function env(g,t,a,peak,d){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);}
+function tone(s,t,type,f,a,peak,d){const o=ctx.createOscillator();o.type=type;o.frequency.value=f;const g=ctx.createGain();o.connect(g);g.connect(s.level);env(g,t,a,peak,d);o.start(t);o.stop(t+a+d+0.05);}
+function noise(s,t,type,f,q,peak,d){const n=ctx.createBufferSource();n.buffer=noiseBuf;const fl=ctx.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=ctx.createGain();n.connect(fl);fl.connect(g);g.connect(s.level);env(g,t,0.002,peak,d);n.start(t,Math.random()*0.8,d+0.05);}
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+
+// метка: короткий широкополосный щелчок - лучше всего слышно направление
+function playClick(s,t){noise(s,t,'bandpass',2600,1.1,1.0,0.05);tone(s,t,'sine',900,0.002,0.35,0.05);s.next=t+0.5;}
+// музыка: простое арпеджио Am-F-C-G
+const PROG=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]],PAT=[0,1,2,1,0,2,1,2];
+function playMusic(s,t){const i=s.step%8,ch=PROG[Math.floor(s.step/8)%4];
+  tone(s,t,'triangle',mtof(ch[PAT[i]]+12),0.004,0.32,0.38);
+  if(i===0||i===4)tone(s,t,'sine',mtof(ch[0]-12),0.01,0.55,0.9);
+  if(i%2===1)noise(s,t,'highpass',7000,0.7,0.12,0.04);
+  s.step++;s.next=t+0.3125;}
+// голос: бормотание из слогов с гласными-формантами
+const VOW=[[800,1200],[500,900],[350,700],[300,2300],[500,1800],[350,1500]];
+function playVoice(s,t){
+  if(s.left<=0){s.left=4+(Math.random()*6|0);s.next=t+0.5+Math.random()*0.9;return;}
+  const d=0.11+Math.random()*0.12,o=ctx.createOscillator();o.type='sawtooth';
+  const f0=112+Math.random()*28;o.frequency.setValueAtTime(f0*1.08,t);o.frequency.linearRampToValueAtTime(f0,t+d);
+  const v=VOW[Math.random()*VOW.length|0],g=ctx.createGain();
+  v.forEach((f,k)=>{const b=ctx.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=6;const bg=ctx.createGain();bg.gain.value=k?0.6:1;o.connect(b);b.connect(bg);bg.connect(g);});
+  g.connect(s.level);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(2.6,t+0.03);g.gain.setValueAtTime(2.6,t+d*0.6);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.start(t);o.stop(t+d+0.05);
+  if(Math.random()<0.6)noise(s,t,'highpass',3500,0.7,0.12,0.03);
+  s.left--;s.next=t+d+0.02+Math.random()*0.05;}
+// уведомление: двойной сигнал
+function playPing(s,t){tone(s,t,'sine',1318.5,0.003,0.5,0.25);tone(s,t+0.1,'sine',1760,0.003,0.45,0.3);s.next=t+2.8;}
+
+function buildAudio(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  ctx=new AC({latencyHint:'interactive'});
+  const comp=ctx.createDynamicsCompressor(); // ограничитель, чтобы не было перегруза
+  comp.threshold.value=-10;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=0.003;comp.release.value=0.25;
+  comp.connect(ctx.destination);
+  master=ctx.createGain();master.gain.value=0.9;master.connect(comp);
+  revIn=ctx.createConvolver();revIn.buffer=makeIR(0.8);revIn.connect(master);
+  noiseBuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
+  const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+  const L=ctx.listener; // слушатель в центре, смотрит вперёд (-Z)
+  if(L.positionX){L.positionX.value=0;L.positionY.value=0;L.positionZ.value=0;L.forwardX.value=0;L.forwardY.value=0;L.forwardZ.value=-1;L.upX.value=0;L.upY.value=1;L.upZ.value=0;}
+  else if(L.setOrientation){L.setPosition(0,0,0);L.setOrientation(0,0,-1,0,1,0);}
+  mkSource('click','#2E3438',0.7,playClick);
+  mkSource('music','#14A9A6',0.55,playMusic);
+  mkSource('voice','#D9962E',0.9,playVoice);
+  mkSource('ping','#6F63E8',0.35,playPing);
+  setInterval(schedule,25);}
+
+function schedule(){if(!ctx||ctx.state!=='running')return;const now=ctx.currentTime,ahead=now+0.15;
+  for(const s of LIST){if(!(s.on||now-s.offAt<1.6)){s.next=0;continue;}
+    if(s.next<now)s.next=now+0.05;let guard=0;while(s.next<ahead&&guard++<20)s.play(s,s.next);}}
+
+function setOn(s,on,mul){const t=ctx.currentTime;if(s.on&&!on)s.offAt=t;if(!s.on&&on){s.step=0;s.left=0;}
+  s.on=on;s.level.gain.setTargetAtTime(on?s.vol*(mul||1):0,t,0.3);}
+
+function upd(s,name,param,v,tc){if(Math.abs((s.last[name]??-99)-v)<0.002)return;s.last[name]=v;param.setTargetAtTime(v,ctx.currentTime,tc);}
+function pushAudio(){if(!ctx)return;
+  for(const s of LIST){const p=s.pan,P=s.pos;
+    if(p.positionX){upd(s,'x',p.positionX,P.x,0.02);upd(s,'y',p.positionY,P.y,0.02);upd(s,'z',p.positionZ,P.z,0.02);}
+    else p.setPosition(P.x,P.y,P.z);
+    const h=s.head;
+    upd(s,'pg',s.panG.gain,Math.cos(h*Math.PI/2),0.04);
+    upd(s,'hg',s.headG.gain,Math.sin(h*Math.PI/2)*0.75,0.04);
+    const d=Math.hypot(P.x,P.y,P.z); // ближе - меньше комнаты: главный признак расстояния
+    upd(s,'sd',s.send.gain,0.3*Math.min(1,Math.max(0.1,d/2.2))*(1-0.85*h),0.06);
+    s.an.getByteTimeDomainData(s.buf);let sum=0;for(let i=0;i<s.buf.length;i++){const v=(s.buf[i]-128)/128;sum+=v*v;}
+    const r=Math.sqrt(sum/s.buf.length);s.rms=Math.max(r,s.rms*0.86);}}
+
+// ---------- сцены ----------
+const pol=(a,r)=>({x:Math.sin(a)*r,y:0,z:-Math.cos(a)*r});
+const ease=x=>x<0.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const DEG=Math.PI/180,R=1.4;
+const INHEAD={music:{x:0.07,y:0.05,z:0},voice:{x:-0.07,y:0.03,z:0},ping:{x:0,y:0.1,z:0}};
+const SPOT={music:{x:1.3,y:0,z:-0.5},voice:{x:-1.2,y:0.05,z:-0.6},ping:{x:0,y:0.35,z:-2.4}};
+const SHOULDER={x:0.3,y:-0.2,z:0.03},LSHOULDER={x:-0.3,y:-0.2,z:0.03},FAR={x:0.5,y:0,z:1.5};
+function place(s,p,jump){s.tgt={...p};if(jump||s.vis<0.05)s.pos={...p};}
+function only(keys,mul){for(const s of LIST)setOn(s,keys.includes(s.key),mul&&mul[s.key]);}
+
+const SC=[
+ {id:'void',dur:7,enter(){only([]);}},
+ {id:'front',dur:9,enter(){only(['click']);const c=SRC.click;c.free=false;c.head=c.headT=0;place(c,pol(0,R));}},
+ {id:'right',dur:5,enter(){only(['click']);const c=SRC.click;c.free=true;c.head=c.headT=0;c.pos=pol(80*DEG,R);}},
+ {id:'left',dur:5,enter(){only(['click']);const c=SRC.click;c.free=true;c.head=c.headT=0;c.pos=pol(-80*DEG,R);}},
+ {id:'mono',dur:12,enter(){only(['music','voice','ping']);
+   for(const k of ['music','voice','ping']){const s=SRC[k];s.free=false;if(s.vis<0.05)s.head=1;s.headT=1;place(s,INHEAD[k]);}}},
+ {id:'spread',dur:14,enter(){only(['music','voice','ping']);
+   for(const k of ['music','voice','ping']){const s=SRC[k];s.free=false;if(s.vis<0.05){s.head=0;place(s,SPOT[k],true);}s.headT=0;s.tgt={...SPOT[k]};}}},
+ {id:'shoulder',dur:12,enter(){only(['music']);const m=SRC.music;m.free=false;m.headT=0;if(m.vis<0.05)m.head=0;place(m,SHOULDER);}},
+ {id:'msg',dur:9,enter(){only(['music','voice']);const m=SRC.music,v=SRC.voice;m.free=v.free=false;m.headT=v.headT=0;
+   if(m.vis<0.05){m.head=0;place(m,SHOULDER,true);}m.tgt={...FAR};v.head=0;place(v,LSHOULDER,true);}},
+ {id:'back',dur:7,enter(){only(['music']);const m=SRC.music;m.free=false;m.headT=0;if(m.vis<0.05){m.head=0;place(m,FAR,true);}m.tgt={...SHOULDER};}},
+ {id:'fin',dur:7,enter(){only(['music'],{music:0.7});const m=SRC.music;m.free=false;m.headT=0;if(m.vis<0.05)m.head=0;place(m,SHOULDER);}},
+ {id:'you',dur:0,enter(){only(['music','voice','ping']);
+   const P={music:SHOULDER,voice:SPOT.voice,ping:SPOT.ping};
+   for(const k of ['music','voice','ping']){const s=SRC[k];s.free=false;s.headT=0;if(s.vis<0.05){s.head=0;place(s,P[k],true);}s.tgt={...P[k]};}}}
+];
+
+let si=0,st=0,paused=false,started=false,capTimer=0;
+const cap=$('cap'),h1=cap.querySelector('h1'),pp=cap.querySelector('p');
+function showCap(){const sc=SC[si],tx=TX.sc[sc.id];h1.classList.add('hide');pp.classList.add('hide');clearTimeout(capTimer);
+  capTimer=setTimeout(()=>{cap.classList.toggle('fin',sc.id==='fin');h1.textContent=tx[0];
+    if(sc.id==='you'){pp.textContent=tx[1];const br=document.createElement('br');const a=document.createElement('a');a.href='https://wispplayer.com';a.textContent='wispplayer.com';pp.append(br,a);}
+    else pp.textContent=tx[1];
+    h1.classList.remove('hide');if(pp.textContent)pp.classList.remove('hide');},380);}
+function go(i){si=cl(i,0,SC.length-1);st=0;SC[si].enter();showCap();
+  const last=SC[si].id==='you';$('bNext').textContent=last?TX.again:TX.next;document.body.classList.toggle('play',last);}
+
+const PN=SC.length-1;const prog=$('prog');
+for(let i=0;i<PN;i++){const e=document.createElement('i');e.appendChild(document.createElement('b'));prog.appendChild(e);}
+function drawProg(){const bs=prog.querySelectorAll('b');bs.forEach((b,i)=>{const v=i<si?1:i>si?0:cl(st/(SC[i].dur||1),0,1);b.style.transform='scaleX('+v+')';});}
+
+function setPaused(p){paused=p;$('bPause').textContent=p?TX.play:TX.pause;if(!ctx)return;if(p)ctx.suspend();else ctx.resume();}
+$('bPause').onclick=()=>setPaused(!paused);
+$('bBack').onclick=()=>go(si-1);
+$('bNext').onclick=()=>{if(SC[si].id==='you')go(0);else go(si+1);};
+addEventListener('keydown',e=>{if(!started)return;if(e.key==='ArrowRight')$('bNext').click();else if(e.key==='ArrowLeft')go(si-1);else if(e.key===' '){e.preventDefault();setPaused(!paused);}});
+document.addEventListener('visibilitychange',()=>{if(!ctx)return;if(document.hidden)ctx.suspend();else if(!paused)ctx.resume();});
+
+let BT=false;
+const Q=new URLSearchParams(location.search).get('delay'); // ручная задержка в мс, например ?delay=300
+function start(bt){BT=bt;buildAudio();ctx.resume();$('intro').classList.add('go');started=true;go(0);}
+$('bWired').onclick=()=>start(false);$('bBT').onclick=()=>start(true);
+// на сколько картинка ждёт звук: системная задержка + запас на Bluetooth
+function visDelay(){if(Q!==null&&!isNaN(+Q))return cl(+Q/1000,0,1);if(!ctx)return 0;
+  const lat=(ctx.baseLatency||0)+(ctx.outputLatency||0);return cl(BT?Math.max(0.25,lat):lat,0,0.6);}
+
+// ---------- картинка: белая пустота, вид чуть сзади-сверху ----------
+const cv=$('cv'),g=cv.getContext('2d');let W,H,F;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0);F=Math.min(W*0.85,H*1.2);}
+addEventListener('resize',resize);resize();
+const FY=-1.5,cam={x:0,y:1.4,z:2.6},look={x:0,y:-0.3,z:-1.2};let B;
+const sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z;
+const cross=(a,b)=>({x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x});
+const norm=a=>{const l=Math.hypot(a.x,a.y,a.z)||1;return{x:a.x/l,y:a.y/l,z:a.z/l};};
+function setCam(time){const k=reduceMotion?0:1;cam.x=Math.sin(time*0.07)*0.45*k;cam.y=1.4+Math.sin(time*0.05)*0.12*k;
+  const f=norm(sub(look,cam)),r=norm(cross(f,{x:0,y:1,z:0}));B={f,r,u:cross(r,f)};}
+function proj(p){const d=sub(p,cam),z=dot(d,B.f);if(z<0.15)return null;return{x:W/2+dot(d,B.r)/z*F,y:H*0.52-dot(d,B.u)/z*F,s:F/z,z};}
+function rgba(hex,a){const n=parseInt(hex.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')';}
+
+function drawBg(){const hz=proj({x:0,y:FY,z:-60}),hy=cl(hz?hz.y/H:0.3,0.05,0.95);
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#E4E9EA');gr.addColorStop(hy,'#FFFFFF');gr.addColorStop(1,'#EDF1F1');
+  g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.strokeStyle='#2E3438';g.lineWidth=1;
+  const seg=(a,b)=>{const pa=proj(a),pb=proj(b);if(!pa||!pb)return;const m=Math.hypot((a.x+b.x)/2,((a.z+b.z)/2));
+    const al=0.16*cl(1-m/9,0,1);if(al<=0.004)return;g.globalAlpha=al;g.beginPath();g.moveTo(pa.x,pa.y);g.lineTo(pb.x,pb.y);g.stroke();};
+  for(let x=-6;x<=6.01;x+=0.6)for(let z=-10;z<2;z+=0.5)seg({x,y:FY,z},{x,y:FY,z:z+0.5});
+  for(let z=-10;z<=2.01;z+=0.6)for(let x=-6;x<6;x+=0.5)seg({x,y:FY,z},{x:x+0.5,y:FY,z});
+  // мягкий «луч взгляда» на полу - где перед
+  const a=proj({x:0,y:FY,z:0}),b=proj({x:-0.9,y:FY,z:-3.2}),c=proj({x:0.9,y:FY,z:-3.2});
+  if(a&&b&&c){g.globalAlpha=0.035;g.fillStyle='#2E3438';g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.lineTo(c.x,c.y);g.closePath();g.fill();}
+  g.globalAlpha=1;}
+
+function drawHead(){const sh=proj({x:0,y:FY,z:0});
+  if(sh){g.globalAlpha=0.07;g.fillStyle='#2E3438';g.beginPath();g.ellipse(sh.x,sh.y,0.35*sh.s,0.12*sh.s,0,0,Math.PI*2);g.fill();}
+  g.globalAlpha=1;g.strokeStyle='#2E3438';g.lineWidth=1.5;g.lineCap='round';
+  g.beginPath();for(let i=0;i<=20;i++){const x=-0.27+0.54*i/20,y=-0.21-0.12*Math.pow(Math.abs(x)/0.27,1.5),p=proj({x,y,z:0.02});if(!p)continue;i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y);}g.stroke();
+  for(const x of[-0.05,0.05]){const a=proj({x,y:-0.1,z:0.02}),b=proj({x,y:-0.21,z:0.02});if(a&&b){g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();}}
+  const h=proj({x:0,y:0,z:0});if(!h)return;
+  g.fillStyle='#FFFFFF';g.beginPath();g.arc(h.x,h.y,0.13*h.s,0,Math.PI*2);g.fill();g.stroke();}
+
+function drawOrb(v){if(v.vis<0.01)return;const p=proj(v.pos);if(!p)return;const fl=proj({x:v.pos.x,y:FY,z:v.pos.z});
+  if(fl&&v.head<0.5){g.globalAlpha=0.25*v.vis;g.strokeStyle=v.color;g.lineWidth=1;g.setLineDash([3,4]);g.beginPath();g.moveTo(p.x,p.y);g.lineTo(fl.x,fl.y);g.stroke();g.setLineDash([]);
+    g.globalAlpha=0.09*v.vis;g.fillStyle=v.color;g.beginPath();g.ellipse(fl.x,fl.y,0.18*fl.s,0.06*fl.s,0,0,Math.PI*2);g.fill();}
+  const r=Math.max(3.5,0.06*p.s)*(1+Math.min(1.2,v.rms*3));
+  const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,r*3.4);gr.addColorStop(0,rgba(v.color,0.4*v.vis));gr.addColorStop(1,rgba(v.color,0));
+  g.globalAlpha=1;g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,r*3.4,0,Math.PI*2);g.fill();
+  g.fillStyle=rgba(v.color,v.vis);g.beginPath();g.arc(p.x,p.y,r,0,Math.PI*2);g.fill();
+  const la=v.vis*(1-v.head);if(la>0.05){g.font='500 13px Manrope, system-ui, sans-serif';g.fillStyle=rgba('#2E3438',0.8*la);
+    const txt=TX.lab[v.key],w=g.measureText(txt).width;let tx=p.x+r+8;g.textAlign='left';if(tx+w>W-10){tx=p.x-r-8;g.textAlign='right';}g.fillText(txt,tx,p.y+4);}}
+
+// история положений: картинка показывает то, что сейчас реально звучит в наушниках
+const HIST=[];
+function snap(t){HIST.push({t,v:LIST.map(s=>({key:s.key,color:s.color,pos:{...s.pos},vis:s.vis,head:s.head,rms:s.rms}))});
+  while(HIST.length>2&&HIST[1].t<t-1.2)HIST.shift();}
+function viewAt(t){for(let i=HIST.length-1;i>=0;i--)if(HIST[i].t<=t)return HIST[i].v;return HIST.length?HIST[0].v:[];}
+
+// перетаскивание шаров в сцене «А теперь ты»
+let drag=null;
+function unproj(sx,sy,Y){const a=(sx-W/2)/F,b=-(sy-H*0.52)/F;
+  const d={x:B.f.x+B.r.x*a+B.u.x*b,y:B.f.y+B.r.y*a+B.u.y*b,z:B.f.z+B.r.z*a+B.u.z*b};
+  if(d.y>-1e-3)return null;const t=(Y-cam.y)/d.y;if(t<=0)return null;return{x:cam.x+d.x*t,y:Y,z:cam.z+d.z*t};}
+cv.addEventListener('pointerdown',e=>{if(!started||SC[si].id!=='you')return;let best=null,bd=1e9;
+  for(const s of LIST){if(!s.on)continue;const p=proj(s.pos);if(!p)continue;const d=Math.hypot(p.x-e.clientX,p.y-e.clientY);
+    if(d<Math.max(30,0.2*p.s)&&d<bd){bd=d;best=s;}}
+  if(best){drag=best;best.free=true;try{cv.setPointerCapture(e.pointerId);}catch(_){}document.body.classList.add('drag');}});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const q=unproj(e.clientX,e.clientY,drag.pos.y);if(!q)return;
+  const rr=Math.hypot(q.x,q.z),k=cl(rr,0.3,3)/(rr||1);drag.pos={x:q.x*k,y:drag.pos.y,z:q.z*k};drag.tgt={...drag.pos};});
+const up=()=>{if(drag){drag=null;document.body.classList.remove('drag');}};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+
+let last=performance.now(),clock=0,camClock=0;
+function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;const live=SC[si].id==='you';
+  if(started&&!paused){st+=dt;clock+=dt;if(!live)camClock+=dt;const sc=SC[si];if(sc.update)sc.update(st,dt);if(sc.dur&&st>=sc.dur&&si<SC.length-1)go(si+1);}
+  if(ctx&&!paused){const k=1-Math.exp(-dt*2.2),kv=1-Math.exp(-dt*3);
+    for(const s of LIST){if(!s.free){s.pos.x+=(s.tgt.x-s.pos.x)*k;s.pos.y+=(s.tgt.y-s.pos.y)*k;s.pos.z+=(s.tgt.z-s.pos.z)*k;}
+      s.head+=(s.headT-s.head)*k;s.vis+=((s.on?1:0)-s.vis)*kv;}
+    pushAudio();}
+  const T=now/1000;snap(T);
+  const view=viewAt(live?T:T-visDelay()); // в «А теперь ты» шар идёт за пальцем без задержки
+  setCam(camClock);drawBg();
+  const items=[{z:proj({x:0,y:0,z:0})?.z??0,f:drawHead}];
+  for(const v of view){const p=proj(v.pos);if(p&&v.vis>0.01)items.push({z:p.z-0.001,f:()=>drawOrb(v)});}
+  items.sort((a,b)=>b.z-a.z).forEach(it=>it.f());
+  drawProg();requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

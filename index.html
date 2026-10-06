@@ -106,10 +106,43 @@
   #skin .wtabs .wb { min-height: 40px; padding: 0 2px; font-size: .74rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #skin:not([data-mode="player"]) .mp { display: none !important; }
   #skin:not([data-mode="call"]) .wcall { display: none !important; }
-  #skin .wtabsrc { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr 48px; gap: 6px; width: 100%; max-width: 560px; margin: 0 auto; }
-  #skin .wtabsrc.one { grid-template-columns: 1fr; }
-  #skin .wtabsrc .wb { min-height: 40px; }
-  #skin:not([data-mode="player"]) .wtabsrc { display: none !important; }
+  #skin .wtabs .wb.live::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--dot); box-shadow: 0 0 6px var(--dot); vertical-align: 1px; }
+  #skin .wscene-src { position: relative; z-index: 2; width: 100%; box-sizing: border-box; margin: 2px 0 8px; }
+  #skin .wsc-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  #skin .wsc { width: 40px; height: 40px; min-width: 40px; flex: none; padding: 0; border-radius: 50%; border: 2px solid var(--c); background: transparent; color: var(--c);
+    font: 700 .8rem ui-monospace, Menlo, Consolas, monospace; cursor: pointer; display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: transform .15s; }
+  #skin .wsc.play { background: var(--c); color: #071014; box-shadow: 0 0 10px var(--c); }
+  #skin .wsc.sel { outline: 2px solid var(--c); outline-offset: 3px; transform: scale(1.08); }
+  #skin .wsc.wsc-add { --c: rgba(160,170,175,.7); border-style: dashed; font-size: 1.1rem; }
+  #skin .wsc-add-row { display: grid; gap: 6px; margin-top: 10px; }
+  #skin .wsc-pick { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 6px; }
+  #skin .wsc-add-row .wb, #skin .wsc-pick .wb { min-height: 40px; width: 100%; min-width: 0; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #skin .wscene-sel { position: relative; z-index: 2; width: 100%; box-sizing: border-box; margin: 8px 0; padding: 6px 8px; border: 1px solid rgba(127,127,127,.3); border-left: 4px solid var(--c);
+    border-radius: 10px; display: flex; flex-direction: column; gap: 6px; }
+  #skin .wss-head { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: .85rem; min-width: 0; }
+  #skin .wss-head b { color: var(--c); flex: none; }
+  #skin .wss-head span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #skin .wss-head .wb { flex: none; width: 52px; min-height: 36px; }
+  #skin .wss-ctl { display: grid; grid-template-columns: 48px minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
+  #skin .wss-ctl .wb { min-height: 40px; }
+  #skin .wss-hint { font-size: .75rem; opacity: .7; line-height: 1.4; margin: 0; }
+  #skin .w-orbit .wb.on { background: var(--cur, var(--r-acc)) !important; border-color: var(--cur, var(--r-acc)) !important; color: #071014 !important; }
+  #skin:not(.detail) .ro, #skin:not(.detail) [data-widget="presets"] { display: none !important; }
+  #skin .wpanel .wl-list { display: flex; flex-direction: column; gap: 6px; }
+  #skin .wpanel .wl-card { border: 1px solid rgba(127,127,127,.3); border-left: 4px solid var(--c); border-radius: 10px; padding: 4px 8px 6px; display: flex; flex-direction: column; gap: 4px; }
+  #skin .wpanel .wl-card.sel { border-color: var(--c); box-shadow: 0 0 0 1px var(--c) inset; }
+  #skin .wpanel .wl-name { display: flex; align-items: center; gap: 8px; background: none; border: none; color: inherit; font: inherit; font-size: .85rem; min-height: 40px; padding: 0; cursor: pointer; text-align: left; min-width: 0; }
+  #skin .wpanel .wl-name i { width: 12px; height: 12px; border-radius: 50%; flex: none; border: 2px solid var(--c); box-sizing: border-box; }
+  #skin .wpanel .wl-card.play .wl-name i { background: var(--c); box-shadow: 0 0 8px var(--c); }
+  #skin .wpanel .wl-name b { color: var(--c); flex: none; }
+  #skin .wpanel .wl-name span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .9; }
+  #skin .wpanel .wl-ctl { display: grid; grid-template-columns: 48px 1fr 44px; gap: 8px; align-items: center; }
+  #skin .wpanel .wl-ctl .wb { min-height: 40px; }
+  #skin .wpanel .wl-add { display: grid; gap: 6px; }
+  #skin .wpanel .wl-add .wb { min-height: 40px; padding: 0 4px; }
+  #skin .wpanel .wl-pick { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  #skin .wpanel .wl-pick .wb { min-height: 40px; }
+  #skin .wai .wai-talk.on { border-color: #b07cff !important; color: #b07cff !important; box-shadow: 0 0 8px #b07cff55; }
   #skin:not([data-mode="ai"]) .wai { display: none !important; }
   #skin .wpanel { position: relative; z-index: 2; width: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 10px;
     border: 1px solid rgba(127,127,127,.28); border-radius: 12px; background: rgba(0,0,0,.18); }
@@ -130,6 +163,10 @@
   #skin .wpanel .wc-p span { display: flex; align-items: center; gap: 6px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #skin .wpanel .wc-p i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
   #skin .wpanel .wc-p small { font-size: .62rem; opacity: .8; font-weight: 400; }
+  .psheet .ear-t { margin: 0; font-size: .78rem; line-height: 1.45; color: #9fb0b5; }
+  .psheet .ear-now { text-align: center; min-height: 1.4em; font-weight: 700; letter-spacing: 2px; color: #3ef0ff; font-size: .95rem; }
+  .psheet .ear-l { display: flex; justify-content: space-between; align-items: baseline; font-size: .72rem; letter-spacing: 1px; text-transform: uppercase; color: #9fb0b5; }
+  .psheet .ear-l b { color: #3ef0ff; font-variant-numeric: tabular-nums; }
   .psheet details.fold.sub { background: transparent; }
   .psheet .fl { font-size: .78rem; color: #9fb0b5; margin-top: 4px; }
   .psheet textarea.tin { height: auto; min-height: 96px; padding: 10px 12px; resize: vertical; line-height: 1.4; }
@@ -193,7 +230,24 @@
     <h3 data-i="echo"></h3><div class="seg" data-mw="echo"></div>
     <h3 data-i="live"></h3><div class="seg" data-mw="live"></div>
     <h3 data-i="duck2"></h3><div class="seg" data-mw="duck"></div>
+    <h3 data-i="detail"></h3><div class="seg" data-mw="detail"></div>
     <h3 data-i="sleep"></h3><div class="seg" data-mw="sleep"></div>
+  </div></details>
+  <details class="fold" id="earFold"><summary data-i="earTitle"></summary><div class="fb">
+    <p class="ear-t" data-i="earText"></p>
+    <button class="mb" id="earPlay"></button>
+    <div class="ear-now" id="earNow"></div>
+    <div class="ear-l"><span data-i="earStrength"></span><b id="earVal"></b></div>
+    <input type="range" class="w-seek" id="earSlider" min="0" max="100">
+    <p class="ear-t" data-i="earHint"></p>
+    <button class="mb" id="earQuiz" data-i="earQuiz"></button>
+    <div id="earQuizBox" class="hidden">
+      <div class="ear-now" id="earQprog"></div>
+      <div class="row2"><button class="mb" id="earAns0" data-i="earFrontBtn"></button><button class="mb" id="earAns1" data-i="earBackBtn"></button></div>
+      <button class="mb" id="earAgain" data-i="earAgain"></button>
+    </div>
+    <div class="ear-now" id="earRes"></div>
+    <button class="mb" id="earReset" data-i="earReset"></button>
   </div></details>
   <details class="fold"><summary data-i="orbit"></summary><div class="fb"><div data-mw="orbit"></div></div></details>
   <details class="fold" id="aiFold"><summary><span><span data-i="aiLink"></span> <small id="aiSum"></small></span></summary><div class="fb">
@@ -214,6 +268,7 @@
     <label class="chk"><input type="checkbox" id="aiSearch"><span data-ait="search"></span></label>
     <label class="chk"><input type="checkbox" id="aiGeo"><span data-ait="geo"></span></label>
     <label class="chk"><input type="checkbox" id="aiEcho"><span data-ait="echo"></span></label>
+    <label class="chk"><input type="checkbox" id="aiGuard"><span data-ait="guard"></span></label>
     <label class="chk"><input type="checkbox" id="aiProc"><span data-ait="proc"></span></label>
     <button class="mb" id="aiReset" data-ait="reset"></button>
     <details class="fold sub"><summary><span><span data-ait="memory"></span> <small id="aiMemSum"></small></span></summary><div class="fb">
@@ -629,6 +684,12 @@ const audioEl = $('audio'), root = $('skin');
 const audioPlain = new Audio(); // для станций, которые не разрешают 3D: играет мимо обработки, обычным стерео
 const M = () => S.plain ? audioPlain : audioEl;
 const dpr = Math.min(window.devicePixelRatio || 1, 3);
+// Настройка слуха («спереди - сзади»): EAR.s от 0 до 1 - насколько сильнее выделять звук за спиной.
+// Звук сзади приглушается (меньше верхов) и чуть отодвигается. Радар при этом показывает настоящее место.
+const EAR = { s: 0.45 };
+const earBack = (z, d) => d > 0.01 ? Math.max(0, z / d) : 0;
+const earZ = (z, d) => z * (1 + 0.6 * EAR.s * earBack(z, d));
+const earMul = back => Math.pow(Math.pow(0.25, EAR.s), back);
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
@@ -761,6 +822,31 @@ Object.entries({ ru: 'Плеер', uk: 'Плеєр', pl: 'Odtwarzacz', en: 'Play
 Object.entries({ ru: 'Музыка уступает голосу', uk: 'Музика поступається голосу', pl: 'Muzyka ustępuje głosowi', en: 'Music yields to voices', de: 'Musik weicht Stimmen',
   es: 'La música cede a las voces', fr: 'La musique cède aux voix', it: 'La musica cede alle voci', pt: 'A música cede às vozes', tr: 'Müzik seslere yol verir' })
   .forEach(([k, v]) => { if (T[k]) T[k].duck2 = v; });
+Object.entries({ ru: 'Подробный радар (градусы, метры, места)', uk: 'Докладний радар (градуси, метри, місця)', pl: 'Szczegółowy radar (stopnie, metry, miejsca)', en: 'Detailed radar (degrees, meters, places)',
+  de: 'Detailliertes Radar (Grad, Meter, Orte)', es: 'Radar detallado (grados, metros, lugares)', fr: 'Radar détaillé (degrés, mètres, places)', it: 'Radar dettagliato (gradi, metri, posti)',
+  pt: 'Radar detalhado (graus, metros, lugares)', tr: 'Ayrıntılı radar (derece, metre, yerler)' }).forEach(([k, v]) => { if (T[k]) T[k].detail = v; });
+Object.entries({
+  ru: { earTitle:'Слух: спереди и сзади', earText:'3D-звук в браузере считается по средней форме головы и ушей, а у каждого человека она своя, поэтому «сзади» у многих звучит как «спереди». Здесь контраст можно подстроить под себя. Наденьте наушники, музыку лучше поставить на паузу.',
+    earPlay:'Послушать: спереди и сзади', earStop:'Остановить', earFront:'СПЕРЕДИ', earBack:'СЗАДИ', earStrength:'Контраст сзади',
+    earHint:'Двигайте ползунок, пока «сзади» не станет слышно явно глуше и дальше, чем «спереди». Если переборщить, звук сзади станет неестественно тихим.',
+    earQuiz:'Проверить вслепую (10 сигналов)', earFrontBtn:'Спереди', earBackBtn:'Сзади', earAgain:'Повторить сигнал', earWasFront:'было спереди', earWasBack:'было сзади',
+    earScore:'Верно: {n} из 10.', earGood:'Хорошо слышно, можно оставить.', earMore:'Добавьте контраст и проверьте ещё раз. Если и на максимуме около 5 из 10 - это обычное дело, тогда помогает движение звука: орбиты.', earReset:'Вернуть по умолчанию' },
+  en: { earTitle:'Hearing: front and back', earText:'3D sound in the browser is calculated for an average head and ears, and everyone\'s are different, so for many people «behind» sounds like «in front». Here you can tune the contrast to yourself. Put on headphones; pausing the music is better.',
+    earPlay:'Listen: front and back', earStop:'Stop', earFront:'FRONT', earBack:'BACK', earStrength:'Contrast behind',
+    earHint:'Move the slider until «behind» is clearly duller and further away than «front». Too much makes the sound behind unnaturally quiet.',
+    earQuiz:'Blind test (10 sounds)', earFrontBtn:'Front', earBackBtn:'Back', earAgain:'Repeat the sound', earWasFront:'it was front', earWasBack:'it was back',
+    earScore:'Correct: {n} of 10.', earGood:'You hear it well, keep it.', earMore:'Add contrast and test again. If you still get about 5 of 10 at the maximum, that is common - moving sound (orbits) helps then.', earReset:'Restore default' },
+  uk: { earTitle:'Слух: спереду і ззаду', earText:'3D-звук у браузері рахується за середньою формою голови та вух, а в кожного вона своя, тому «ззаду» в багатьох звучить як «спереду». Тут контраст можна підлаштувати під себе. Одягніть навушники, музику краще поставити на паузу.',
+    earPlay:'Послухати: спереду і ззаду', earStop:'Зупинити', earFront:'СПЕРЕДУ', earBack:'ЗЗАДУ', earStrength:'Контраст ззаду',
+    earHint:'Рухайте повзунок, доки «ззаду» не стане чутно виразно глухіше й далі, ніж «спереду». Якщо переборщити, звук ззаду стане неприродно тихим.',
+    earQuiz:'Перевірити наосліп (10 сигналів)', earFrontBtn:'Спереду', earBackBtn:'Ззаду', earAgain:'Повторити сигнал', earWasFront:'було спереду', earWasBack:'було ззаду',
+    earScore:'Влучно: {n} з 10.', earGood:'Добре чутно, можна залишити.', earMore:'Додайте контраст і перевірте ще раз. Якщо навіть на максимумі близько 5 з 10 - це звичайна справа, тоді допомагає рух звуку: орбіти.', earReset:'Повернути типові' },
+  pl: { earTitle:'Słuch: przód i tył', earText:'Dźwięk 3D w przeglądarce jest liczony dla przeciętnego kształtu głowy i uszu, a każdy ma inny, więc u wielu osób „z tyłu” brzmi jak „z przodu”. Tu możesz dopasować kontrast do siebie. Załóż słuchawki, muzykę lepiej wstrzymać.',
+    earPlay:'Posłuchaj: przód i tył', earStop:'Zatrzymaj', earFront:'PRZÓD', earBack:'TYŁ', earStrength:'Kontrast z tyłu',
+    earHint:'Przesuwaj suwak, aż „z tyłu” będzie wyraźnie głuchsze i dalsze niż „z przodu”. Przesada sprawi, że dźwięk z tyłu będzie nienaturalnie cichy.',
+    earQuiz:'Test na ślepo (10 sygnałów)', earFrontBtn:'Przód', earBackBtn:'Tył', earAgain:'Powtórz sygnał', earWasFront:'był z przodu', earWasBack:'był z tyłu',
+    earScore:'Poprawnie: {n} z 10.', earGood:'Dobrze słychać, można zostawić.', earMore:'Dodaj kontrast i sprawdź jeszcze raz. Jeśli nawet na maksimum jest ok. 5 z 10, to normalne - wtedy pomaga ruch dźwięku: orbity.', earReset:'Przywróć domyślne' }
+}).forEach(([k, v]) => { if (T[k]) Object.assign(T[k], v); });
 const LANGS = [['en','English'],['ru','Русский'],['uk','Українська'],['pl','Polski'],['de','Deutsch'],['es','Español'],['fr','Français'],['it','Italiano'],['pt','Português'],['tr','Türkçe']];
 
 // Язык: сохранённый выбор, иначе язык телефона/браузера, иначе английский
@@ -778,12 +864,13 @@ const L = v => typeof v === 'string' ? v : (v && (v[lang] || v.en)) || '';
 // ---------------- Состояние ----------------
 const S = {
   pos: store.get('pp_pos', { x: -0.2, y: 0 }), speed: store.get('pp_speed', 1),
-  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
+  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, detail: store.get('pp_detail', false), live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
   sleepMin: 0, sleepEnd: 0
 };
 const METERS = 3, SIZE = 300, C = 150;
 
 // ---------------- Звук ----------------
+EAR.s = store.get('pp_ear', 0.45);
 let ac = null, panner, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave, duckG;
 // Мягкое «комнатное» эхо: шум, который со временем темнеет (как в настоящей комнате),
 // плюс 18 мс тишины в начале. Резкого белого шума с верхами больше нет - он и давал «писк».
@@ -819,6 +906,7 @@ function initAudio() {
     src.connect(dryGain); spatialOut.connect(duckG); dryGain.connect(duckG);
     master.connect(analyser); analyser.connect(ac.destination);
     applyPos(true); applyFx(true);
+    if (ac.addEventListener) ac.addEventListener('statechange', () => { if (ac.state === 'running' && auPending) reapplyAll(); });
   }
   if (ac.state === 'suspended') ac.resume();
 }
@@ -842,7 +930,7 @@ function duckedPos(src) {
   return { x: nd * Math.sin(a), y: -nd * Math.cos(a) };
 }
 const musicPos = () => duckedPos(SRCS.music);
-const drawPos = src => src.key === 'music' || src.key === 'tab' ? duckedPos(src) : livePosOf(src);
+const drawPos = src => src.key === 'music' || src.bg ? duckedPos(src) : livePosOf(src);
 const livePos = () => drawPos(CUR);
 // Книга - это речь, а две речи сразу не разобрать: пока говорят, книга встаёт на паузу,
 // а после 1.5 с тишины продолжает с отмоткой на 2 с. Музыка и радио - отходят и звучат тише.
@@ -859,24 +947,34 @@ setInterval(() => {
     bookPaused = false;
     if (book) { audioEl.currentTime = Math.max(0, audioEl.currentTime - 2); audioEl.play().catch(() => {}); }
   }
-  const target = voices && !book ? 1 : 0, was = duck;
+  const target = voices ? 1 : 0, was = duck;
   duck += (target - duck) * 0.12; if (Math.abs(target - duck) < 0.005) duck = target;
-  if (ac && duckG) duckG.gain.setTargetAtTime(1 - 0.45 * duck, ac.currentTime, 0.1);
+  if (ac && duckG) tgt(duckG.gain, 1 - 0.45 * duck, 0.1);
   const moving = duck !== was, playing = !M().paused;
   if (ac && (moving || (S.live && playing && !SRCS.music.O.on))) applyPos(false);
   if (S.live && AI.active() && !SRCS.ai.O.on) AI.applyPos();
-  if (TAB.active('bg') || TAB.active('voice')) requestDraw();
-  if (moving || (S.live && (playing || AI.active()))) requestDraw();
+  LAY.tick(moving);
+  if (moving || LAY.anyPlaying() || TAB.active() || (S.live && (playing || AI.active()))) requestDraw();
 }, 80);
-function setParam(p, v, now) { if (now) p.setValueAtTime(v, ac.currentTime); else p.setTargetAtTime(v, ac.currentTime, 0.04); }
+// Параметры звука меняем бережно: только когда звук реально идёт и только если значение изменилось.
+// Иначе, пока браузер свёрнут и звук стоит на паузе, команды копятся тысячами, и после возврата
+// звук щёлкает, подвисает или прыгает. Пропущенное применяется разом, когда звук снова пошёл.
+const _pl = new WeakMap(); let auPending = false;
+function tgt(p, v, tc) {
+  if (!ac || ac.state !== 'running') { auPending = true; return; }
+  const o = _pl.get(p); if (o !== undefined && Math.abs(o - v) < 1e-4) return;
+  _pl.set(p, v); p.setTargetAtTime(v, ac.currentTime, tc);
+}
+function setParam(p, v, now) { if (now) { _pl.set(p, v); p.setValueAtTime(v, ac.currentTime); } else tgt(p, v, 0.04); }
+function reapplyAll() { auPending = false; Object.values(SRCS).forEach(src => { try { applySrc(src); } catch (e) {} }); }
 function applyPos(now) {
   if (!ac) return;
   const P = musicPos(), x = P.x * METERS, z = P.y * METERS, d = Math.hypot(x, z);
   const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7)));
-  if (panner.positionX) { setParam(panner.positionX, x, now); setParam(panner.positionY, 0, now); setParam(panner.positionZ, z, now); }
-  else panner.setPosition(x, 0, z);
+  if (panner.positionX) { setParam(panner.positionX, x, now); setParam(panner.positionY, 0, now); setParam(panner.positionZ, earZ(z, d), now); }
+  else panner.setPosition(x, 0, earZ(z, d));
   const back = d > 0.01 ? Math.max(0, z / d) : 0; // 0 - впереди или сбоку, 1 - прямо за спиной
-  setParam(lowpass.frequency, 20000 * Math.pow(5000 / 20000, k) * Math.pow(0.55, back), now);
+  setParam(lowpass.frequency, 20000 * Math.pow(5000 / 20000, k) * earMul(back), now);
   setParam(wet.gain, S.echo ? 0.015 + 0.07 * (d / METERS) : 0, now); // эхо тихое и тёмное; можно выключить
 }
 function setEcho(v) { S.echo = v; store.set('pp_echo', v); initAudio(); applyPos(false); render(); }
@@ -917,28 +1015,24 @@ const MAIN_SHAPES = ['circle', 'back', 'pendulum', 'wander', 'eight'];
 const MORE_SHAPES = SHAPE_IDS.filter(id => !MAIN_SHAPES.includes(id));
 let O = Object.assign({ shape: 'circle', period: 10, size: 0.7, dir: 1 }, store.get('pp_orbit', {}), { on: false, u: 0, last: 0, trail: [] });
 if (!SHAPES[O.shape]) O.shape = 'circle';
+const HOOKS = { paint: [] };
 const SRCS = {
   music: { key: 'music', pos: S.pos, O, ph: LPH, posKey: 'pp_pos', orbKey: 'pp_orbit' },
-  ai: { key: 'ai', pos: store.get('pp_ai_pos', { x: 0.22, y: -0.03 }),
+  ai: { key: 'ai', color: '#b07cff', pos: store.get('pp_ai_pos', { x: 0.22, y: -0.03 }),
     O: Object.assign({ shape: 'circle', period: 20, size: 0.5, dir: 1 }, store.get('pp_ai_orbit', {}), { on: false, u: 0, last: 0, trail: [] }),
     ph: [Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28], posKey: 'pp_ai_pos', orbKey: 'pp_ai_orbit' },
   // куда сядет первый собеседник звонка (точку можно поставить заранее)
   next: { key: 'next', pos: store.get('pp_call_pos', { x: 0.36, y: 0 }), O: { shape: 'circle', period: 20, size: 0.5, dir: 1, on: false, u: 0, last: 0, trail: [] },
     ph: [0, 0, 0], posKey: 'pp_call_pos', orbKey: null },
-  // звук вкладки браузера в плеере (компьютер)
-  tab: { key: 'tab', label: '▣', pos: store.get('pp_tab_pos', { x: -0.4, y: -0.4 }),
-    O: Object.assign({ shape: 'circle', period: 20, size: 0.6, dir: 1 }, store.get('pp_tab_orbit', {}), { on: false, u: 0, last: 0, trail: [] }),
-    ph: [Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28], posKey: 'pp_tab_pos', orbKey: 'pp_tab_orbit' }
 };
-if (!SHAPES[SRCS.tab.O.shape]) SRCS.tab.O.shape = 'circle';
 if (!SHAPES[SRCS.ai.O.shape]) SRCS.ai.O.shape = 'circle';
 // Радар, орбиты и места управляют тем источником, чья вкладка открыта (CUR)
 let CUR = SRCS.music, MODE = 'player';
 delete S.pos; Object.defineProperty(S, 'pos', { get: () => CUR.pos, set: v => { CUR.pos = v; }, configurable: true });
-const saveSrcPos = () => { if (CUR.posKey) store.set(CUR.posKey, CUR.pos); };
+const saveSrcPos = () => { if (CUR.posKey) store.set(CUR.posKey, CUR.pos); if (CUR.layer) LAY.save(); };
 let orbitTimer = null;
 const saveOrbit = () => { if (CUR.orbKey) store.set(CUR.orbKey, { shape: O.shape, period: O.period, size: O.size, dir: O.dir }); };
-const applySrc = src => src.key === 'music' ? applyPos(false) : src.key === 'ai' ? (AI.applyPos(), TAB.applyPos('voice')) : src.key === 'tab' ? TAB.applyPos('bg') : src.key === 'next' ? null : CALL.applyPos(src);
+const applySrc = src => src.key === 'music' ? applyPos(false) : src.key === 'ai' ? (AI.applyPos(), TAB.applyPos()) : src.layer ? LAY.applyPos(src) : src.key === 'next' ? null : CALL.applyPos(src);
 function orbitTick() {
   const now = performance.now(); let any = false;
   for (const src of Object.values(SRCS)) {
@@ -956,7 +1050,7 @@ function orbitTick() {
 function orbitStart() { ping('orbit'); initAudio(); O.on = true; O.last = performance.now(); O.trail = []; if (!orbitTimer) orbitTimer = setInterval(orbitTick, 40); orbitTick(); render(); requestDraw(); }
 function orbitStop() { if (!O.on) return; O.on = false; O.trail = []; saveSrcPos(); render(); requestDraw(); }
 function setMode(m) {
-  MODE = m; CUR = m === 'ai' ? SRCS.ai : m === 'call' ? CALL.current() : TAB.playerSrc(); O = CUR.O; S.dragging = false;
+  MODE = m; CUR = m === 'ai' ? SRCS.ai : m === 'call' ? CALL.current() : LAY.playerSrc(); O = CUR.O; S.dragging = false;
   render(); requestDraw(); AI.render(); CALL.render();
 }
 function shapeIcon(id) {
@@ -1035,7 +1129,7 @@ let seekPreview = 0;
 // ---------------- Скин: монтаж ----------------
 let skin = null, W = { txt: [], radar: [], viz: [], seek: [], ring: [], speed: [], sleep: [], fx: [], echo: [], list: [], orbit: [] }, colors = {};
 const SPEEDS = [1, 1.25, 1.5], SLEEPS = [0, 15, 30, 60];
-const MW = { speed: [], sleep: [], fx: [], echo: [], live: [], duck: [], orbit: [] };
+const MW = { speed: [], sleep: [], fx: [], echo: [], live: [], duck: [], detail: [], orbit: [] };
 function makeMenuWidgets() {
   document.querySelectorAll('#menu [data-mw]').forEach(el => {
     const w = el.dataset.mw;
@@ -1045,6 +1139,7 @@ function makeMenuWidgets() {
     else if (w === 'fx') MW.fx.push(makeChoice(el, [1, 0], v => v ? t('on') : t('off'), v => { S.fx = !!v; initAudio(); applyFx(false); render(); }));
     else if (w === 'live') MW.live.push(makeChoice(el, [1, 0], v => v ? t('on') : t('off'), v => { S.live = !!v; store.set('pp_live', S.live); applyPos(false); render(); requestDraw(); }));
     else if (w === 'duck') MW.duck.push(makeChoice(el, [1, 0], v => v ? t('on') : t('off'), v => { S.duck = !!v; store.set('pp_duck', S.duck); render(); }));
+    else if (w === 'detail') MW.detail.push(makeChoice(el, [1, 0], v => v ? t('on') : t('off'), v => { S.detail = !!v; store.set('pp_detail', S.detail); render(); requestDraw(); }));
     else if (w === 'orbit') MW.orbit.push(makeOrbit(el, true));
   });
 }
@@ -1053,7 +1148,7 @@ function mountSkin(sk) {
   skin = sk;
   $('skinCss').textContent = sk.css;
   root.innerHTML = sk.html;
-  W = { txt: [], radar: [], viz: [], seek: [], ring: [], speed: [...MW.speed], sleep: [...MW.sleep], fx: [...MW.fx], echo: [...MW.echo], live: [...MW.live], duck: [...MW.duck], list: [], orbit: [...MW.orbit] };
+  W = { txt: [], radar: [], viz: [], seek: [], ring: [], speed: [...MW.speed], sleep: [...MW.sleep], fx: [...MW.fx], echo: [...MW.echo], live: [...MW.live], duck: [...MW.duck], detail: [...MW.detail], list: [], orbit: [...MW.orbit] };
   const mps = root.querySelectorAll('.mp');
   if (mps.length) {
     const tabs = document.createElement('div'); tabs.className = 'wtabs';
@@ -1064,8 +1159,9 @@ function mountSkin(sk) {
     mps[mps.length - 1].after(pnl); AI.bindPanel(pnl);
     const cp = document.createElement('div'); cp.className = 'wpanel wcall'; cp.innerHTML = CALL.panelHtml();
     pnl.after(cp); CALL.bindPanel(cp);
-    TAB.mount(pnl, tabs);
+    TAB.mount(pnl);
   } else if (MODE !== 'player') setMode('player');
+  LAY.mountScene(root);
   root.querySelectorAll('[data-txt]').forEach(el => W.txt.push(el));
   root.querySelectorAll('[data-act]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); act(el.dataset.act, el); }));
   root.querySelectorAll('[data-widget]').forEach(el => {
@@ -1171,9 +1267,10 @@ function render() {
     const txt = c === null ? '' : (c.values === SLEEPS && v === S.sleepMin && S.sleepEnd) ? fmtM(Math.max(0, (S.sleepEnd - Date.now()) / 1000)) : c.label(v);
     if (b.textContent !== txt) b.textContent = txt;
   }));
-  choice(W.speed, S.speed); choice(W.sleep, S.sleepMin); choice(W.fx, S.fx ? 1 : 0); choice(W.echo, S.echo ? 1 : 0); choice(W.live || [], S.live ? 1 : 0); choice(W.duck || [], S.duck ? 1 : 0);
+  choice(W.speed, S.speed); choice(W.sleep, S.sleepMin); choice(W.fx, S.fx ? 1 : 0); choice(W.echo, S.echo ? 1 : 0); choice(W.live || [], S.live ? 1 : 0); choice(W.duck || [], S.duck ? 1 : 0); choice(W.detail || [], S.detail ? 1 : 0);
   root.classList.toggle('orbiting', O.on);
   root.dataset.mode = MODE;
+  HOOKS.paint.forEach(f => f());
   root.querySelectorAll('.wtabs [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === MODE));
   W.orbit.forEach(o => {
     o.shapes.forEach(b => { b.classList.toggle('on', b.dataset.sh === O.shape); b.title = t('sh_' + b.dataset.sh); });
@@ -1189,8 +1286,8 @@ function applyLang() {
   renderStations();
   $('helpText').innerHTML = HELP[lang];
   $('langSel').value = lang;
-  W.speed.concat(W.sleep, W.fx, W.echo, W.live || [], W.duck || []).forEach(c => c.btns.forEach(b => b.textContent = ''));
-  renderSkinList(); AI.applyLang(); CALL.applyLang(); TAB.paint(); render(); requestDraw();
+  W.speed.concat(W.sleep, W.fx, W.echo, W.live || [], W.duck || [], W.detail || []).forEach(c => c.btns.forEach(b => b.textContent = ''));
+  renderSkinList(); AI.applyLang(); CALL.applyLang(); TAB.paint(); LAY.applyLang(); render(); requestDraw();
 }
 
 // ---------------- Радар ----------------
@@ -1207,7 +1304,18 @@ function makeRadar(el) {
     const d = Math.hypot(nx, ny); if (d > 1) { nx /= d; ny /= d; }
     setPos(nx, ny, false);
   };
-  cv.addEventListener('pointerdown', e => { if (S.locked) return; initAudio(); orbitStop(); drag = true; S.dragging = true; cv.setPointerCapture(e.pointerId); toPos(e); });
+  cv.addEventListener('pointerdown', e => {
+    // касание по точке другого источника выбирает его; при открытом замке её сразу можно тащить
+    const r = cv.getBoundingClientRect(), s = SIZE / r.width, R = radarR(), mx = (e.clientX - r.left) * s, my = (e.clientY - r.top) * s;
+    let hit = null, best = 18;
+    for (const src of Object.values(SRCS)) {
+      if (src === CUR || !srcVisible(src)) continue;
+      const q = drawPos(src), dd = Math.hypot(C + q.x * R - mx, C + q.y * R - my); if (dd < best) { best = dd; hit = src; }
+    }
+    if (hit) { LAY.selectSource(hit); if (S.locked) return; }
+    if (S.locked) return;
+    initAudio(); orbitStop(); drag = true; S.dragging = true; cv.setPointerCapture(e.pointerId); toPos(e);
+  });
   cv.addEventListener('pointermove', e => { if (drag) toPos(e); });
   const end = () => { if (drag) { drag = false; S.dragging = false; saveSrcPos(); applySrc(CUR); } };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
@@ -1215,6 +1323,7 @@ function makeRadar(el) {
 }
 const radarR = () => (skin && skin.radar && skin.radar.r) || 128;
 
+const srcVisible = src => src.key !== 'next' && !(src.key === 'ai' && !AI.active() && !TAB.active());
 function drawRadar(g, now) {
   if (!g) return;
   const o = skin.radar || {}, c = colors, R = radarR();
@@ -1252,7 +1361,7 @@ function drawRadar(g, now) {
       g.beginPath(); g.moveTo(C + cs * (R + 2), C + sn * (R + 2)); g.lineTo(C + cs * (R + 2 + len), C + sn * (R + 2 + len)); g.stroke();
     }
     g.globalAlpha = .85;
-    for (let a = 0; a < 360; a += 30) {
+    if (S.detail) for (let a = 0; a < 360; a += 30) {
       const rad = (a - 90) * Math.PI / 180;
       g.fillText(String(a).padStart(3, '0'), C + Math.cos(rad) * (R - 11), C + Math.sin(rad) * (R - 11));
     }
@@ -1265,7 +1374,7 @@ function drawRadar(g, now) {
     g.lineWidth = 1;
   }
   // метры
-  if (o.dist) {
+  if (o.dist && S.detail) {
     g.globalAlpha = .75; g.fillStyle = c['r-txt']; g.font = '9px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle';
     [1, 2, 3].forEach(m => { const r = R * m / 3 * Math.SQRT1_2; g.fillText(m + 'M', C - r - 9, C + r + 2); });
   }
@@ -1283,11 +1392,12 @@ function drawRadar(g, now) {
   }
   const LP = livePos(), px = C + LP.x * R, py = C + LP.y * R, dist = Math.hypot(px - C, py - C);
   const talk = src => src.key === 'ai' ? AI.speaking() || TAB.speaking() : src.lastVoice !== undefined && CALL.talking(src);
-  const pc = talk(CUR) ? '#ffb020' : S.locked ? c['r-lock'] : (CUR.color || c['r-acc']);
+  const pc = CUR.color || c['r-acc'];
   for (const src of Object.values(SRCS)) {
-    if (src === CUR || src.key === 'next' || (src.key === 'ai' && !AI.active() && !TAB.active('voice')) || (src.key === 'tab' && !TAB.active('bg'))) continue;
-    const q = drawPos(src), qx = C + q.x * R, qy = C + q.y * R, col = talk(src) ? '#ffb020' : (src.color || c['r-acc2']);
-    g.save(); g.globalAlpha = .6; g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 8;
+    if (src === CUR || !srcVisible(src)) continue;
+    const q = drawPos(src), qx = C + q.x * R, qy = C + q.y * R, col = src.key === 'music' ? c['r-acc'] : (src.color || c['r-acc2']);
+    if (talk(src)) { g.save(); g.strokeStyle = col; g.lineWidth = 2; g.globalAlpha = .5 + .4 * Math.sin(now / 120); g.beginPath(); g.arc(qx, qy, 9 + 2.5 * Math.sin(now / 150), 0, TAU); g.stroke(); g.restore(); }
+    g.save(); g.globalAlpha = (src.layer && !src.playing) ? .3 : .75; g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 8;
     g.beginPath(); g.arc(qx, qy, 4, 0, TAU); g.fill(); g.shadowBlur = 0; g.globalAlpha = .8;
     g.font = 'bold 9px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(src.key === 'ai' ? 'AI' : src.key === 'music' ? '♪' : src.label, qx, qy - 11);
     g.restore();
@@ -1340,10 +1450,12 @@ function drawRadar(g, now) {
     g.stroke();
     g.restore();
   }
+  if (S.locked) { g.save(); g.strokeStyle = c['r-lock']; g.globalAlpha = .85; g.lineWidth = 1.5; g.beginPath(); g.arc(px, py, 11, 0, TAU); g.stroke(); g.restore(); }
+  if (talk(CUR)) { g.save(); g.strokeStyle = pc; g.lineWidth = 2; g.globalAlpha = .5 + .4 * Math.sin(now / 120); g.beginPath(); g.arc(px, py, 14 + 3 * Math.sin(now / 150), 0, TAU); g.stroke(); g.restore(); }
   // подпись
   if (o.label !== false && dist > 3) {
     const pi = posInfo(); const nd = Math.hypot(LP.x, LP.y);
-    const lines = o.reticle ? ['AZM ' + pi.degS, 'RNG ' + pi.dist.toUpperCase()] : [pi.dist + ' · ' + pi.deg + '°'];
+    const nm = LAY.nameOf(CUR), lines = !S.detail ? [nm.length > 22 ? nm.slice(0, 21) + '…' : nm] : o.reticle ? ['AZM ' + pi.degS, 'RNG ' + pi.dist.toUpperCase()] : [pi.dist + ' · ' + pi.deg + '°'];
     g.font = (o.reticle ? '600 10px ' : 'bold 11px ') + mono; g.fillStyle = pc; g.textBaseline = 'middle';
     let lx, ly, al;
     if (nd > 0.45) { const r = px > C; al = r ? 'right' : 'left'; lx = r ? px - 28 : px + 28; ly = py < 40 ? py + 30 : py - 26; }
@@ -1425,7 +1537,11 @@ function frame(ts) {
 function requestDraw() { drawPending = true; if (!rafOn) { rafOn = true; requestAnimationFrame(frame); } }
 function resizeAll() { W.viz.forEach(sizeViz); }
 window.addEventListener('resize', () => { resizeAll(); requestDraw(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) savePos(); else requestDraw(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { savePos(); return; }
+  if (ac && ac.state !== 'running') ac.resume().then(reapplyAll).catch(() => {}); else if (ac) reapplyAll();
+  requestDraw();
+});
 
 // ---------------- Книга ----------------
 let lastSave = 0;
@@ -1550,9 +1666,17 @@ function playStation(st) {
   audioEl.src = st.url;
   let started = false;
   audioEl.onplaying = () => { if (my !== radioTry) return; if (!started) { started = true; mark(st, true); } };
+  let tries = 0;
   audioEl.onerror = () => {
     if (my !== radioTry || S.plain) return;
-    if (!started) startPlain(st, my);                                   // скорее всего, станция не разрешает 3D
+    if (!started) {
+      // Ошибка до начала игры: либо станция не даёт 3D, либо просто сеть моргнула (смена Wi-Fi, возврат из другого приложения).
+      // Станцию, которая уже играла в 3D, пробуем снова до трёх раз; новую - один раз. Только потом - обычное стерео.
+      const known = stations.find(x => x.url === st.url), was3d = known && known.d3 === true;
+      if (tries < (was3d ? 3 : 1)) { tries++; setTimeout(() => { if (my === radioTry && S.radio === st) { audioEl.src = st.url; audioEl.play().catch(() => {}); } }, 1500); return; }
+      startPlain(st, my);
+      return;
+    }
     else setTimeout(() => { if (my === radioTry && S.radio === st) { audioEl.src = st.url; audioEl.play().catch(() => {}); } }, 2000); // обрыв - переподключаемся
   };
   audioEl.play().catch(() => {});
@@ -1748,6 +1872,7 @@ const AIT = {
     voice:'Голос', model:'Модель', custom:'Своя - ввести название вручную', modelPh:'точное название, например gemini-...', test:'Проверить все модели',
     persona:'Характер помощника', patience:'Терпение - сколько тишины ждать, прежде чем ответить', p800:'Обычное', p1500:'Терпеливое - 1.5 с', p2500:'Очень терпеливое - 2.5 с',
     duck:'Музыка уступает - пока попутчик говорит, музыка отходит назад и звучит тише', search:'Поиск Google - свежие события и новости (на бесплатном ключе есть не у всех моделей)',
+    guard:'Защита от эха: пока попутчик говорит, микрофон молчит. Перебить его нельзя, зато он не слышит сам себя. В наушниках можно выключить',
     geo:'Сообщать, где я - город и район (по GPS)', echo:'Простор - лёгкое эхо, как в плеере', proc:'Эхоподавление - только для колонок; с наушниками на телефоне выключите',
     reset:'Вернуть настройки по умолчанию', memory:'Память', memOn:'Помнить разговоры - после «Закончить» попутчик запишет короткую выжимку',
     profile:'О себе - имя, кто вы, чем занимаетесь, что интересно', profilePh:'Меня зовут ...', facts:'Что попутчик узнал о вас', past:'Прошлые разговоры',
@@ -1769,6 +1894,7 @@ const AIT = {
     voice:'Voice', model:'Model', custom:'Custom - type the name', modelPh:'exact name, e.g. gemini-...', test:'Test all models',
     persona:'Companion personality', patience:'Patience - how much silence to wait before answering', p800:'Normal', p1500:'Patient - 1.5 s', p2500:'Very patient - 2.5 s',
     duck:'Music steps aside - while the companion speaks, music moves back and gets quieter', search:'Google Search - fresh events and news (not every model has it on a free key)',
+    guard:'Echo guard: while the companion speaks, the microphone stays silent. You cannot interrupt it, but it does not hear itself. With headphones you can turn it off',
     geo:'Tell where I am - city and district (GPS)', echo:'Room - a light echo, like in the player', proc:'Echo cancellation - for speakers only; turn off with headphones on a phone',
     reset:'Restore defaults', memory:'Memory', memOn:'Remember conversations - after «End» the companion saves a short summary',
     profile:'About you - name, who you are, what you do, what interests you', profilePh:'My name is ...', facts:'What the companion learned about you', past:'Past conversations',
@@ -1800,7 +1926,7 @@ const AI = (() => {
   const MODELS = [['gemini-3.8-live', '3.8 Live', 'mNew'], ['gemini-3.8-live-extended-thinking', '3.8 Live', 'mThink'],
     ['gemini-3.1-flash-live-preview', '3.1 Flash Live (preview)', ''], ['gemini-2.5-flash-native-audio-preview-12-2025', '2.5 Native Audio', 'mOld']];
   const modelLabel = m => m[1] + (m[2] ? ' - ' + at(m[2]) : '');
-  let proc = !/Android/i.test(navigator.userAgent), echoOn = true, searchFallback = false;
+  let proc = !/Android/i.test(navigator.userAgent), echoOn = true, searchFallback = false, guardOn = true;
   const isDefPersona = v => !v || v === OLD_PERSONA || v === AIT.ru.personaDef || v === AIT.en.personaDef;
 
   function fillModels() {
@@ -1825,6 +1951,7 @@ const AI = (() => {
     q('aiSearch').checked = ls('wispAiSearch') !== '0';
     { const v = ls('wispAiProc'); if (v !== null) proc = v === '1'; } q('aiProc').checked = proc;
     echoOn = ls('wispAiEcho') !== '0'; q('aiEcho').checked = echoOn;
+    guardOn = ls('wispAiGuard') !== '0'; q('aiGuard').checked = guardOn;
     q('aiMemOn').checked = ls('wispAiMemOn') !== '0';
     q('aiProfile').value = ls('wispAiProfile') || '';
 
@@ -1840,6 +1967,7 @@ const AI = (() => {
     q('aiPatience').onchange = () => { ls('wispAiPatience', q('aiPatience').value); restartSession(); };
     q('aiSearch').onchange = () => { ls('wispAiSearch', q('aiSearch').checked ? '1' : '0'); searchFallback = false; restartSession(); };
     q('aiGeo').onchange = () => ls('wispAiGeo', q('aiGeo').checked ? '1' : '0');
+    q('aiGuard').onchange = () => { guardOn = q('aiGuard').checked; ls('wispAiGuard', guardOn ? '1' : '0'); };
     q('aiProc').onchange = () => { proc = q('aiProc').checked; ls('wispAiProc', proc ? '1' : '0'); };
     q('aiEcho').onchange = () => { echoOn = q('aiEcho').checked; ls('wispAiEcho', echoOn ? '1' : '0'); applyPos(); };
     q('aiMemOn').onchange = () => ls('wispAiMemOn', q('aiMemOn').checked ? '1' : '0');
@@ -1906,10 +2034,10 @@ const AI = (() => {
   function applyPos() {
     if (!ready) return;
     const p = livePosOf(SRCS.ai), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
-    pan.positionX.setTargetAtTime(x, now, 0.04); pan.positionY.setTargetAtTime(0, now, 0.04); pan.positionZ.setTargetAtTime(z, now, 0.04);
+    tgt(pan.positionX, x, 0.04); tgt(pan.positionY, 0, 0.04); tgt(pan.positionZ, earZ(z, d), 0.04);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
-    lp.frequency.setTargetAtTime(Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * Math.pow(0.4, back)), now, 0.04);
-    wet.gain.setTargetAtTime(echoOn ? 0.015 + 0.07 * (d / METERS) : 0, now, 0.04);
+    tgt(lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.04);
+    tgt(wet.gain, echoOn ? 0.015 + 0.07 * (d / METERS) : 0, 0.04);
   }
   function level() { if (!speaking() || !an) return 0; an.getByteTimeDomainData(wave); let m = 0; for (const v of wave) m = Math.max(m, Math.abs(v - 128) / 128); return m; }
   function tickUi() {
@@ -1937,6 +2065,7 @@ const AI = (() => {
   let capBuf = [], capLen = 0;
   function onFrame(f) {
     if (!live) return;
+    if (guardOn && ac.currentTime < playEnd + 0.35) { capBuf = []; capLen = 0; return; } // защита от эха
     capBuf.push(f); capLen += f.length;
     if (capLen < Math.round(ac.sampleRate * 0.1)) return;
     const all = new Float32Array(capLen); let o = 0;
@@ -2309,9 +2438,9 @@ const CALL = (() => {
   function applyPos(v) {
     if (!v || !v.pan) return;
     const p = livePosOf(v), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
-    v.pan.positionX.setTargetAtTime(x, now, 0.08); v.pan.positionY.setTargetAtTime(0, now, 0.08); v.pan.positionZ.setTargetAtTime(z, now, 0.08);
+    tgt(v.pan.positionX, x, 0.08); tgt(v.pan.positionY, 0, 0.08); tgt(v.pan.positionZ, earZ(z, d), 0.08);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
-    v.lp.frequency.setTargetAtTime(Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * Math.pow(0.4, back)), now, 0.08);
+    tgt(v.lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.08);
   }
   // кто сейчас говорит - по уровню звука (для «музыка уступает» и подсветки на радаре)
   function tick() {
@@ -2550,102 +2679,396 @@ const CALL = (() => {
       box.appendChild(b);
     }
   }
-  return { init, applyLang, applyPos, speaking, talking, current, panelHtml, bindPanel, render };
+  return { init, applyLang, applyPos, speaking, talking, current, panelHtml, bindPanel, render, active: () => !!room || !!demo, select: k => { sel = k; } };
 })();
 
 // ======================================================================
-//  Звук вкладки браузера (только Chrome и Edge на компьютере).
-//  Голос - ИИ из соседней вкладки (Claude, ChatGPT, Gemini) садится на место попутчика.
-//  Фон - любой звук вкладки (YouTube и т.п.) как второй источник в плеере.
+//  Голос ИИ из вкладки браузера (только Chrome и Edge на компьютере).
+//  Открываешь Claude, ChatGPT или Gemini в соседней вкладке - голос садится на место попутчика.
 // ======================================================================
 const TABT = {
-  ru: { voice:'Голос из вкладки (Claude, ChatGPT...)', voiceOff:'Отключить голос вкладки', bg:'▣ Звук вкладки', music:'♪ Музыка', tab:'▣ Вкладка',
+  ru: { voice:'Голос из вкладки (Claude, ChatGPT...)', voiceOff:'Отключить голос вкладки',
     noAudio:'Звук не пришёл - в окне выбора отметьте «Поделиться звуком вкладки»', fail:'Вкладка не подключилась: ' },
-  en: { voice:'Voice from a tab (Claude, ChatGPT...)', voiceOff:'Disconnect tab voice', bg:'▣ Tab sound', music:'♪ Music', tab:'▣ Tab',
+  en: { voice:'Voice from a tab (Claude, ChatGPT...)', voiceOff:'Disconnect tab voice',
     noAudio:'No sound came through - tick «Share tab audio» in the picker', fail:'The tab did not connect: ' }
 };
 const TAB = (() => {
   const D = () => TABT[lang] || (lang === 'uk' || lang === 'be' ? TABT.ru : TABT.en);
   const tt = k => (D()[k] !== undefined ? D()[k] : TABT.en[k]);
   const can = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) && !/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-  const slot = { voice: null, bg: null };
-  let pcur = 'music', aiBtn = null, row = null;
-  const posOf = kind => kind === 'voice' ? livePosOf(SRCS.ai) : duckedPos(SRCS.tab);
-
-  async function start(kind) {
-    if (slot[kind]) return;
+  let voice = null, aiBtn = null;
+  // общее окно «Поделиться вкладкой»: звук вкладки приходит потоком, картинка не нужна
+  async function grab() {
     initAudio(); await ac.resume();
     let stream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: { suppressLocalAudioPlayback: true },
         preferCurrentTab: false, selfBrowserSurface: 'exclude', systemAudio: 'exclude', surfaceSwitching: 'include' });
-    } catch (e) { if (e.name !== 'NotAllowedError') toast(tt('fail') + e.name); return; }
-    stream.getVideoTracks().forEach(t => t.stop()); // картинка не нужна, только звук
-    const tr = stream.getAudioTracks()[0];
-    if (!tr) { toast(tt('noAudio')); return; }
+    } catch (e) { if (e.name !== 'NotAllowedError') toast(tt('fail') + e.name); return null; }
+    stream.getVideoTracks().forEach(t => t.stop());
+    if (!stream.getAudioTracks()[0]) { toast(tt('noAudio')); return null; }
+    return stream;
+  }
+  async function startVoice() {
+    if (voice) return;
+    const stream = await grab(); if (!stream) return;
     const s = { stream, lastVoice: 0 };
     s.src = ac.createMediaStreamSource(stream);
     s.lp = new BiquadFilterNode(ac, { type: 'lowpass', frequency: 20000 });
     s.pan = new PannerNode(ac, { panningModel: 'HRTF', distanceModel: 'inverse', refDistance: 1, rolloffFactor: 1 });
     s.an = new AnalyserNode(ac, { fftSize: 512 }); s.arr = new Float32Array(512);
-    s.src.connect(s.an); s.src.connect(s.lp).connect(s.pan).connect(kind === 'bg' ? duckG : ac.destination);
-    tr.onended = () => stop(kind);
-    slot[kind] = s;
-    if (kind === 'bg') pcur = 'tab';
-    applyPos(kind); refresh();
+    s.src.connect(s.an); s.src.connect(s.lp).connect(s.pan).connect(ac.destination);
+    stream.getAudioTracks()[0].onended = stopVoice;
+    voice = s; applyPos(); paint(); requestDraw();
   }
-  function stop(kind) {
-    const s = slot[kind]; if (!s) return;
-    s.stream.getTracks().forEach(t => t.stop());
-    s.src.disconnect(); s.pan.disconnect();
-    slot[kind] = null;
-    if (kind === 'bg') pcur = 'music';
-    refresh();
+  function stopVoice() {
+    if (!voice) return;
+    voice.stream.getTracks().forEach(t => t.stop());
+    voice.src.disconnect(); voice.pan.disconnect(); voice = null;
+    paint(); requestDraw();
   }
-  function applyPos(kind) {
-    const s = slot[kind]; if (!s) return;
-    const p = posOf(kind), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
-    s.pan.positionX.setTargetAtTime(x, now, 0.06); s.pan.positionY.setTargetAtTime(0, now, 0.06); s.pan.positionZ.setTargetAtTime(z, now, 0.06);
+  function applyPos() {
+    if (!voice) return;
+    const p = livePosOf(SRCS.ai), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
+    tgt(voice.pan.positionX, x, 0.06); tgt(voice.pan.positionY, 0, 0.06); tgt(voice.pan.positionZ, earZ(z, d), 0.06);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
-    s.lp.frequency.setTargetAtTime(Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * Math.pow(0.45, back)), now, 0.06);
+    tgt(voice.lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.06);
   }
   setInterval(() => {
-    const v = slot.voice;
-    if (v) { v.an.getFloatTimeDomainData(v.arr); let m = 0; for (const x of v.arr) m = Math.max(m, Math.abs(x)); if (m > 0.04) v.lastVoice = performance.now(); }
-    applyPos('voice'); applyPos('bg');
+    if (!voice) return;
+    voice.an.getFloatTimeDomainData(voice.arr); let m = 0; for (const x of voice.arr) m = Math.max(m, Math.abs(x));
+    if (m > 0.04) voice.lastVoice = performance.now();
+    applyPos();
   }, 100);
-  const speaking = () => !!slot.voice && performance.now() - slot.voice.lastVoice < 700;
-  const active = kind => !!slot[kind];
-  function refresh() { if (MODE === 'player') setMode('player'); else { render(); requestDraw(); } paint(); }
-  const playerSrc = () => (pcur === 'tab' && slot.bg) ? SRCS.tab : SRCS.music;
-
-  // кнопки: в панели попутчика и строка выбора над плеером (только где это работает)
-  function mount(aiPanel, tabsEl) {
-    if (!can) { aiBtn = row = null; return; }
+  const speaking = () => !!voice && performance.now() - voice.lastVoice < 700;
+  function mount(aiPanel) {
+    if (!can) return;
     aiBtn = document.createElement('button'); aiBtn.className = 'wb';
-    aiBtn.addEventListener('click', () => slot.voice ? stop('voice') : start('voice'));
-    aiPanel.appendChild(aiBtn);
-    row = document.createElement('div'); row.className = 'wtabsrc';
-    tabsEl.after(row);
+    aiBtn.addEventListener('click', () => voice ? stopVoice() : startVoice());
+    aiPanel.appendChild(aiBtn); paint();
+  }
+  function paint() { if (aiBtn) { aiBtn.textContent = voice ? tt('voiceOff') : tt('voice'); aiBtn.classList.toggle('on', !!voice); } }
+  return { can, grab, applyPos, speaking, active: () => !!voice, mount, paint };
+})();
+
+// ======================================================================
+//  Ещё звуки (слои) - до четырёх источников поверх главного плеера: радио, файл, вкладка.
+//  У каждого свой цвет, своя точка на радаре и своя орбита. Это фон: когда говорят, они отходят.
+// ======================================================================
+const LAYT = {
+  ru: { main:'Плеер', radio:'+ Радио', file:'+ Файл', tab:'+ Вкладка', pickSt:'Выберите станцию',
+    noSt:'Нет станций - добавьте их в окне «Радио» плеера', max:'Больше четырёх звуков не добавить', remove:'Убрать',
+    no3d:'Станция не разрешает 3D - звучит обычным стерео', fail:'Не играет: ', tabName:'Вкладка',
+    addTitle:'Добавить звук', nextName:'Место первого собеседника', aiHint:'Разговором управляет вкладка «Попутчик» наверху, местом - радар и орбиты', callHint:'Звонком управляет вкладка «Звонок» наверху, местом голоса - радар и орбиты' },
+  en: { main:'Player', radio:'+ Radio', file:'+ File', tab:'+ Tab', pickSt:'Choose a station',
+    noSt:'No stations - add them in the player\'s «Radio» window', max:'No more than four sounds', remove:'Remove',
+    no3d:'The station does not allow 3D - plays as plain stereo', fail:'Does not play: ', tabName:'Tab',
+    addTitle:'Add a sound', nextName:'Place of the first caller', aiHint:'The «Companion» tab above controls the talk, the radar and orbits control its place', callHint:'The «Call» tab above controls the call, the radar and orbits control the voice\'s place' }
+};
+const LAY = (() => {
+  const D = () => LAYT[lang] || (lang === 'uk' || lang === 'be' ? LAYT.ru : LAYT.en);
+  const lt = k => (D()[k] !== undefined ? D()[k] : LAYT.en[k]);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const COLORS = ['#6ea8ff', '#ff5fb0', '#ffd23d', '#3fd9c4'], LABELS = ['A', 'B', 'C', 'D'], MAX = 4;
+  const SPOTS = [{ x: -0.45, y: 0.4 }, { x: 0.45, y: 0.4 }, { x: 0, y: -0.75 }, { x: 0, y: 0.85 }];
+  const list = []; let sel = 'music', picking = false, n = 0;
+  const save = () => store.set('pp_layers', list.filter(c => c.url).map(c => ({ slot: c.slot, name: c.name, url: c.url, pos: c.pos, vol: c.vol })));
+
+  function make(kind, name, url, pos, vol, slot) {
+    const used = new Set(list.map(c => c.slot));
+    if (slot === undefined || used.has(slot)) { slot = 0; while (used.has(slot)) slot++; }
+    const c = { key: 'h' + (++n), layer: true, bg: true, kind, name, url: url || null, slot, color: COLORS[slot], label: LABELS[slot],
+      vol: vol === undefined ? 0.8 : vol, pos: pos ? { ...pos } : { ...SPOTS[slot] },
+      O: { shape: 'circle', period: 20, size: 0.55, dir: 1, on: false, u: 0, last: 0, trail: [] },
+      ph: [Math.random() * 6.28, Math.random() * 6.28, Math.random() * 6.28], posKey: null, orbKey: null, playing: false, want: false, muted: false };
+    list.push(c); list.sort((a, b) => a.slot - b.slot); SRCS[c.key] = c; sel = c.key;
+    return c;
+  }
+  function wire(c, srcNode) {
+    c.g = new GainNode(ac, { gain: c.vol });
+    c.lp = new BiquadFilterNode(ac, { type: 'lowpass', frequency: 20000 });
+    c.pan = new PannerNode(ac, { panningModel: 'HRTF', distanceModel: 'inverse', refDistance: 1, rolloffFactor: 1 });
+    srcNode.connect(c.g).connect(c.lp).connect(c.pan).connect(duckG);
+    c.srcNode = srcNode; applyPos(c);
+  }
+  function applyPos(c) {
+    if (!c || !c.pan) return;
+    const p = duckedPos(c), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
+    tgt(c.pan.positionX, x, 0.08); tgt(c.pan.positionY, 0, 0.08); tgt(c.pan.positionZ, earZ(z, d), 0.08);
+    const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
+    tgt(c.lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.08);
+  }
+  // раз в 80 мс (вызывается из общего таймера плеера): пересчитать места играющих слоёв
+  function tick(moving) { for (const c of list) if (c.playing && !c.O.on && (moving || S.live)) applyPos(c); }
+  const anyPlaying = () => list.some(c => c.playing);
+
+  // радио: сначала с разрешением на 3D; станция не дала - играем обычным стерео
+  function startRadio(c) {
+    initAudio(); ac.resume();
+    c.el = new Audio(); c.el.crossOrigin = 'anonymous'; c.el.preload = 'none';
+    wire(c, ac.createMediaElementSource(c.el));
+    let started = false; c.want = true;
+    c.el.onplaying = () => { started = true; c.playing = true; paint(); requestDraw(); };
+    c.el.onpause = () => { c.playing = false; paint(); };
+    let tries = 0;
+    c.el.onerror = () => {
+      if (started) { setTimeout(() => { if (c.el && c.want && c.el.paused) { c.el.src = c.url; c.el.play().catch(() => {}); } }, 2000); return; }
+      if (tries < 1) { tries++; setTimeout(() => { if (c.el && c.want) { c.el.src = c.url; c.el.play().catch(() => {}); } }, 1500); return; }
+      c.el.onerror = null; c.el.removeAttribute('src');
+      c.plain = new Audio(c.url); c.plain.volume = c.vol;
+      c.plain.onplaying = () => { c.playing = true; toast(lt('no3d')); paint(); };
+      c.plain.onpause = () => { c.playing = false; paint(); };
+      c.plain.onerror = () => { c.playing = false; toast(lt('fail') + c.name); paint(); };
+      c.plain.play().catch(() => {});
+    };
+    c.el.src = c.url; c.el.play().catch(() => {});
+  }
+  const media = c => c.plain || c.el;
+  function toggle(c) {
+    initAudio(); ac.resume();
+    if (c.kind === 'tab') { c.muted = !c.muted; c.g.gain.setTargetAtTime(c.muted ? 0 : c.vol, ac.currentTime, 0.05); c.playing = !c.muted; paint(); requestDraw(); return; }
+    if (!c.el) { if (c.url) startRadio(c); return; }
+    const m = media(c);
+    if (m.paused) { c.want = true; if (c.kind === 'radio' && !c.plain) m.src = c.url; m.play().catch(() => {}); }
+    else { c.want = false; m.pause(); if (c.kind === 'radio') { m.removeAttribute('src'); m.load(); } }
+  }
+  function remove(c) {
+    c.want = false;
+    const m = media(c); if (m) { m.pause(); m.removeAttribute('src'); m.load(); }
+    if (c.blob) URL.revokeObjectURL(c.blob);
+    if (c.stream) c.stream.getTracks().forEach(t => t.stop());
+    if (c.srcNode) c.srcNode.disconnect(); if (c.pan) c.pan.disconnect();
+    if (c.O.on) { c.O.on = false; }
+    list.splice(list.indexOf(c), 1); delete SRCS[c.key];
+    if (sel === c.key) sel = 'music';
+    save(); build(); if (MODE === 'player') setMode('player'); else requestDraw();
+  }
+  function after() { build(); if (MODE === 'player') setMode('player'); else requestDraw(); }
+  function addFile(f) {
+    if (list.length >= MAX) { toast(lt('max')); return; }
+    initAudio(); ac.resume();
+    const c = make('file', f.name.replace(/\.[^.]+$/, ''));
+    c.blob = URL.createObjectURL(f); c.el = new Audio(c.blob); c.el.loop = true; c.want = true;
+    wire(c, ac.createMediaElementSource(c.el));
+    c.el.onplaying = () => { c.playing = true; paint(); requestDraw(); };
+    c.el.onpause = () => { c.playing = false; paint(); };
+    c.el.play().catch(() => {}); after();
+  }
+  function addRadio(st) {
+    if (list.length >= MAX) { toast(lt('max')); return; }
+    picking = false;
+    addOpen = false; const c = make('radio', st.name || st.url, st.url); save(); after(); startRadio(c);
+  }
+  async function addTab() {
+    if (list.length >= MAX) { toast(lt('max')); return; }
+    const stream = await TAB.grab(); if (!stream) return;
+    const c = make('tab', lt('tabName'));
+    c.stream = stream; c.playing = true;
+    wire(c, ac.createMediaStreamSource(stream));
+    stream.getAudioTracks()[0].onended = () => { if (list.includes(c)) remove(c); };
+    after();
+  }
+
+  const playerSrc = () => (sel !== 'music' && SRCS[sel] && SRCS[sel].layer) ? SRCS[sel] : SRCS.music;
+
+  // ---------- сцена: цветные кружки источников над радаром, управление выбранным - под ним ----------
+  let chipsEl = null, selEl = null, fileIn = null, addOpen = false, chipSig = '', selSig = '';
+  const nameOf = s => s.key === 'music' ? (S.radio ? S.radio.name : t('tabPlayer')) : s.layer ? s.name : s.key === 'ai' ? t('aiLink') : s.key === 'next' ? lt('nextName') : (s.name || '');
+  const tagOf = s => s.key === 'music' ? '♪' : s.key === 'ai' ? 'AI' : s.key === 'next' ? '•' : s.label;
+  const colorOf = s => s.key === 'music' ? 'var(--r-acc, #3ef0ff)' : s.key === 'next' ? '#ffb86b' : s.color;
+  const isOn = s => s.key === 'music' ? !M().paused : s.layer ? s.playing : true;
+  function items() {
+    const a = [SRCS.music, ...list];
+    if (AI.active() || TAB.active()) a.push(SRCS.ai);
+    for (const s of Object.values(SRCS)) if (s.lastVoice !== undefined) a.push(s);
+    return a;
+  }
+  // выбрать источник: плеер и дополнительные - во вкладке «Плеер», попутчик и собеседники - в своих вкладках
+  function selectSource(s) {
+    if (s.key === 'music' || s.layer) { sel = s.key; setMode('player'); }
+    else if (s.key === 'ai') setMode('ai');
+    else if (s.lastVoice !== undefined) { CALL.select(s.key); setMode('call'); }
     paint();
   }
-  function paint() {
-    if (aiBtn) { aiBtn.textContent = slot.voice ? tt('voiceOff') : tt('voice'); aiBtn.classList.toggle('on', !!slot.voice); }
-    if (!row) return;
-    row.innerHTML = '';
-    const b = (txt, on, fn) => { const e = document.createElement('button'); e.className = 'wb' + (on ? ' on' : ''); e.textContent = txt; e.addEventListener('click', fn); row.appendChild(e); };
-    if (!slot.bg) { row.classList.add('one'); b(tt('bg'), false, () => start('bg')); return; }
-    row.classList.remove('one');
-    b(tt('music'), pcur === 'music', () => { pcur = 'music'; refresh(); });
-    b(tt('tab'), pcur === 'tab', () => { pcur = 'tab'; refresh(); });
-    b('✕', false, () => stop('bg'));
+  function mountScene(root) {
+    chipsEl = selEl = null; chipSig = selSig = '';
+    const radarEl = root.querySelector('[data-widget="radar"]'); if (!radarEl) return;
+    const anchor = radarEl.closest('.rbox, .face') || radarEl;
+    chipsEl = document.createElement('div'); chipsEl.className = 'wscene-src'; anchor.before(chipsEl);
+    selEl = document.createElement('div'); selEl.className = 'wscene-sel'; anchor.after(selEl);
+    // орбиты переезжают под радар: они относятся к выбранному источнику, а не к плееру
+    const ow = root.querySelector('[data-widget="orbit"]');
+    if (ow) { const box = ow.parentElement; selEl.after(ow); if (box && box !== root && !box.contains(radarEl) && !box.classList.contains('hud') && !box.classList.contains('wrap')) box.remove(); }
+    fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'audio/*'; fileIn.className = 'hidden';
+    fileIn.addEventListener('change', () => { const f = fileIn.files[0]; fileIn.value = ''; if (f) addFile(f); });
+    chipsEl.after(fileIn);
+    paint();
   }
-  return { can, start, stop, applyPos, speaking, active, mount, paint, playerSrc };
+  function buildChips(it) {
+    chipsEl.innerHTML = '';
+    const row = document.createElement('div'); row.className = 'wsc-row';
+    for (const s of it) {
+      const b = document.createElement('button'); b.className = 'wsc'; b.dataset.k = s.key; b.style.setProperty('--c', colorOf(s));
+      b.textContent = tagOf(s); b.title = nameOf(s); b.setAttribute('aria-label', nameOf(s));
+      b.addEventListener('click', () => selectSource(s));
+      row.appendChild(b);
+    }
+    if (list.length < MAX) {
+      const p = document.createElement('button'); p.className = 'wsc wsc-add' + (addOpen ? ' sel' : ''); p.textContent = '+';
+      p.title = lt('addTitle'); p.setAttribute('aria-label', lt('addTitle'));
+      p.addEventListener('click', () => { addOpen = !addOpen; picking = false; paint(); });
+      row.appendChild(p);
+    }
+    chipsEl.appendChild(row);
+    if (!addOpen) return;
+    const add = document.createElement('div'); add.className = 'wsc-add-row';
+    const btn = (box, txt, fn, on) => { const b = document.createElement('button'); b.className = 'wb' + (on ? ' on' : ''); b.textContent = txt; b.addEventListener('click', fn); box.appendChild(b); };
+    btn(add, lt('radio'), () => { picking = !picking; paint(); }, picking);
+    btn(add, lt('file'), () => { addOpen = false; paint(); fileIn.click(); });
+    if (TAB.can) btn(add, lt('tab'), () => { addOpen = false; paint(); addTab(); });
+    add.style.gridTemplateColumns = 'repeat(' + add.children.length + ', minmax(0, 1fr))';
+    chipsEl.appendChild(add);
+    if (picking) {
+      const pk = document.createElement('div'); pk.className = 'wsc-pick';
+      if (!stations.length) { const p = document.createElement('p'); p.className = 'wss-hint'; p.textContent = lt('noSt'); pk.appendChild(p); }
+      for (const st of stations) btn(pk, st.name || st.url, () => { addOpen = false; addRadio(st); });
+      chipsEl.appendChild(pk);
+    }
+  }
+  function paintSel() {
+    if (!selEl) return;
+    const s = CUR, sig = s.key + '|' + nameOf(s) + '|' + lang;
+    if (sig !== selSig) {
+      selSig = sig; selEl.style.setProperty('--c', colorOf(s)); selEl.innerHTML = '';
+      const head = document.createElement('div'); head.className = 'wss-head';
+      head.innerHTML = '<b>' + esc(tagOf(s)) + '</b><span>' + esc(nameOf(s)) + '</span>';
+      selEl.appendChild(head);
+      if (s.key === 'music') {
+        const pp = document.createElement('button'); pp.className = 'wb wss-pp'; pp.addEventListener('click', () => act('play')); head.appendChild(pp);
+      } else if (s.layer) {
+        const ctl = document.createElement('div'); ctl.className = 'wss-ctl';
+        ctl.innerHTML = '<button class="wb wss-pp"></button><input type="range" class="w-seek wss-vol" min="0" max="100" value="' + Math.round(s.vol * 100) + '"><button class="wb wss-x" aria-label="' + esc(lt('remove')) + '">✕</button>';
+        ctl.querySelector('.wss-pp').addEventListener('click', () => toggle(s));
+        const v = ctl.querySelector('.wss-vol'); v.style.setProperty('--p', v.value + '%');
+        v.addEventListener('input', e => { s.vol = +e.target.value / 100; v.style.setProperty('--p', e.target.value + '%'); if (s.g && !s.muted) s.g.gain.setTargetAtTime(s.vol, ac.currentTime, 0.05); if (s.plain) s.plain.volume = s.vol; save(); });
+        ctl.querySelector('.wss-x').addEventListener('click', () => remove(s));
+        selEl.appendChild(ctl);
+      } else {
+        const h = document.createElement('div'); h.className = 'wss-hint'; h.textContent = lt(s.key === 'ai' ? 'aiHint' : 'callHint'); selEl.appendChild(h);
+      }
+    }
+    const pp = selEl.querySelector('.wss-pp'); if (pp) pp.textContent = isOn(s) ? '❚❚' : '▶';
+  }
+  function paint() {
+    if (!chipsEl) return;
+    const it = items(), sig = it.map(s => s.key + tagOf(s) + colorOf(s) + nameOf(s)).join('|') + (addOpen ? '+' : '') + (picking ? 'p' : '') + lang + stations.length + list.length;
+    if (sig !== chipSig) { chipSig = sig; buildChips(it); }
+    chipsEl.querySelectorAll('.wsc[data-k]').forEach(b => { const s = SRCS[b.dataset.k]; if (!s) return; b.classList.toggle('sel', s === CUR); b.classList.toggle('play', isOn(s)); });
+    paintSel();
+  }
+  setInterval(() => { if (!document.hidden) paint(); }, 400);
+  const build = () => { chipSig = selSig = ''; paint(); };
+  const applyLang = () => build();
+  function init() {
+    for (const c of store.get('pp_layers', []).slice(0, MAX)) make('radio', c.name, c.url, c.pos, c.vol, c.slot);
+    sel = 'music';
+  }
+  return { init, applyLang, applyPos, tick, anyPlaying, playerSrc, mountScene, selectSource, nameOf, paint, build, save };
+})();
+
+// цветные точки на вкладках: источник работает - у кнопки вкладки горит его цвет, тот же, что на радаре
+HOOKS.paint.push(() => {
+  const live = { player: !M().paused || LAY.anyPlaying(), ai: AI.active() || TAB.active(), call: CALL.active() };
+  const col = { player: 'var(--r-acc, #3ef0ff)', ai: '#b07cff', call: '#ffb86b' };
+  root.querySelectorAll('.wtabs [data-mode]').forEach(b => { b.classList.toggle('live', !!live[b.dataset.mode]); b.style.setProperty('--dot', col[b.dataset.mode]); });
+  root.style.setProperty('--cur', CUR.key === 'music' ? 'var(--r-acc, #3ef0ff)' : CUR.key === 'next' ? '#ffb86b' : (CUR.color || 'var(--r-acc, #3ef0ff)'));
+  root.classList.toggle('detail', !!S.detail);
+  LAY.paint();
+});
+
+
+// ======================================================================
+//  Настройка слуха: «спереди - сзади».
+//  Встроенный в браузер расчёт 3D-звука один на всех, а у людей разная форма ушей и головы,
+//  поэтому «сзади» у многих звучит как «спереди». Подстраиваем то, что можем: контраст сзади.
+// ======================================================================
+const EARUI = (() => {
+  const q = id => document.getElementById(id);
+  let demoTimer = null, phase = 0, nbuf = null, quiz = null;
+  const noise = () => {
+    if (!nbuf) { nbuf = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.5), ac.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    return nbuf;
+  };
+  // короткий шумовой щелчок: по такому звуку направление слышно лучше всего
+  function burst(back) {
+    initAudio(); ac.resume();
+    const D = 1.2, now = ac.currentTime + 0.02, k = Math.min(1, Math.max(0, (D - 0.7) / (METERS - 0.7)));
+    const src = new AudioBufferSourceNode(ac, { buffer: noise() });
+    const lp = new BiquadFilterNode(ac, { type: 'lowpass', frequency: Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back ? 1 : 0)) });
+    const pan = new PannerNode(ac, { panningModel: 'HRTF', distanceModel: 'inverse', refDistance: 1, rolloffFactor: 1, positionX: 0, positionY: 0, positionZ: earZ(back ? D : -D, D) });
+    const g = new GainNode(ac, { gain: 0 });
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(0.5, now + 0.01); g.gain.setValueAtTime(0.5, now + 0.28); g.gain.linearRampToValueAtTime(0, now + 0.34);
+    src.connect(lp).connect(pan).connect(g).connect(ac.destination);
+    src.start(now); src.stop(now + 0.4);
+  }
+  function demoStart() {
+    demoStop(); quizStop(); phase = 0;
+    const tick = () => { const back = phase % 2 === 1; burst(back); q('earNow').textContent = t(back ? 'earBack' : 'earFront'); phase++; };
+    tick(); demoTimer = setInterval(tick, 1100);
+    q('earPlay').textContent = t('earStop'); q('earPlay').classList.add('on');
+  }
+  function demoStop() {
+    clearInterval(demoTimer); demoTimer = null;
+    if (q('earNow')) q('earNow').textContent = '';
+    if (q('earPlay')) { q('earPlay').textContent = t('earPlay'); q('earPlay').classList.remove('on'); }
+  }
+  // слепая проверка: 10 сигналов в случайном порядке, нужно сказать, откуда звук
+  function quizStart() {
+    demoStop(); quiz = { n: 0, ok: 0, cur: null };
+    q('earQuizBox').classList.remove('hidden'); q('earQuiz').classList.add('hidden'); q('earRes').textContent = ''; next();
+  }
+  function quizStop() { quiz = null; if (q('earQuizBox')) { q('earQuizBox').classList.add('hidden'); q('earQuiz').classList.remove('hidden'); q('earQprog').textContent = ''; } }
+  function next() {
+    if (!quiz) return;
+    if (quiz.n >= 10) { finish(); return; }
+    quiz.cur = Math.random() < 0.5; quiz.n++; q('earQprog').textContent = quiz.n + ' / 10'; q('earRes').textContent = '';
+    setTimeout(() => { if (quiz && quiz.cur !== null) burst(quiz.cur); }, 350);
+  }
+  function answer(back) {
+    if (!quiz || quiz.cur === null) return;
+    const ok = back === quiz.cur; if (ok) quiz.ok++;
+    q('earRes').textContent = ok ? '✓' : '✗ ' + t(quiz.cur ? 'earWasBack' : 'earWasFront');
+    quiz.cur = null; setTimeout(next, 900);
+  }
+  function finish() {
+    const ok = quiz.ok; quizStop();
+    q('earRes').textContent = t('earScore').replace('{n}', ok) + ' ' + t(ok >= 8 ? 'earGood' : 'earMore');
+  }
+  function pct() { const sl = q('earSlider'); sl.style.setProperty('--p', sl.value + '%'); q('earVal').textContent = sl.value + '%'; }
+  function setStrength(v) {
+    EAR.s = v / 100; store.set('pp_ear', EAR.s); q('earSlider').value = v; pct();
+    Object.values(SRCS).forEach(src => { try { applySrc(src); } catch (e) {} });
+  }
+  function init() {
+    q('earSlider').value = Math.round(EAR.s * 100); pct(); q('earPlay').textContent = t('earPlay');
+    q('earSlider').addEventListener('input', () => setStrength(+q('earSlider').value));
+    q('earPlay').addEventListener('click', () => demoTimer ? demoStop() : demoStart());
+    q('earQuiz').addEventListener('click', quizStart);
+    q('earAns0').addEventListener('click', () => answer(false));
+    q('earAns1').addEventListener('click', () => answer(true));
+    q('earAgain').addEventListener('click', () => { if (quiz && quiz.cur !== null) burst(quiz.cur); });
+    q('earReset').addEventListener('click', () => setStrength(45));
+    q('earFold').addEventListener('toggle', () => { if (!q('earFold').open) { demoStop(); quizStop(); } });
+    q('menuClose').addEventListener('click', () => { demoStop(); quizStop(); });
+  }
+  return { init };
 })();
 
 // ---------------- Старт ----------------
 makeMenuWidgets();
+EARUI.init();
 AI.init();
+LAY.init();
 useSkin(skinId);
 CALL.init();
 
