@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wisp - студия звуковых сцен</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2E3438;--soft:#7E888D;--fog:#DCE2E3;--panel:rgba(255,255,255,.94);--acc:#14A9A6}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#F6F8F8;color:var(--ink);font-family:Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+body.drag canvas{cursor:grabbing}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+#panel{position:fixed;top:0;right:0;bottom:0;width:360px;background:var(--panel);border-left:1px solid var(--fog);display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 14px);gap:10px;backdrop-filter:blur(6px);z-index:3}
+body.hide #panel{display:none}
+#panel h1{font-size:1.05rem;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#panel h1 small{font-weight:400;color:var(--soft);font-size:.72rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.b{min-height:44px;border:1px solid var(--fog);background:#fff;border-radius:12px;padding:0 10px;font-weight:600;font-size:.88rem}
+.b.on{border-color:var(--acc);color:var(--acc)}
+.b.main{background:var(--ink);border-color:var(--ink);color:#fff}
+.b.main.on{background:#c0392b;border-color:#c0392b;color:#fff}
+#list{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+.card{border:1px solid var(--fog);border-left:5px solid var(--c);border-radius:12px;background:#fff;padding:6px 8px;display:flex;flex-direction:column;gap:6px}
+.card.sel{box-shadow:0 0 0 2px var(--c) inset}
+.card.play{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 14%,#fff),#fff)}
+.r1{display:grid;grid-template-columns:52px minmax(0,1fr) 40px 44px;gap:8px;align-items:center}
+.vc{width:40px;height:40px;border-radius:10px;border:1px solid var(--fog);background:#fff;font-size:1rem;opacity:.45}
+.vc.on{opacity:1;border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
+.r2{display:grid;grid-template-columns:minmax(0,1fr) 62px minmax(0,1.1fr) 36px;gap:6px;align-items:center}
+.num{width:52px;height:40px;border:1px solid var(--fog);border-radius:10px;text-align:center;font-weight:600;font-size:1rem;background:#fff}
+.nm{font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.nm small{display:block;color:var(--soft);font-size:.7rem}
+.pp{width:44px;height:40px;border-radius:10px;border:1px solid var(--fog);background:#fff;font-size:1rem}
+.card.play .pp{border-color:var(--c);color:var(--c)}
+.gap,.mot{height:36px;border:1px solid var(--fog);border-radius:10px;background:#fff;font-size:.78rem;padding:0 6px;min-width:0;width:100%}
+.gap{text-align:center}
+.x{width:36px;height:36px;border-radius:50%;border:1px solid var(--fog);background:#fff;color:var(--soft)}
+input[type=range]{width:100%;accent-color:var(--c, var(--acc));min-width:0}
+.lbl{font-size:.68rem;color:var(--soft);letter-spacing:.5px}
+.keys{font-size:.72rem;color:var(--soft);line-height:1.5}
+.keys b{color:var(--ink);font-weight:600}
+#now{font-size:.8rem;color:var(--acc);min-height:1.2em}
+#empty{position:fixed;left:0;right:360px;top:12vh;text-align:center;padding:0 24px;pointer-events:none;color:var(--soft);font-size:1rem;line-height:1.5;z-index:2}
+#empty b{display:block;color:var(--ink);font-weight:500;font-size:1.3rem;margin-bottom:6px}
+body.hide #empty{right:0}
+#show{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:4;display:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--fog);background:rgba(255,255,255,.7);color:var(--soft)}
+body.hide #show{display:block;opacity:.25}
+body.hide #show:hover{opacity:1}
+@media (max-width:720px){
+  #panel{top:auto;left:0;width:auto;height:48vh;border-left:none;border-top:1px solid var(--fog);border-radius:16px 16px 0 0}
+  #empty{right:0;top:8vh}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="empty"><b data-t="emptyH"></b><span data-t="emptyP"></span></div>
+<button id="show" aria-label="panel">☰</button>
+<div id="panel">
+  <h1><span data-t="title"></span><small>Wisp</small></h1>
+  <div class="row"><button class="b" id="add" data-t="add"></button><button class="b main" id="run" data-t="run"></button></div>
+  <div id="now"></div>
+  <div id="list"></div>
+  <div class="row"><button class="b" id="labels" data-t="labels"></button><button class="b" id="hide" data-t="hide"></button></div>
+  <div class="row"><button class="b" id="stop" data-t="stopAll"></button><button class="b" id="clear" data-t="clear"></button></div>
+  <p class="keys" id="keys"></p>
+  <input type="file" id="files" accept="audio/*" multiple hidden>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+// ---------- язык ----------
+const LANG = (() => { const ls = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en']; return ls.some(l => /^(ru|uk|be)/i.test(l)) ? 'ru' : 'en'; })();
+document.documentElement.lang = LANG;
+const TX = { ru: { title:'Студия звуковых сцен', add:'+ Звуки', run:'▶ Сценарий', runStop:'■ Стоп', labels:'Подписи', hide:'Скрыть панель', stopAll:'Тишина', clear:'Очистить',
+    emptyH:'Соберите звуковую сцену', emptyP:'Добавьте свои файлы (фразы, шаги, шум) - они встанут шарами вокруг головы. Перетаскивайте шары, нажмите на шар - он прозвучит. Номера задают порядок для сценария.',
+    voice:'Голос: пока он звучит, остальные звуки отходят назад и становятся тише', still:'стоит', circle:'круг', pass:'мимо →', passL:'мимо ←', gap:'пауза, с', vol:'громк.', now:'Сейчас: ', clearQ:'Убрать все звуки из сцены?', badFile:'Не удалось открыть: ',
+    keys:'<b>1-9</b> - звук с этим номером · <b>Пробел</b> - сценарий · <b>Esc</b> - тишина · <b>H</b> - спрятать панель для записи · <b>L</b> - подписи' },
+  en: { title:'Sound scene studio', add:'+ Sounds', run:'▶ Scenario', runStop:'■ Stop', labels:'Labels', hide:'Hide panel', stopAll:'Silence', clear:'Clear',
+    emptyH:'Build a sound scene', emptyP:'Add your own files (phrases, steps, noise) - they become orbs around the head. Drag the orbs, tap an orb to play it. Numbers set the order for the scenario.',
+    voice:'Voice: while it plays, the other sounds step back and get quieter', still:'still', circle:'circle', pass:'pass →', passL:'pass ←', gap:'pause, s', vol:'vol.', now:'Now: ', clearQ:'Remove all sounds from the scene?', badFile:'Could not open: ',
+    keys:'<b>1-9</b> - sound with that number · <b>Space</b> - scenario · <b>Esc</b> - silence · <b>H</b> - hide panel for recording · <b>L</b> - labels' } }[LANG];
+document.querySelectorAll('[data-t]').forEach(el => el.textContent = TX[el.dataset.t]);
+$('keys').innerHTML = TX.keys;
+
+// ---------- звук ----------
+const COLORS = ['#14A9A6', '#D9962E', '#6F63E8', '#E05A7A', '#3B82F6', '#5BB36A', '#B062C9', '#E0703A', '#2E9BC4', '#9A8A2E'];
+const SPOTS = [{ x: 1.2, z: -0.3 }, { x: -1.2, z: -0.3 }, { x: 0, z: -1.6 }, { x: 1, z: 1 }, { x: -1, z: 1 }, { x: 0.35, z: 0.02 }, { x: -0.35, z: 0.02 }, { x: 0, z: -2.8 }, { x: 2.2, z: -1.2 }, { x: -2.2, z: -1.2 }];
+let ctx = null, master, revIn;
+function makeIR(sec) {
+  const sr = ctx.sampleRate, len = Math.floor(sr * sec), b = ctx.createBuffer(2, len, sr);
+  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); let lp = 0; for (let i = 0; i < len; i++) { const t = i / sr; lp += ((Math.random() * 2 - 1) - lp) * 0.35; d[i] = t < 0.008 ? 0 : lp * Math.exp(-t * 8) * 0.6; } }
+  return b;
+}
+function initAudio() {
+  if (ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -8; comp.knee.value = 6; comp.ratio.value = 10; comp.attack.value = 0.003; comp.release.value = 0.25;
+  comp.connect(ctx.destination);
+  master = ctx.createGain(); master.gain.value = 0.9; master.connect(comp);
+  revIn = ctx.createConvolver(); revIn.buffer = makeIR(0.8); revIn.connect(master);
+  const L = ctx.listener;
+  if (L.positionX) { L.positionX.value = 0; L.positionY.value = 0; L.positionZ.value = 0; L.forwardX.value = 0; L.forwardY.value = 0; L.forwardZ.value = -1; L.upX.value = 0; L.upY.value = 1; L.upZ.value = 0; }
+}
+const blocks = []; let nid = 0, sel = null, labels = true;
+function wire(b) {
+  b.g = new GainNode(ctx, { gain: b.vol });
+  b.lp = new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 20000, Q: 0.5 });
+  b.pan = new PannerNode(ctx, { panningModel: 'HRTF', distanceModel: 'inverse', refDistance: 0.6, rolloffFactor: 0.8, maxDistance: 50 });
+  b.send = new GainNode(ctx, { gain: 0 });
+  b.an = new AnalyserNode(ctx, { fftSize: 512 }); b.arr = new Uint8Array(512);
+  b.g.connect(b.lp).connect(b.pan).connect(master); b.g.connect(b.send).connect(revIn); b.g.connect(b.an);
+}
+// где звук сейчас: стоит, кружит или проходит мимо (за время звучания)
+function posNow(b, t) {
+  const p = b.pos;
+  if (!b.src) return p;
+  const el = Math.max(0, ctx.currentTime - b.t0), u = b.dur > 0 ? Math.min(1, el / b.dur) : 0;
+  if (b.mot === 'circle') { const r = Math.max(0.4, Math.hypot(p.x, p.z)), a = Math.atan2(p.x, -p.z) + el * Math.PI * 2 / 8; return { x: r * Math.sin(a), z: -r * Math.cos(a) }; }
+  if (b.mot === 'pass') return { x: -3 + 6 * u, z: p.z };
+  if (b.mot === 'passL') return { x: 3 - 6 * u, z: p.z };
+  return p;
+}
+let D = 0; // 0 - никто не говорит, 1 - звучит «голос»
+function ducked(b, p) {
+  if (b.duck || D < 0.005) return p;
+  const d = Math.hypot(p.x, p.z), a = d > 0.01 ? Math.atan2(p.x, -p.z) : Math.PI, nd = d + (Math.max(2.5, d) - d) * D;
+  return { x: nd * Math.sin(a), z: -nd * Math.cos(a) };
+}
+function applyPos(b) {
+  if (!b.pan) return;
+  const p = ducked(b, posNow(b)), d = Math.hypot(p.x, p.z), now = ctx.currentTime, back = d > 0.01 ? Math.max(0, p.z / d) : 0;
+  const gv = b.vol * (b.duck ? 1 : 1 - 0.55 * D); if (Math.abs((b._g ?? -1) - gv) > 0.002) { b._g = gv; b.g.gain.setTargetAtTime(gv, now, 0.05); }
+  b.pan.positionX.setTargetAtTime(p.x, now, 0.03); b.pan.positionY.setTargetAtTime(0, now, 0.03); b.pan.positionZ.setTargetAtTime(p.z, now, 0.03);
+  const k = Math.min(1, Math.max(0, (d - 0.7) / 2.8));
+  b.lp.frequency.setTargetAtTime(Math.max(2500, 20000 * Math.pow(0.25, k) * Math.pow(0.55, back)), now, 0.03);
+  b.send.gain.setTargetAtTime(0.25 * Math.min(1, Math.max(0.12, d / 2.5)), now, 0.05);
+  b.cur = p;
+}
+function play(b) {
+  initAudio(); ctx.resume();
+  if (!b.buf) return;
+  stopOne(b);
+  const s = new AudioBufferSourceNode(ctx, { buffer: b.buf }); s.connect(b.g);
+  b.src = s; b.t0 = ctx.currentTime; b.dur = b.buf.duration;
+  s.onended = () => { if (b.src === s) { b.src = null; paint(); } };
+  applyPos(b); s.start(); paint();
+}
+function stopOne(b) { if (b.src) { const s = b.src; b.src = null; try { s.stop(); } catch (e) {} } }
+function stopAll() { runStop(); blocks.forEach(stopOne); paint(); }
+
+// ---------- сценарий: звуки по номерам, каждый после окончания предыдущего плюс его пауза ----------
+let run = null;
+function runStart() {
+  initAudio(); ctx.resume();
+  const seq = blocks.filter(b => b.buf).sort((a, b) => (a.order - b.order) || (a.id - b.id));
+  if (!seq.length) return;
+  run = { seq, i: 0, timer: null };
+  const step = () => {
+    if (!run) return;
+    if (run.i >= run.seq.length) { runStop(); return; }
+    const b = run.seq[run.i++]; play(b); $('now').textContent = TX.now + b.order + ' · ' + b.name;
+    run.timer = setTimeout(step, (b.buf.duration + Math.max(0, b.gap)) * 1000);
+  };
+  step(); paint();
+}
+function runStop() { if (run) { clearTimeout(run.timer); run = null; } $('now').textContent = ''; paint(); }
+
+// ---------- хранение сцены в браузере (вместе с самими файлами) ----------
+let db = null;
+function dbOpen() { return new Promise(res => { try { const r = indexedDB.open('wisp-studio', 1); r.onupgradeneeded = () => r.result.createObjectStore('blocks', { keyPath: 'id' }); r.onsuccess = () => { db = r.result; res(db); }; r.onerror = () => res(null); } catch (e) { res(null); } }); }
+let saveT = 0;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { if (!db) return; try {
+  const tx = db.transaction('blocks', 'readwrite'), st = tx.objectStore('blocks'); st.clear();
+  blocks.forEach(b => st.put({ id: b.id, name: b.name, color: b.color, pos: b.pos, order: b.order, gap: b.gap, vol: b.vol, mot: b.mot, duck: !!b.duck, blob: b.blob }));
+} catch (e) {} }, 400); }
+async function load() {
+  await dbOpen(); if (!db) return;
+  const rows = await new Promise(res => { try { const r = db.transaction('blocks').objectStore('blocks').getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => res([]); } catch (e) { res([]); } });
+  if (!rows.length) return;
+  initAudio();
+  for (const r of rows.sort((a, b) => a.id - b.id)) {
+    const b = Object.assign({ src: null, buf: null, rms: 0 }, r); nid = Math.max(nid, b.id);
+    wire(b); blocks.push(b);
+    try { b.buf = await ctx.decodeAudioData(await b.blob.arrayBuffer()); } catch (e) {}
+  }
+  build();
+}
+
+// ---------- добавление файлов ----------
+async function addFiles(files) {
+  initAudio(); ctx.resume();
+  for (const f of files) {
+    const i = blocks.length, b = { id: ++nid, name: f.name.replace(/\.[^.]+$/, ''), color: COLORS[i % COLORS.length], pos: { ...SPOTS[i % SPOTS.length] },
+      order: (blocks.reduce((m, x) => Math.max(m, x.order), 0) + 1), gap: 0.4, vol: 0.9, mot: 'still', duck: false, blob: f, src: null, buf: null, rms: 0 };
+    try { b.buf = await ctx.decodeAudioData(await f.arrayBuffer()); } catch (e) { toastErr(f.name); continue; }
+    wire(b); blocks.push(b); sel = b;
+  }
+  build(); save();
+}
+function toastErr(n) { $('now').textContent = TX.badFile + n; setTimeout(() => { if (!run) $('now').textContent = ''; }, 3000); }
+$('add').onclick = () => $('files').click();
+$('files').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addFiles(fs); };
+
+// ---------- карточки ----------
+function build() {
+  const box = $('list'); box.innerHTML = '';
+  for (const b of blocks) {
+    const c = document.createElement('div'); c.className = 'card'; c.style.setProperty('--c', b.color); b.card = c;
+    c.innerHTML = '<div class="r1"><input class="num" type="number" min="1" max="99"><div class="nm"></div><button class="vc" title="' + TX.voice + '" aria-label="' + TX.voice + '">🗣</button><button class="pp">▶</button></div>' +
+      '<div class="r2"><input type="range" class="vol" min="0" max="100" title="' + TX.vol + '"><input class="gap" type="number" min="0" max="30" step="0.1" title="' + TX.gap + '">' +
+      '<select class="mot"><option value="still">' + TX.still + '</option><option value="circle">' + TX.circle + '</option><option value="pass">' + TX.pass + '</option><option value="passL">' + TX.passL + '</option></select>' +
+      '<button class="x" aria-label="✕">✕</button></div>';
+    const q = s => c.querySelector(s);
+    q('.num').value = b.order; q('.gap').value = b.gap; q('.vol').value = Math.round(b.vol * 100); q('.mot').value = b.mot;
+    q('.nm').innerHTML = ''; const nm = document.createElement('span'); nm.textContent = b.name; q('.nm').appendChild(nm);
+    const sm = document.createElement('small'); sm.textContent = b.buf ? b.buf.duration.toFixed(1) + ' s' : '…'; q('.nm').appendChild(sm);
+    q('.nm').onclick = () => { sel = b; paint(); };
+    q('.pp').onclick = () => { sel = b; b.src ? (stopOne(b), paint()) : play(b); };
+    q('.num').onchange = e => { b.order = Math.max(1, Math.min(99, parseInt(e.target.value, 10) || 1)); e.target.value = b.order; save(); };
+    q('.gap').onchange = e => { b.gap = Math.max(0, Math.min(30, parseFloat(e.target.value) || 0)); e.target.value = b.gap; save(); };
+    q('.vol').oninput = e => { b.vol = +e.target.value / 100; b._g = -1; if (b.g && !b.src) b.g.gain.setTargetAtTime(b.vol, ctx.currentTime, 0.03); save(); };
+    q('.mot').onchange = e => { b.mot = e.target.value; save(); };
+    q('.vc').classList.toggle('on', !!b.duck);
+    q('.vc').onclick = () => { b.duck = !b.duck; q('.vc').classList.toggle('on', b.duck); save(); };
+    q('.x').onclick = () => { stopOne(b); blocks.splice(blocks.indexOf(b), 1); if (sel === b) sel = null; build(); save(); };
+    box.appendChild(c);
+  }
+  $('empty').style.display = blocks.length ? 'none' : '';
+  paint();
+}
+function paint() {
+  for (const b of blocks) if (b.card) { b.card.classList.toggle('sel', b === sel); b.card.classList.toggle('play', !!b.src); const pp = b.card.querySelector('.pp'); pp.textContent = b.src ? '■' : '▶'; }
+  $('run').textContent = run ? TX.runStop : TX.run; $('run').classList.toggle('on', !!run);
+  $('labels').classList.toggle('on', labels);
+}
+$('run').onclick = () => run ? runStop() : runStart();
+$('stop').onclick = stopAll;
+$('labels').onclick = () => { labels = !labels; paint(); };
+$('hide').onclick = () => document.body.classList.add('hide');
+$('show').onclick = () => document.body.classList.remove('hide');
+$('clear').onclick = () => { if (!blocks.length || !confirm(TX.clearQ)) return; stopAll(); blocks.length = 0; sel = null; build(); save(); };
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (/^[1-9]$/.test(e.key)) { const n = +e.key, b = blocks.find(x => x.order === n && x.buf); if (b) { sel = b; play(b); } }
+  else if (e.key === ' ') { e.preventDefault(); run ? runStop() : runStart(); }
+  else if (e.key === 'Escape') stopAll();
+  else if (e.key === 'h' || e.key === 'H' || e.key === 'р' || e.key === 'Р') document.body.classList.toggle('hide');
+  else if (e.key === 'l' || e.key === 'L' || e.key === 'д' || e.key === 'Д') { labels = !labels; paint(); }
+});
+
+// ---------- картинка: белая комната, вид чуть сзади и сверху ----------
+const cv = $('cv'), g = cv.getContext('2d'); let W, H, F, CX, CY;
+const FY = -1.5, cam = { x: 0, y: 1.6, z: 3.0 }, look = { x: 0, y: -0.3, z: -1.0 }; let B;
+const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }), dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
+const cross = (a, b) => ({ x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x });
+const norm = a => { const l = Math.hypot(a.x, a.y, a.z) || 1; return { x: a.x / l, y: a.y / l, z: a.z / l }; };
+const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+addEventListener('resize', resize); resize();
+// рабочая область сцены: без панели справа (компьютер) или снизу (телефон)
+function view() {
+  const hidden = document.body.classList.contains('hide'), narrow = W <= 720;
+  const vw = hidden || narrow ? W : W - 360, vh = hidden || !narrow ? H : H * 0.52;
+  CX = vw / 2; CY = vh * 0.5; F = narrow ? Math.min(vw * 0.95, vh * 1.15) : Math.min(vw * 0.62, vh * 0.95);
+  const f = norm(sub(look, cam)), r = norm(cross(f, { x: 0, y: 1, z: 0 })); B = { f, r, u: cross(r, f) };
+}
+function proj(p) { const d = sub(p, cam), z = dot(d, B.f); if (z < 0.15) return null; return { x: CX + dot(d, B.r) / z * F, y: CY - dot(d, B.u) / z * F, s: F / z, z }; }
+function unproj(sx, sy, Y) {
+  const a = (sx - CX) / F, b = -(sy - CY) / F, d = { x: B.f.x + B.r.x * a + B.u.x * b, y: B.f.y + B.r.y * a + B.u.y * b, z: B.f.z + B.r.z * a + B.u.z * b };
+  if (d.y > -1e-3) return null; const t = (Y - cam.y) / d.y; if (t <= 0) return null; return { x: cam.x + d.x * t, z: cam.z + d.z * t };
+}
+function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
+function drawBg() {
+  const hz = proj({ x: 0, y: FY, z: -60 }), hy = cl(hz ? hz.y / H : 0.3, 0.05, 0.95);
+  const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#E4E9EA'); gr.addColorStop(hy, '#FFFFFF'); gr.addColorStop(1, '#EDF1F1');
+  g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  g.strokeStyle = '#2E3438'; g.lineWidth = 1;
+  const seg = (a, b) => { const pa = proj(a), pb = proj(b); if (!pa || !pb) return; const m = Math.hypot((a.x + b.x) / 2, (a.z + b.z) / 2);
+    const al = 0.16 * cl(1 - m / 9, 0, 1); if (al <= 0.004) return; g.globalAlpha = al; g.beginPath(); g.moveTo(pa.x, pa.y); g.lineTo(pb.x, pb.y); g.stroke(); };
+  for (let x = -6; x <= 6.01; x += 0.6) for (let z = -10; z < 2.5; z += 0.5) seg({ x, y: FY, z }, { x, y: FY, z: z + 0.5 });
+  for (let z = -10; z <= 2.51; z += 0.6) for (let x = -6; x < 6; x += 0.5) seg({ x, y: FY, z }, { x: x + 0.5, y: FY, z });
+  const a = proj({ x: 0, y: FY, z: 0 }), b = proj({ x: -0.9, y: FY, z: -3.2 }), c = proj({ x: 0.9, y: FY, z: -3.2 });
+  if (a && b && c) { g.globalAlpha = 0.035; g.fillStyle = '#2E3438'; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.lineTo(c.x, c.y); g.closePath(); g.fill(); }
+  g.globalAlpha = 1;
+}
+function drawHead() {
+  const sh = proj({ x: 0, y: FY, z: 0 });
+  if (sh) { g.globalAlpha = 0.07; g.fillStyle = '#2E3438'; g.beginPath(); g.ellipse(sh.x, sh.y, 0.35 * sh.s, 0.12 * sh.s, 0, 0, Math.PI * 2); g.fill(); }
+  g.globalAlpha = 1; g.strokeStyle = '#2E3438'; g.lineWidth = 1.5; g.lineCap = 'round';
+  g.beginPath(); for (let i = 0; i <= 20; i++) { const x = -0.27 + 0.54 * i / 20, y = -0.21 - 0.12 * Math.pow(Math.abs(x) / 0.27, 1.5), p = proj({ x, y, z: 0.02 }); if (!p) continue; i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y); } g.stroke();
+  for (const x of [-0.05, 0.05]) { const a = proj({ x, y: -0.1, z: 0.02 }), b = proj({ x, y: -0.21, z: 0.02 }); if (a && b) { g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); } }
+  const h = proj({ x: 0, y: 0, z: 0 }); if (!h) return;
+  g.fillStyle = '#FFFFFF'; g.beginPath(); g.arc(h.x, h.y, 0.13 * h.s, 0, Math.PI * 2); g.fill(); g.stroke();
+}
+function drawOrb(b) {
+  const pos = b.cur || b.pos, P = { x: pos.x, y: 0, z: pos.z }, p = proj(P); if (!p) return;
+  const fl = proj({ x: P.x, y: FY, z: P.z }), on = !!b.src, vis = on ? 1 : 0.55;
+  if (fl) { g.globalAlpha = 0.25 * vis; g.strokeStyle = b.color; g.lineWidth = 1; g.setLineDash([3, 4]); g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(fl.x, fl.y); g.stroke(); g.setLineDash([]);
+    g.globalAlpha = 0.09 * vis; g.fillStyle = b.color; g.beginPath(); g.ellipse(fl.x, fl.y, 0.18 * fl.s, 0.06 * fl.s, 0, 0, Math.PI * 2); g.fill(); }
+  const r = Math.max(4, 0.06 * p.s) * (1 + Math.min(1.2, b.rms * 3));
+  const gr = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3.4); gr.addColorStop(0, rgba(b.color, (on ? 0.45 : 0.18))); gr.addColorStop(1, rgba(b.color, 0));
+  g.globalAlpha = 1; g.fillStyle = gr; g.beginPath(); g.arc(p.x, p.y, r * 3.4, 0, Math.PI * 2); g.fill();
+  g.fillStyle = rgba(b.color, vis); g.beginPath(); g.arc(p.x, p.y, r, 0, Math.PI * 2); g.fill();
+  if (b === sel && !document.body.classList.contains('hide')) { g.strokeStyle = b.color; g.lineWidth = 2; g.beginPath(); g.arc(p.x, p.y, r + 6, 0, Math.PI * 2); g.stroke(); }
+  if (labels) {
+    const small = W <= 720, max = small ? 16 : 28;
+    g.font = '500 ' + (small ? 11 : 13) + 'px Manrope, system-ui, sans-serif'; g.fillStyle = rgba('#2E3438', on ? 0.9 : 0.55);
+    let txt = b.order + '  ' + b.name; if (txt.length > max) txt = txt.slice(0, max - 1) + '…';
+    // на телефоне подпись под шаром, по центру - так левые и правые не налезают друг на друга
+    if (small) { g.textAlign = 'center'; g.fillText(txt, cl(p.x, 40, W - 40), p.y + r + 14); b.sp = p; b.sr = r; return; }
+    const w = g.measureText(txt).width, left = p.x < CX - 4; let tx = left ? p.x - r - 8 : p.x + r + 8; g.textAlign = left ? 'right' : 'left';
+    if (!left && tx + w > CX * 2 - 6) { tx = p.x - r - 8; g.textAlign = 'right'; } else if (left && tx - w < 6) { tx = p.x + r + 8; g.textAlign = 'left'; }
+    g.fillText(txt, tx, p.y + 4);
+  }
+  b.sp = p; b.sr = r;
+}
+let lastF = performance.now(), voiceUntil = 0;
+function frame() {
+  const tnow = performance.now(), dt = Math.min(0.1, (tnow - lastF) / 1000); lastF = tnow;
+  if (blocks.some(b => b.duck && b.src)) voiceUntil = tnow + 400;
+  const target = tnow < voiceUntil ? 1 : 0; D += (target - D) * (1 - Math.exp(-dt * 6)); if (Math.abs(target - D) < 0.003) D = target;
+  view(); drawBg();
+  if (ctx) for (const b of blocks) {
+    if (b.src) { applyPos(b); b.an.getByteTimeDomainData(b.arr); let s = 0; for (let i = 0; i < b.arr.length; i += 4) { const v = (b.arr[i] - 128) / 128; s += v * v; } b.rms = Math.max(Math.sqrt(s / (b.arr.length / 4)), b.rms * 0.86); }
+    else { b.rms *= 0.86; b.cur = b.pos; }
+  }
+  const items = [{ z: (proj({ x: 0, y: 0, z: 0 }) || { z: 0 }).z, f: drawHead }];
+  for (const b of blocks) { const p = proj({ x: (b.cur || b.pos).x, y: 0, z: (b.cur || b.pos).z }); if (p) items.push({ z: p.z - 0.001, f: () => drawOrb(b) }); }
+  items.sort((a, b) => b.z - a.z).forEach(it => it.f());
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---------- мышь и палец: тащить шар, короткое нажатие - сыграть ----------
+let drag = null, down = null;
+cv.addEventListener('pointerdown', e => {
+  let best = null, bd = 1e9;
+  for (const b of blocks) { if (!b.sp) continue; const d = Math.hypot(b.sp.x - e.clientX, b.sp.y - e.clientY); if (d < Math.max(28, b.sr * 2) && d < bd) { bd = d; best = b; } }
+  if (!best) return;
+  drag = best; sel = best; down = { x: e.clientX, y: e.clientY, moved: false }; paint();
+  try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  document.body.classList.add('drag');
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) down.moved = true;
+  if (!down.moved) return;
+  const q = unproj(e.clientX, e.clientY, 0); if (!q) return;
+  const rr = Math.hypot(q.x, q.z), k = cl(rr, 0.3, 3.5) / (rr || 1);
+  drag.pos = { x: q.x * k, z: q.z * k }; if (ctx) applyPos(drag);
+});
+const up = () => {
+  if (!drag) return;
+  const b = drag; drag = null; document.body.classList.remove('drag');
+  if (!down.moved) { b.src ? (stopOne(b), paint()) : play(b); } else save();
+};
+cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume(); });
+
+load(); build();
+})();
+</script>
+</body>
+</html>

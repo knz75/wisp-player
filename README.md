@@ -20,11 +20,15 @@ Let it fly in orbits, and it does the opposite: a gentle, living point that keep
 - **Living point** - a sound that stands still slowly sways around its place (±20°, ±15% distance), so it never feels like a nail in the air.
 - **Behind sounds behind** - the further a sound goes behind your head, the softer its highs, the way your ears and the back of your head shape real sound.
 - **Audiobooks** - open files or a whole folder; the player remembers your position in every chapter.
-- **Internet radio** - add any direct `https://` stream. Stations that don't allow processing still play in plain stereo.
+- **Internet radio** - add any direct `https://` stream, or **scan**: stations of your country (by time zone), the whole world or any other country from the open radio-browser.info catalog, each one checked automatically for 3D. Stations that don't allow processing still play in plain stereo.
+- **Several sounds at once** - besides the main player, up to four extra sources (radio, files, a whole folder as a playlist, a browser tab on desktop). Each has its own color, place, orbit and volume; tap its circle above the radar or its dot on the radar to move it.
+- **Hearing setup** - a front/back contrast slider and a 10-sound blind test, because generic 3D audio does not fit every pair of ears.
+- **Demo for first visitors** - one tap plays a melody built right in the browser and sends it orbiting around your head.
 - **Sleep timer, speed 1-1.5×, radar lock** (locked at start, so the page scrolls), and a **3D off** switch to compare with normal stereo.
 - **Skins** that change the whole player (Drone HUD, Watch, Classic '99) - a skin is a JSON file you can save, edit and share.
 - **10 languages**, picked automatically from your device.
 - **Installable app (PWA)**, works offline for local files.
+- **Sound scene studio** ([`studio.html`](studio.html)) - drop in your own clips, place them around the head, play them by tapping or as a numbered scenario, mark voices so everything else steps back while they speak. Made for recording demo videos.
 
 ## How it works
 
@@ -74,6 +78,16 @@ All of them can play at once, each as its own dot: radio orbiting behind you, th
 
 The old addresses `/call.html` and `/ai.html` now simply redirect into the player.
 
+## Ideas for the future
+
+*Published openly on 6 October 2026, so anyone can build on them and nobody can lock them up.*
+
+- **Spoken notifications with a place.** A native Android companion app (Notification Listener access) turns each incoming notification into one short spoken line - who and what - played from a fixed place around the head chosen per source (for example, messages at the left shoulder, e-mail at the right). Whatever is playing is not paused: it moves away to at least 2.5 m and gets quieter, and comes back when the line ends; spoken content such as an audiobook pauses instead and resumes about 2 seconds earlier. The listener answers by voice («read it», «mark as read», «delete», «reply») and the app presses the notification's own action buttons. Importance (sender, app) maps to distance: important voices come closer.
+- **Priority by distance as an audio-focus model.** Instead of the usual «duck or pause» when two apps want the ears, every stream gets a place; the less important stream moves back in space rather than being muted. Music steps back, speech pauses.
+- **«Talk to me» gesture.** A tap or double tap on the earbuds (media keys) addresses the AI companion; the rest of the time its microphone stays closed, so it never answers what you say to someone else.
+- **Soft head tracking.** When head orientation is available (AR/VR glasses, WebXR, earbuds that expose it), quick head movements shift the sources in the world - which gives the brain its front/back cue - while the whole scene slowly re-centres to the head within 1-3 seconds, so «the shoulder» stays the shoulder while walking.
+- **Sector wandering in 3D.** The sphere around the head is split into 8 sectors (front/back × left/right × up/down); a source wanders inside its sector instead of standing still - the «living point» extended to height.
+
 ## Honest limitations
 
 - **Headphones required.**
@@ -105,5 +119,7 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translat
 Главная находка: если вывести звук из центра головы в сторону и немного вдаль, он перестаёт забирать всё внимание и работает как фон - как радио на подоконнике, пока вы работаете. А орбита, наоборот, превращает прогулку в ощущение: звук живёт вокруг вас, и взгляд остаётся на улице, а не в экране.
 
 Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Wisp - это не только плеер, а система, где у каждого звука своё место на одном общем радаре. Три вкладки: **Плеер** (музыка, книги, радио), **Попутчик** - голосовой ИИ на плече (Gemini Live, со своим бесплатным ключом) и **Звонок** - разговор по ссылке, где каждый собеседник - своя точка вокруг головы. Всё может звучать одновременно, а когда кто-то говорит, музыка не выключается, а отходит назад и становится тише.
+
+**Идеи на будущее** (опубликованы 6 октября 2026 года, подробно - в английском разделе «Ideas for the future»): уведомления голосом, у каждого источника своё место вокруг головы, при этом остальной звук не выключается, а отходит назад, книга встаёт на паузу, а ответ голосом нажимает кнопки уведомления; приоритеты расстоянием как замена обычному «приглушить или остановить»; жест «говорю с тобой» для ИИ; мягкое слежение за головой; блуждание звука по 8 секторам сферы.
 
 Отзывы и идеи - в Telegram [@WispPlayer_bot](https://t.me/WispPlayer_bot).
