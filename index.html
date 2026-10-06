@@ -84,7 +84,17 @@
   .psheet select.tin { appearance: none; -webkit-appearance: none; cursor: pointer; background-image: linear-gradient(45deg, transparent 50%, #7d8b90 50%), linear-gradient(135deg, #7d8b90 50%, transparent 50%); background-position: calc(100% - 18px) 19px, calc(100% - 12px) 19px; background-size: 6px 6px; background-repeat: no-repeat; }
   .psheet a.mb { text-decoration: none; }
   .psheet .note { margin: 0; font-size: .8rem; line-height: 1.45; color: #7d8b90; }
-  #stList { display: flex; flex-direction: column; gap: 6px; }
+  #stList, #scanList { display: flex; flex-direction: column; gap: 6px; }
+  #scanList .st { display: flex; align-items: center; gap: 6px; border: 1px solid #2c3438; border-radius: 12px; background: #0d1214; padding: 4px 4px 4px 0; }
+  #scanList .st.on { border-color: #3ef0ff; }
+  #scanList .sp { flex: 1; min-width: 0; text-align: left; background: none; border: none; color: inherit; font: inherit; padding: 8px 10px; cursor: pointer; }
+  #scanList .sp b { display: block; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #scanList .sp small { display: block; font-size: .72rem; color: #7d8b90; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #scanList .bd { font-size: .68rem; font-weight: 700; color: #7dff9a; flex-shrink: 0; min-width: 34px; text-align: center; }
+  #scanList .bd.no, #scanList .bd.wait { color: #7d8b90; }
+  #scanList .add { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1px solid #2c3438; background: #11171a; color: #3ef0ff; font-size: 1.1rem; cursor: pointer; }
+  #scanList .add:disabled { color: #7dff9a; cursor: default; }
+  #scanState:empty { display: none; }
   #stList .st { display: flex; align-items: center; gap: 6px; border: 1px solid #2c3438; border-radius: 12px; background: #0d1214; padding: 4px 4px 4px 0; }
   #stList .st.on { border-color: #3ef0ff; }
   #stList .sp { flex: 1; min-width: 0; text-align: left; background: none; border: none; color: inherit; font: inherit; padding: 8px 10px; cursor: pointer; }
@@ -107,6 +117,12 @@
   #skin:not([data-mode="player"]) .mp { display: none !important; }
   #skin:not([data-mode="call"]) .wcall { display: none !important; }
   #skin .wtabs .wb.live::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--dot); box-shadow: 0 0 6px var(--dot); vertical-align: 1px; }
+  #skin .wdemo { position: relative; z-index: 2; width: 100%; max-width: 560px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+    gap: 8px; padding: 12px; border: 1px dashed var(--r-acc, #3ef0ff); border-radius: 12px; text-align: center; }
+  #skin .wdemo b { color: var(--r-acc, #3ef0ff); letter-spacing: 2px; font-size: .85rem; }
+  #skin .wdemo .wdemo-go { min-height: 52px; width: 100%; font-size: 1rem !important; }
+  #skin .wdemo span { font-size: .78rem; opacity: .75; line-height: 1.4; }
+  #skin:not(.empty) .wdemo { display: none !important; }
   #skin .wscene-src { position: relative; z-index: 2; width: 100%; box-sizing: border-box; margin: 2px 0 8px; }
   #skin .wsc-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
   #skin .wsc { width: 40px; height: 40px; min-width: 40px; flex: none; padding: 0; border-radius: 50%; border: 2px solid var(--c); background: transparent; color: var(--c);
@@ -125,6 +141,7 @@
   #skin .wss-head .wb { flex: none; width: 52px; min-height: 36px; }
   #skin .wss-ctl { display: grid; grid-template-columns: 48px minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
   #skin .wss-ctl .wb { min-height: 40px; }
+  #skin .wss-ctl.four { grid-template-columns: 48px 48px minmax(0, 1fr) 44px; }
   #skin .wss-hint { font-size: .75rem; opacity: .7; line-height: 1.4; margin: 0; }
   #skin .w-orbit .wb.on { background: var(--cur, var(--r-acc)) !important; border-color: var(--cur, var(--r-acc)) !important; color: #071014 !important; }
   #skin:not(.detail) .ro, #skin:not(.detail) [data-widget="presets"] { display: none !important; }
@@ -300,6 +317,11 @@
   <div class="bar"><h2 data-i="radio"></h2><button class="x" id="radioClose">✕</button></div>
   <h3 data-i="stations"></h3>
   <div id="stList"></div>
+  <h3 data-i="scanTitle"></h3>
+  <div class="row2"><button class="mb" id="scanHere"></button><button class="mb" id="scanWorld" data-i="scanWorld"></button></div>
+  <select id="scanCountry" class="tin hidden"></select>
+  <p class="note" id="scanState"></p>
+  <div id="scanList"></div>
   <h3 data-i="addSt"></h3>
   <input id="stUrl" class="tin" type="url" inputmode="url" placeholder="https://…" autocomplete="off">
   <input id="stName" class="tin" type="text" data-ph="stNamePh" autocomplete="off">
@@ -822,6 +844,28 @@ Object.entries({ ru: 'Плеер', uk: 'Плеєр', pl: 'Odtwarzacz', en: 'Play
 Object.entries({ ru: 'Музыка уступает голосу', uk: 'Музика поступається голосу', pl: 'Muzyka ustępuje głosowi', en: 'Music yields to voices', de: 'Musik weicht Stimmen',
   es: 'La música cede a las voces', fr: 'La musique cède aux voix', it: 'La musica cede alle voci', pt: 'A música cede às vozes', tr: 'Müzik seslere yol verir' })
   .forEach(([k, v]) => { if (T[k]) T[k].duck2 = v; });
+Object.entries({
+  ru: { scanTitle:'Найти станции', scanIn:'Скан:', scanWorld:'🌍 Весь мир', scanOther:'Другая страна…', scanLoading:'Ищу станции…', scanFail:'Каталог радио не ответил, попробуйте позже',
+    scanNone:'Подходящих станций не нашлось', scanChecking:'Проверяю, какие идут в 3D: {n} из {m}', scanDone:'Найдено {n}, в 3D: {k}. Нажмите на станцию - послушать, «+» - сохранить в свои.' },
+  uk: { scanTitle:'Знайти станції', scanIn:'Скан:', scanWorld:'🌍 Увесь світ', scanOther:'Інша країна…', scanLoading:'Шукаю станції…', scanFail:'Каталог радіо не відповів, спробуйте пізніше',
+    scanNone:'Відповідних станцій не знайшлося', scanChecking:'Перевіряю, які йдуть у 3D: {n} з {m}', scanDone:'Знайдено {n}, у 3D: {k}. Натисніть на станцію - послухати, «+» - зберегти до своїх.' },
+  pl: { scanTitle:'Znajdź stacje', scanIn:'Skan:', scanWorld:'🌍 Cały świat', scanOther:'Inny kraj…', scanLoading:'Szukam stacji…', scanFail:'Katalog radia nie odpowiedział, spróbuj później',
+    scanNone:'Nie znaleziono pasujących stacji', scanChecking:'Sprawdzam, które grają w 3D: {n} z {m}', scanDone:'Znaleziono {n}, w 3D: {k}. Dotknij stacji - posłuchaj, «+» - zapisz do swoich.' },
+  en: { scanTitle:'Find stations', scanIn:'Scan:', scanWorld:'🌍 Whole world', scanOther:'Another country…', scanLoading:'Looking for stations…', scanFail:'The radio catalog did not answer, try later',
+    scanNone:'No suitable stations found', scanChecking:'Checking which play in 3D: {n} of {m}', scanDone:'Found {n}, in 3D: {k}. Tap a station to listen, «+» to save it.' }
+}).forEach(([k, v]) => { if (T[k]) Object.assign(T[k], v); });
+Object.entries({
+  ru: ['НАДЕНЬТЕ НАУШНИКИ', '▶ Послушать пример', 'Музыка полетит вокруг головы. Потом откройте свою книгу, музыку или радио.'],
+  uk: ['ОДЯГНІТЬ НАВУШНИКИ', '▶ Послухати приклад', 'Музика полетить навколо голови. Потім відкрийте свою книгу, музику чи радіо.'],
+  pl: ['ZAŁÓŻ SŁUCHAWKI', '▶ Posłuchaj przykładu', 'Muzyka poleci wokół głowy. Potem otwórz swoją książkę, muzykę lub radio.'],
+  en: ['PUT ON HEADPHONES', '▶ Play a demo', 'Music will fly around your head. Then open your own book, music or radio.'],
+  de: ['KOPFHÖRER AUFSETZEN', '▶ Beispiel anhören', 'Die Musik fliegt um deinen Kopf. Danach öffne dein Hörbuch, deine Musik oder Radio.'],
+  es: ['PONTE AURICULARES', '▶ Escuchar un ejemplo', 'La música volará alrededor de tu cabeza. Luego abre tu libro, música o radio.'],
+  fr: ['METTEZ UN CASQUE', '▶ Écouter un exemple', 'La musique va tourner autour de votre tête. Ensuite, ouvrez votre livre, votre musique ou la radio.'],
+  it: ['INDOSSA LE CUFFIE', '▶ Ascolta un esempio', 'La musica volerà intorno alla tua testa. Poi apri il tuo libro, la tua musica o la radio.'],
+  pt: ['COLOQUE FONES DE OUVIDO', '▶ Ouvir um exemplo', 'A música vai voar ao redor da sua cabeça. Depois abra seu livro, música ou rádio.'],
+  tr: ['KULAKLIK TAKIN', '▶ Örneği dinle', 'Müzik başınızın etrafında dönecek. Sonra kendi kitabınızı, müziğinizi ya da radyoyu açın.']
+}).forEach(([k, v]) => { if (T[k]) { T[k].demoTitle = v[0]; T[k].demoBtn = v[1]; T[k].demoSub = v[2]; } });
 Object.entries({ ru: 'Подробный радар (градусы, метры, места)', uk: 'Докладний радар (градуси, метри, місця)', pl: 'Szczegółowy radar (stopnie, metry, miejsca)', en: 'Detailed radar (degrees, meters, places)',
   de: 'Detailliertes Radar (Grad, Meter, Orte)', es: 'Radar detallado (grados, metros, lugares)', fr: 'Radar détaillé (degrés, mètres, places)', it: 'Radar dettagliato (gradi, metri, posti)',
   pt: 'Radar detalhado (graus, metros, lugares)', tr: 'Ayrıntılı radar (derece, metre, yerler)' }).forEach(([k, v]) => { if (T[k]) T[k].detail = v; });
@@ -1155,6 +1199,9 @@ function mountSkin(sk) {
     tabs.innerHTML = '<button class="wb" data-mode="player" data-i="tabPlayer"></button><button class="wb" data-mode="ai" data-i="aiLink"></button><button class="wb" data-mode="call" data-i="callLink"></button>';
     tabs.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     mps[0].before(tabs);
+    const db = document.createElement('div'); db.className = 'wdemo mp';
+    db.innerHTML = '<b data-i="demoTitle"></b><button class="wb wdemo-go" data-i="demoBtn"></button><span data-i="demoSub"></span>';
+    mps[0].before(db); db.querySelector('.wdemo-go').addEventListener('click', () => DEMO.play());
     const pnl = document.createElement('div'); pnl.className = 'wpanel wai'; pnl.innerHTML = AI.panelHtml();
     mps[mps.length - 1].after(pnl); AI.bindPanel(pnl);
     const cp = document.createElement('div'); cp.className = 'wpanel wcall'; cp.innerHTML = CALL.panelHtml();
@@ -1287,7 +1334,7 @@ function applyLang() {
   $('helpText').innerHTML = HELP[lang];
   $('langSel').value = lang;
   W.speed.concat(W.sleep, W.fx, W.echo, W.live || [], W.duck || [], W.detail || []).forEach(c => c.btns.forEach(b => b.textContent = ''));
-  renderSkinList(); AI.applyLang(); CALL.applyLang(); TAB.paint(); LAY.applyLang(); render(); requestDraw();
+  renderSkinList(); if (typeof SCAN !== 'undefined') SCAN.paint(); AI.applyLang(); CALL.applyLang(); TAB.paint(); LAY.applyLang(); render(); requestDraw();
 }
 
 // ---------------- Радар ----------------
@@ -1600,7 +1647,7 @@ function takeFiles(e) {
   initAudio(); savePos();
   const path = f => f.webkitRelativePath || f.name;
   files.sort((a, b) => path(a).localeCompare(path(b), undefined, { numeric: true }));
-  S.tracks = files; S.cur = -1;
+  S.tracks = files; S.cur = -1; S.demo = false;
   let best = 0, bestAt = -1;
   files.forEach((f, i) => { const s = store.get(keyOf(f), null); if (s && s.at > bestAt) { bestAt = s.at; best = i; } });
   load(best);
@@ -1612,7 +1659,7 @@ audioEl.addEventListener('play', () => { render(); requestDraw(); try { navigato
 audioEl.addEventListener('pause', () => { render(); savePos(); requestDraw(); try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {} });
 audioEl.addEventListener('ended', () => {
   if (S.cur >= 0) store.set(keyOf(S.tracks[S.cur]), { t: 0, at: Date.now() });
-  S.ready = false; if (S.cur < S.tracks.length - 1) load(S.cur + 1);
+  S.ready = false; if (S.cur < S.tracks.length - 1) load(S.cur + 1); else if (S.demo) load(0);
 });
 window.addEventListener('pagehide', savePos);
 // Сторож: играет, но время стоит 10 секунд - пинаем плеер
@@ -1656,7 +1703,7 @@ function playStation(st) {
   savePos();
   if (S.radio) stopRadio(); else { audioEl.pause(); if (audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src); }
   S.tracks = []; S.cur = -1; S.ready = false; renderList();
-  S.radio = st; S.plain = false;
+  S.radio = st; S.plain = false; S.demo = false;
   const my = ++radioTry;
   initAudio();
   // Просим поток с разрешением на обработку. Не дал разрешения - поток не откроется, и мы переключимся на стерео.
@@ -2756,11 +2803,11 @@ const TAB = (() => {
 //  У каждого свой цвет, своя точка на радаре и своя орбита. Это фон: когда говорят, они отходят.
 // ======================================================================
 const LAYT = {
-  ru: { main:'Плеер', radio:'+ Радио', file:'+ Файл', tab:'+ Вкладка', pickSt:'Выберите станцию',
+  ru: { main:'Плеер', radio:'+ Радио', file:'+ Файлы', folder:'+ Папка', next:'Следующий трек', tab:'+ Вкладка', pickSt:'Выберите станцию',
     noSt:'Нет станций - добавьте их в окне «Радио» плеера', max:'Больше четырёх звуков не добавить', remove:'Убрать',
     no3d:'Станция не разрешает 3D - звучит обычным стерео', fail:'Не играет: ', tabName:'Вкладка',
     addTitle:'Добавить звук', nextName:'Место первого собеседника', aiHint:'Разговором управляет вкладка «Попутчик» наверху, местом - радар и орбиты', callHint:'Звонком управляет вкладка «Звонок» наверху, местом голоса - радар и орбиты' },
-  en: { main:'Player', radio:'+ Radio', file:'+ File', tab:'+ Tab', pickSt:'Choose a station',
+  en: { main:'Player', radio:'+ Radio', file:'+ Files', folder:'+ Folder', next:'Next track', tab:'+ Tab', pickSt:'Choose a station',
     noSt:'No stations - add them in the player\'s «Radio» window', max:'No more than four sounds', remove:'Remove',
     no3d:'The station does not allow 3D - plays as plain stereo', fail:'Does not play: ', tabName:'Tab',
     addTitle:'Add a sound', nextName:'Place of the first caller', aiHint:'The «Companion» tab above controls the talk, the radar and orbits control its place', callHint:'The «Call» tab above controls the call, the radar and orbits control the voice\'s place' }
@@ -2844,16 +2891,33 @@ const LAY = (() => {
     save(); build(); if (MODE === 'player') setMode('player'); else requestDraw();
   }
   function after() { build(); if (MODE === 'player') setMode('player'); else requestDraw(); }
-  function addFile(f) {
+  // файлы или папка: один файл крутится по кругу, несколько - идут плейлистом по порядку, потом снова с начала
+  function addFiles(files, isDir) {
+    files = [...files].filter(f => (f.type || '').startsWith('audio/') || AUDIO_RE.test(f.name));
+    if (!files.length) { toast(t('noAudio')); return; }
     if (list.length >= MAX) { toast(lt('max')); return; }
+    const path = f => f.webkitRelativePath || f.name;
+    files.sort((a, b) => path(a).localeCompare(path(b), undefined, { numeric: true }));
     initAudio(); ac.resume();
-    const c = make('file', f.name.replace(/\.[^.]+$/, ''));
-    c.blob = URL.createObjectURL(f); c.el = new Audio(c.blob); c.el.loop = true; c.want = true;
+    const dir = isDir && files[0].webkitRelativePath ? files[0].webkitRelativePath.split('/')[0] : '';
+    const c = make('file', dir || stripExt(files[0].name) + (files.length > 1 ? ' +' + (files.length - 1) : ''));
+    c.files = files; c.idx = 0; c.want = true; c.bad = 0;
+    c.el = new Audio(); c.el.loop = files.length === 1;
     wire(c, ac.createMediaElementSource(c.el));
-    c.el.onplaying = () => { c.playing = true; paint(); requestDraw(); };
+    c.el.onplaying = () => { c.playing = true; c.bad = 0; paint(); requestDraw(); };
     c.el.onpause = () => { c.playing = false; paint(); };
-    c.el.play().catch(() => {}); after();
+    c.el.onended = () => nextTrack(c);
+    c.el.onerror = () => { if (c.files.length > 1 && c.bad++ < c.files.length) nextTrack(c); };
+    loadTrack(c, 0, true); after();
   }
+  function loadTrack(c, i, play) {
+    if (c.blob) URL.revokeObjectURL(c.blob);
+    c.idx = ((i % c.files.length) + c.files.length) % c.files.length;
+    c.blob = URL.createObjectURL(c.files[c.idx]); c.el.src = c.blob;
+    if (play) c.el.play().catch(() => {});
+    paint();
+  }
+  function nextTrack(c) { if (c.files) loadTrack(c, c.idx + 1, c.want); }
   function addRadio(st) {
     if (list.length >= MAX) { toast(lt('max')); return; }
     picking = false;
@@ -2872,7 +2936,7 @@ const LAY = (() => {
   const playerSrc = () => (sel !== 'music' && SRCS[sel] && SRCS[sel].layer) ? SRCS[sel] : SRCS.music;
 
   // ---------- сцена: цветные кружки источников над радаром, управление выбранным - под ним ----------
-  let chipsEl = null, selEl = null, fileIn = null, addOpen = false, chipSig = '', selSig = '';
+  let chipsEl = null, selEl = null, fileIn = null, dirIn = null, addOpen = false, chipSig = '', selSig = '';
   const nameOf = s => s.key === 'music' ? (S.radio ? S.radio.name : t('tabPlayer')) : s.layer ? s.name : s.key === 'ai' ? t('aiLink') : s.key === 'next' ? lt('nextName') : (s.name || '');
   const tagOf = s => s.key === 'music' ? '♪' : s.key === 'ai' ? 'AI' : s.key === 'next' ? '•' : s.label;
   const colorOf = s => s.key === 'music' ? 'var(--r-acc, #3ef0ff)' : s.key === 'next' ? '#ffb86b' : s.color;
@@ -2899,9 +2963,12 @@ const LAY = (() => {
     // орбиты переезжают под радар: они относятся к выбранному источнику, а не к плееру
     const ow = root.querySelector('[data-widget="orbit"]');
     if (ow) { const box = ow.parentElement; selEl.after(ow); if (box && box !== root && !box.contains(radarEl) && !box.classList.contains('hud') && !box.classList.contains('wrap')) box.remove(); }
-    fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'audio/*'; fileIn.className = 'hidden';
-    fileIn.addEventListener('change', () => { const f = fileIn.files[0]; fileIn.value = ''; if (f) addFile(f); });
-    chipsEl.after(fileIn);
+    fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'audio/*'; fileIn.multiple = true; fileIn.className = 'hidden';
+    fileIn.addEventListener('change', () => { const fs = [...fileIn.files]; fileIn.value = ''; if (fs.length) addFiles(fs, false); });
+    dirIn = document.createElement('input'); dirIn.type = 'file'; dirIn.multiple = true; dirIn.className = 'hidden';
+    dirIn.setAttribute('webkitdirectory', ''); dirIn.setAttribute('directory', '');
+    dirIn.addEventListener('change', () => { const fs = [...dirIn.files]; dirIn.value = ''; if (fs.length) addFiles(fs, true); });
+    chipsEl.after(fileIn, dirIn);
     paint();
   }
   function buildChips(it) {
@@ -2925,6 +2992,7 @@ const LAY = (() => {
     const btn = (box, txt, fn, on) => { const b = document.createElement('button'); b.className = 'wb' + (on ? ' on' : ''); b.textContent = txt; b.addEventListener('click', fn); box.appendChild(b); };
     btn(add, lt('radio'), () => { picking = !picking; paint(); }, picking);
     btn(add, lt('file'), () => { addOpen = false; paint(); fileIn.click(); });
+    btn(add, lt('folder'), () => { addOpen = false; paint(); dirIn.click(); });
     if (TAB.can) btn(add, lt('tab'), () => { addOpen = false; paint(); addTab(); });
     add.style.gridTemplateColumns = 'repeat(' + add.children.length + ', minmax(0, 1fr))';
     chipsEl.appendChild(add);
@@ -2937,17 +3005,19 @@ const LAY = (() => {
   }
   function paintSel() {
     if (!selEl) return;
-    const s = CUR, sig = s.key + '|' + nameOf(s) + '|' + lang;
+    const s = CUR, multi = !!(s.files && s.files.length > 1), sig = s.key + '|' + nameOf(s) + '|' + lang + (multi ? '|' + s.idx : '');
     if (sig !== selSig) {
       selSig = sig; selEl.style.setProperty('--c', colorOf(s)); selEl.innerHTML = '';
       const head = document.createElement('div'); head.className = 'wss-head';
-      head.innerHTML = '<b>' + esc(tagOf(s)) + '</b><span>' + esc(nameOf(s)) + '</span>';
+      head.innerHTML = '<b>' + esc(tagOf(s)) + '</b><span>' + esc(nameOf(s) + (multi ? ' · ' + (s.idx + 1) + '/' + s.files.length : '')) + '</span>';
       selEl.appendChild(head);
       if (s.key === 'music') {
         const pp = document.createElement('button'); pp.className = 'wb wss-pp'; pp.addEventListener('click', () => act('play')); head.appendChild(pp);
       } else if (s.layer) {
         const ctl = document.createElement('div'); ctl.className = 'wss-ctl';
-        ctl.innerHTML = '<button class="wb wss-pp"></button><input type="range" class="w-seek wss-vol" min="0" max="100" value="' + Math.round(s.vol * 100) + '"><button class="wb wss-x" aria-label="' + esc(lt('remove')) + '">✕</button>';
+        ctl.innerHTML = '<button class="wb wss-pp"></button>' + (multi ? '<button class="wb wss-nx" aria-label="' + esc(lt('next')) + '">⏭</button>' : '') +
+          '<input type="range" class="w-seek wss-vol" min="0" max="100" value="' + Math.round(s.vol * 100) + '"><button class="wb wss-x" aria-label="' + esc(lt('remove')) + '">✕</button>';
+        if (multi) { ctl.classList.add('four'); ctl.querySelector('.wss-nx').addEventListener('click', () => { s.want = true; nextTrack(s); }); }
         ctl.querySelector('.wss-pp').addEventListener('click', () => toggle(s));
         const v = ctl.querySelector('.wss-vol'); v.style.setProperty('--p', v.value + '%');
         v.addEventListener('input', e => { s.vol = +e.target.value / 100; v.style.setProperty('--p', e.target.value + '%'); if (s.g && !s.muted) s.g.gain.setTargetAtTime(s.vol, ac.currentTime, 0.05); if (s.plain) s.plain.volume = s.vol; save(); });
@@ -2983,6 +3053,7 @@ HOOKS.paint.push(() => {
   root.querySelectorAll('.wtabs [data-mode]').forEach(b => { b.classList.toggle('live', !!live[b.dataset.mode]); b.style.setProperty('--dot', col[b.dataset.mode]); });
   root.style.setProperty('--cur', CUR.key === 'music' ? 'var(--r-acc, #3ef0ff)' : CUR.key === 'next' ? '#ffb86b' : (CUR.color || 'var(--r-acc, #3ef0ff)'));
   root.classList.toggle('detail', !!S.detail);
+  root.classList.toggle('empty', S.cur < 0 && !S.radio);
   LAY.paint();
 });
 
@@ -3064,8 +3135,157 @@ const EARUI = (() => {
   return { init };
 })();
 
+// ======================================================================
+//  Пример для первого посетителя: музыка собирается прямо в браузере (без файла с сервера)
+//  и сразу летит по кругу вокруг головы. Свой файл, папка или радио пример выключают.
+// ======================================================================
+const DEMO = (() => {
+  let file = null, busy = false;
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  async function synth() {
+    const sr = 22050, beat = 0.625, bars = 8, dur = bars * 4 * beat; // 96 ударов в минуту, 20 секунд, по кругу
+    const oc = new OfflineAudioContext(1, Math.ceil(sr * dur), sr);
+    const out = oc.createGain(); out.gain.value = 0.6; out.connect(oc.destination);
+    const nb = oc.createBuffer(1, sr, sr), nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
+    const tone = (t, type, f, a, peak, d) => { const o = oc.createOscillator(), g = oc.createGain(); o.type = type; o.frequency.value = f; o.connect(g).connect(out); env(g, t, a, peak, d); o.start(t); o.stop(Math.min(dur, t + a + d + 0.05)); };
+    const hat = t => { const s = oc.createBufferSource(), f = oc.createBiquadFilter(), g = oc.createGain(); s.buffer = nb; f.type = 'highpass'; f.frequency.value = 6000; s.connect(f).connect(g).connect(out); env(g, t, 0.002, 0.12, 0.05); s.start(t, Math.random() * 0.5, 0.1); };
+    const PROG = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], PAT = [0, 1, 2, 1, 0, 2, 1, 2];
+    for (let step = 0; step < bars * 8; step++) {
+      const t = step * beat / 2, ch = PROG[Math.floor(step / 8) % 4], i = step % 8;
+      tone(t, 'triangle', mtof(ch[PAT[i]] + 12), 0.005, 0.32, 0.42);
+      if (i === 0) for (const n of ch) tone(t, 'sine', mtof(n), 0.4, 0.06, 2.0); // мягкий аккорд
+      if (i === 0 || i === 4) tone(t, 'sine', mtof(ch[0] - 12), 0.01, 0.5, 0.9);
+      if (i % 2 === 1) hat(t);
+    }
+    const buf = await oc.startRendering(), d = buf.getChannelData(0), n = d.length;
+    let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(d[i]));
+    const k = peak > 0 ? 0.8 / peak : 1, ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i] * k)) * 32767, true);
+    return new File([ab], 'Wisp demo.wav', { type: 'audio/wav' });
+  }
+  async function play() {
+    if (busy) return; busy = true;
+    initAudio(); ac.resume();
+    try { if (!file) file = await synth(); } catch (e) { busy = false; toast(t('noAudio')); return; }
+    S.demo = true; S.tracks = [file]; S.cur = -1; load(0);
+    // музыка - выбранный источник, и сразу по кругу (настройки орбиты пользователя не сохраняем)
+    LAY.selectSource(SRCS.music);
+    O.shape = 'circle'; O.size = 0.6; O.period = 12; O.dir = 1;
+    if (!O.on) orbitStart(); else render();
+    ping('demo'); busy = false;
+  }
+  return { play };
+})();
+
+// ======================================================================
+//  Скан радио: ищет станции в открытом каталоге radio-browser.info - сначала в стране,
+//  где открыт плеер (по часовому поясу), потом в мире или в другой стране -
+//  и сам проверяет, какие из них пойдут в 3D (станция должна разрешать браузеру обработку звука).
+// ======================================================================
+const SCAN = (() => {
+  const API = ['https://de1.api.radio-browser.info', 'https://nl1.api.radio-browser.info', 'https://at1.api.radio-browser.info', 'https://fi1.api.radio-browser.info'];
+  const TZ = { 'Europe/Warsaw': 'PL', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Moscow': 'RU', 'Europe/Minsk': 'BY', 'Europe/Berlin': 'DE', 'Europe/Vienna': 'AT',
+    'Europe/Zurich': 'CH', 'Europe/Paris': 'FR', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Lisbon': 'PT',
+    'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Bucharest': 'RO',
+    'Europe/Sofia': 'BG', 'Europe/Athens': 'GR', 'Europe/Istanbul': 'TR', 'Europe/Helsinki': 'FI', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO',
+    'Europe/Copenhagen': 'DK', 'Europe/Vilnius': 'LT', 'Europe/Riga': 'LV', 'Europe/Tallinn': 'EE', 'Europe/Chisinau': 'MD', 'Europe/Belgrade': 'RS',
+    'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Asia/Tbilisi': 'GE', 'Asia/Yerevan': 'AM', 'Asia/Baku': 'AZ', 'Asia/Almaty': 'KZ', 'Asia/Tashkent': 'UZ',
+    'Asia/Jerusalem': 'IL', 'Asia/Tokyo': 'JP', 'Asia/Seoul': 'KR', 'Asia/Shanghai': 'CN', 'Asia/Kolkata': 'IN', 'Australia/Sydney': 'AU',
+    'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Mexico_City': 'MX', 'America/Sao_Paulo': 'BR', 'America/Argentina/Buenos_Aires': 'AR',
+    'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US' };
+  const q = id => document.getElementById(id);
+  let here = 'US', countries = null, runId = 0;
+  function detect() {
+    try { const z = Intl.DateTimeFormat().resolvedOptions().timeZone; if (TZ[z]) return TZ[z]; } catch (e) {}
+    for (const l of (navigator.languages || [navigator.language || ''])) { const m = /-([A-Z]{2})$/i.exec(l); if (m) return m[1].toUpperCase(); }
+    return 'US';
+  }
+  const cname = cc => { try { return new Intl.DisplayNames([lang], { type: 'region' }).of(cc) || cc; } catch (e) { return cc; } };
+  async function api(path) {
+    for (const h of API.slice().sort(() => Math.random() - 0.5)) {
+      const c = new AbortController(), tm = setTimeout(() => c.abort(), 7000);
+      try { const r = await fetch(h + path, { signal: c.signal }); if (r.ok) return await r.json(); } catch (e) {} finally { clearTimeout(tm); }
+    }
+    throw new Error('radio-browser');
+  }
+  // 3D возможно, если сервер станции отвечает браузеру с разрешением (CORS). Проверяем заголовки и сразу обрываем поток.
+  async function can3d(url) {
+    const c = new AbortController(), tm = setTimeout(() => c.abort(), 5000);
+    try { const r = await fetch(url, { mode: 'cors', cache: 'no-store', signal: c.signal }); c.abort(); return r.ok; }
+    catch (e) { return e.name === 'AbortError' ? null : false; }
+    finally { clearTimeout(tm); }
+  }
+  function row(st, status) {
+    const r = document.createElement('div'); r.className = 'st';
+    r.innerHTML = '<button class="sp"><b></b><small></small></button><span class="bd wait">…</span><button class="add">+</button>';
+    r.querySelector('b').textContent = st.name;
+    r.querySelector('small').textContent = [st.cc, st.codec, st.bitrate ? st.bitrate + 'k' : ''].filter(Boolean).join(' · ');
+    r.querySelector('.sp').addEventListener('click', () => { playStation(st); renderStations(); q('scanList').querySelectorAll('.st').forEach(x => x.classList.toggle('on', x === r)); });
+    const add = r.querySelector('.add');
+    const saved = () => stations.some(x => x.url === st.url);
+    if (saved()) { add.textContent = '✓'; add.disabled = true; }
+    add.addEventListener('click', () => { if (!saved()) { stations.push({ name: st.name, url: st.url, d3: st.d3 }); store.set('pp_stations', stations); renderStations(); } add.textContent = '✓'; add.disabled = true; });
+    st.el = r; return r;
+  }
+  function badge(st) {
+    const b = st.el.querySelector('.bd');
+    b.className = 'bd' + (st.d3 === true ? '' : ' no');
+    b.textContent = st.d3 === true ? '3D' : st.d3 === false ? t('stereo') : '?';
+  }
+  async function scan(cc) {
+    const my = ++runId, box = q('scanList'), state = q('scanState');
+    box.innerHTML = ''; state.textContent = t('scanLoading');
+    let list;
+    try {
+      list = await api('/json/stations/search?hidebroken=true&order=clickcount&reverse=true&limit=80' + (cc ? '&countrycode=' + cc : ''));
+    } catch (e) { if (my === runId) state.textContent = t('scanFail'); return; }
+    if (my !== runId) return;
+    // только https: страница открыта по https, и обычный http-поток браузер не пустит
+    const seen = new Set(), sts = [];
+    for (const s of list) {
+      const url = (s.url_resolved || s.url || '').trim();
+      if (!/^https:\/\//i.test(url) || seen.has(url)) continue;
+      seen.add(url); sts.push({ name: (s.name || url).trim().slice(0, 60), url, cc: s.countrycode, codec: s.codec, bitrate: s.bitrate });
+      if (sts.length >= 30) break;
+    }
+    if (!sts.length) { state.textContent = t('scanNone'); return; }
+    sts.forEach(st => box.appendChild(row(st)));
+    let done = 0, i = 0;
+    const tick = () => { state.textContent = t('scanChecking').replace('{n}', done).replace('{m}', sts.length); };
+    tick();
+    const worker = async () => { while (i < sts.length && my === runId) { const st = sts[i++]; st.d3 = await can3d(st.url); if (my !== runId) return; badge(st); done++; tick(); } };
+    await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
+    if (my !== runId) return;
+    // 3D - наверх
+    sts.slice().sort((a, b) => (b.d3 === true) - (a.d3 === true)).forEach(st => box.appendChild(st.el));
+    state.textContent = t('scanDone').replace('{n}', sts.length).replace('{k}', sts.filter(s => s.d3 === true).length);
+  }
+  async function fillCountries() {
+    if (countries) return;
+    try { countries = await api('/json/countries?order=stationcount&reverse=true&hidebroken=true'); } catch (e) { countries = []; }
+    const sel = q('scanCountry');
+    const opts = countries.filter(c => c.iso_3166_1 && c.stationcount >= 20).slice(0, 90)
+      .map(c => ({ cc: c.iso_3166_1.toUpperCase(), n: cname(c.iso_3166_1.toUpperCase()) })).sort((a, b) => a.n.localeCompare(b.n, lang));
+    sel.innerHTML = '<option value="">' + t('scanOther') + '</option>' + opts.map(o => '<option value="' + o.cc + '">' + o.n.replace(/</g, '&lt;') + '</option>').join('');
+    sel.classList.remove('hidden');
+  }
+  function paint() { const b = q('scanHere'); if (b) b.textContent = '📡 ' + t('scanIn') + ' ' + cname(here); }
+  function init() {
+    here = detect(); paint();
+    q('scanHere').addEventListener('click', () => { scan(here); fillCountries(); });
+    q('scanWorld').addEventListener('click', () => { scan(''); fillCountries(); });
+    q('scanCountry').addEventListener('change', e => { if (e.target.value) scan(e.target.value); });
+  }
+  return { init, paint };
+})();
+
 // ---------------- Старт ----------------
 makeMenuWidgets();
+SCAN.init();
 EARUI.init();
 AI.init();
 LAY.init();
