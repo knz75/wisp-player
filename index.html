@@ -141,6 +141,7 @@
   #skin .wss-head .wb { flex: none; width: 52px; min-height: 36px; }
   #skin .wss-ctl { display: grid; grid-template-columns: 48px minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
   #skin .wss-ctl .wb { min-height: 40px; }
+  #skin .wss-ctl.two { grid-template-columns: 48px minmax(0, 1fr); }
   #skin .wss-ctl.four { grid-template-columns: 48px 48px minmax(0, 1fr) 44px; }
   #skin .wss-hint { font-size: .75rem; opacity: .7; line-height: 1.4; margin: 0; }
   #skin .w-orbit .wb.on { background: var(--cur, var(--r-acc)) !important; border-color: var(--cur, var(--r-acc)) !important; color: #071014 !important; }
@@ -908,14 +909,14 @@ const L = v => typeof v === 'string' ? v : (v && (v[lang] || v.en)) || '';
 // ---------------- Состояние ----------------
 const S = {
   pos: store.get('pp_pos', { x: -0.2, y: 0 }), speed: store.get('pp_speed', 1),
-  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, detail: store.get('pp_detail', false), live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
+  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, vol: store.get('pp_vol', 1), detail: store.get('pp_detail', false), live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
   sleepMin: 0, sleepEnd: 0
 };
 const METERS = 3, SIZE = 300, C = 150;
 
 // ---------------- Звук ----------------
 EAR.s = store.get('pp_ear', 0.45);
-let ac = null, panner, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave, duckG;
+let ac = null, panner, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave, duckG, mainVol;
 // Мягкое «комнатное» эхо: шум, который со временем темнеет (как в настоящей комнате),
 // плюс 18 мс тишины в начале. Резкого белого шума с верхами больше нет - он и давал «писк».
 function makeImpulse(sec) {
@@ -947,7 +948,8 @@ function initAudio() {
     src.connect(mono); mono.connect(lowpass); lowpass.connect(panner); panner.connect(spatialOut);
     lowpass.connect(verb); verb.connect(wetLP); wetLP.connect(wetHP); wetHP.connect(wet); wet.connect(spatialOut);
     duckG = ac.createGain(); duckG.connect(master);
-    src.connect(dryGain); spatialOut.connect(duckG); dryGain.connect(duckG);
+    mainVol = ac.createGain(); mainVol.gain.value = S.vol; mainVol.connect(duckG); // громкость самого плеера
+    src.connect(dryGain); spatialOut.connect(mainVol); dryGain.connect(mainVol);
     master.connect(analyser); analyser.connect(ac.destination);
     applyPos(true); applyFx(true);
     if (ac.addEventListener) ac.addEventListener('statechange', () => { if (ac.state === 'running' && auPending) reapplyAll(); });
@@ -1010,6 +1012,11 @@ function tgt(p, v, tc) {
   _pl.set(p, v); p.setTargetAtTime(v, ac.currentTime, tc);
 }
 function setParam(p, v, now) { if (now) { _pl.set(p, v); p.setValueAtTime(v, ac.currentTime); } else tgt(p, v, 0.04); }
+function setMainVol(v) {
+  S.vol = Math.max(0, Math.min(1, v)); store.set('pp_vol', S.vol);
+  if (mainVol) mainVol.gain.setTargetAtTime(S.vol, ac.currentTime, 0.05);
+  audioPlain.volume = S.vol; // станции без 3D играют мимо обработки
+}
 function reapplyAll() { auPending = false; Object.values(SRCS).forEach(src => { try { applySrc(src); } catch (e) {} }); }
 function applyPos(now) {
   if (!ac) return;
@@ -1732,6 +1739,7 @@ function playStation(st) {
 function startPlain(st, my) {
   audioEl.onerror = null; audioEl.removeAttribute('src'); audioEl.load();
   S.plain = true;
+  audioPlain.volume = S.vol;
   audioPlain.src = st.url;
   audioPlain.onplaying = () => { if (my === radioTry) { mark(st, false); toast(t('no3d')); } audioPlain.onplaying = null; };
   audioPlain.onerror = () => { if (my === radioTry && S.radio === st) { toast(t('streamFail')); stopRadio(); render(); } };
@@ -1830,17 +1838,20 @@ if (FEEDBACK_URL) $('fbLink').href = FEEDBACK_URL; else $('fbLink').classList.ad
 // ---------------- Своя статистика: тихие отметки в журнал сервера ----------------
 // Без cookies и без личных данных: только «что произошло» и язык. Каждая отметка - раз за запуск.
 const pinged = {};
+// Для статистики «живых людей»: сколько дней прошло с первого визита (0 - сегодня впервые).
+// Никакого номера или имени - только это число, оно лежит в браузере человека.
+const SINCE = (() => { const today = Math.floor(Date.now() / 864e5); let f = store.get('pp_first', 0); if (!f) { f = today; store.set('pp_first', f); } return Math.max(0, Math.min(999, today - f)); })();
 function ping(ev) {
   if (pinged[ev] || location.protocol !== 'https:') return;
   pinged[ev] = 1;
   try {
     const app = window.matchMedia && matchMedia('(display-mode: standalone)').matches ? 'app' : 'web';
-    fetch('/e/' + ev + '?l=' + lang + '&m=' + app, { cache: 'no-store', keepalive: true }).catch(() => {});
+    fetch('/e/' + ev + '?l=' + lang + '&m=' + app + '&d=' + SINCE, { cache: 'no-store', keepalive: true }).catch(() => {});
   } catch (e) {}
 }
 ping('open');
 window.addEventListener('appinstalled', () => ping('install'));
-audioEl.addEventListener('play', () => ping(S.radio ? 'radio' : 'play'));
+audioEl.addEventListener('play', () => { if (!S.demo) ping(S.radio ? 'radio' : 'play'); });
 audioPlain.addEventListener('play', () => ping('radio'));
 
 $('expSkin').addEventListener('click', () => {
@@ -2344,7 +2355,7 @@ const AI = (() => {
     if (ls('wispAiPending')) { setStatus('remembering'); await summarize(); }
     convo = [];
     placeCtx = await getPlace();
-    connect();
+    connect(); ping('ai');
     starting = false; render(); requestDraw();
   }
   function stop() {
@@ -2627,7 +2638,7 @@ const CALL = (() => {
     try { const j = await (await fetch('/call/api/turn')).json(); if (j.iceServers) ICE.push(...j.iceServers); } catch (e) {}
     room = joinRoom || newRoom();
     history.replaceState(null, '', '/?call=' + room + (FORCE_RELAY ? '&relay=1' : ''));
-    starting = false; setStatus('connecting'); connect(); render();
+    starting = false; setStatus('connecting'); connect(); render(); ping('call');
   }
   function end() {
     room = null;
@@ -2803,11 +2814,11 @@ const TAB = (() => {
 //  У каждого свой цвет, своя точка на радаре и своя орбита. Это фон: когда говорят, они отходят.
 // ======================================================================
 const LAYT = {
-  ru: { main:'Плеер', radio:'+ Радио', file:'+ Файлы', folder:'+ Папка', next:'Следующий трек', tab:'+ Вкладка', pickSt:'Выберите станцию',
+  ru: { volume:'Громкость', main:'Плеер', radio:'+ Радио', file:'+ Файлы', folder:'+ Папка', next:'Следующий трек', tab:'+ Вкладка', pickSt:'Выберите станцию',
     noSt:'Нет станций - добавьте их в окне «Радио» плеера', max:'Больше четырёх звуков не добавить', remove:'Убрать',
     no3d:'Станция не разрешает 3D - звучит обычным стерео', fail:'Не играет: ', tabName:'Вкладка',
     addTitle:'Добавить звук', nextName:'Место первого собеседника', aiHint:'Разговором управляет вкладка «Попутчик» наверху, местом - радар и орбиты', callHint:'Звонком управляет вкладка «Звонок» наверху, местом голоса - радар и орбиты' },
-  en: { main:'Player', radio:'+ Radio', file:'+ Files', folder:'+ Folder', next:'Next track', tab:'+ Tab', pickSt:'Choose a station',
+  en: { volume:'Volume', main:'Player', radio:'+ Radio', file:'+ Files', folder:'+ Folder', next:'Next track', tab:'+ Tab', pickSt:'Choose a station',
     noSt:'No stations - add them in the player\'s «Radio» window', max:'No more than four sounds', remove:'Remove',
     no3d:'The station does not allow 3D - plays as plain stereo', fail:'Does not play: ', tabName:'Tab',
     addTitle:'Add a sound', nextName:'Place of the first caller', aiHint:'The «Companion» tab above controls the talk, the radar and orbits control its place', callHint:'The «Call» tab above controls the call, the radar and orbits control the voice\'s place' }
@@ -2890,7 +2901,7 @@ const LAY = (() => {
     if (sel === c.key) sel = 'music';
     save(); build(); if (MODE === 'player') setMode('player'); else requestDraw();
   }
-  function after() { build(); if (MODE === 'player') setMode('player'); else requestDraw(); }
+  function after() { ping('layer'); build(); if (MODE === 'player') setMode('player'); else requestDraw(); }
   // файлы или папка: один файл крутится по кругу, несколько - идут плейлистом по порядку, потом снова с начала
   function addFiles(files, isDir) {
     files = [...files].filter(f => (f.type || '').startsWith('audio/') || AUDIO_RE.test(f.name));
@@ -3012,7 +3023,12 @@ const LAY = (() => {
       head.innerHTML = '<b>' + esc(tagOf(s)) + '</b><span>' + esc(nameOf(s) + (multi ? ' · ' + (s.idx + 1) + '/' + s.files.length : '')) + '</span>';
       selEl.appendChild(head);
       if (s.key === 'music') {
-        const pp = document.createElement('button'); pp.className = 'wb wss-pp'; pp.addEventListener('click', () => act('play')); head.appendChild(pp);
+        const ctl = document.createElement('div'); ctl.className = 'wss-ctl two';
+        ctl.innerHTML = '<button class="wb wss-pp"></button><input type="range" class="w-seek wss-vol" min="0" max="100" value="' + Math.round(S.vol * 100) + '" aria-label="' + esc(lt('volume')) + '">';
+        ctl.querySelector('.wss-pp').addEventListener('click', () => act('play'));
+        const v = ctl.querySelector('.wss-vol'); v.style.setProperty('--p', v.value + '%');
+        v.addEventListener('input', e => { v.style.setProperty('--p', e.target.value + '%'); setMainVol(+e.target.value / 100); });
+        selEl.appendChild(ctl);
       } else if (s.layer) {
         const ctl = document.createElement('div'); ctl.className = 'wss-ctl';
         ctl.innerHTML = '<button class="wb wss-pp"></button>' + (multi ? '<button class="wb wss-nx" aria-label="' + esc(lt('next')) + '">⏭</button>' : '') +
@@ -3276,8 +3292,8 @@ const SCAN = (() => {
   function paint() { const b = q('scanHere'); if (b) b.textContent = '📡 ' + t('scanIn') + ' ' + cname(here); }
   function init() {
     here = detect(); paint();
-    q('scanHere').addEventListener('click', () => { scan(here); fillCountries(); });
-    q('scanWorld').addEventListener('click', () => { scan(''); fillCountries(); });
+    q('scanHere').addEventListener('click', () => { ping('scan'); scan(here); fillCountries(); });
+    q('scanWorld').addEventListener('click', () => { ping('scan'); scan(''); fillCountries(); });
     q('scanCountry').addEventListener('change', e => { if (e.target.value) scan(e.target.value); });
   }
   return { init, paint };
