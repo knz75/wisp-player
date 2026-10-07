@@ -12,6 +12,27 @@ Wisp flips that. Move the sound out of the center of your head - a little to the
 
 Let it fly in orbits, and it does the opposite: a gentle, living point that keeps a small part of your attention outward, on the world around you, instead of down into a screen.
 
+## A personal layer, not a window into another world
+
+VR, AR and head tracking try to pin sound to the world: the forest stays behind the window, the voice stays in the corner of the room, and when you turn your head the sound stays put. That is a way of *replacing* reality or blending into it.
+
+Wisp is the opposite on purpose. It is a **personal layer** between you and the world - a transparent dome, like a helmet or a shawl. The sounds live on its surface and move with you; the world outside stays the world. On a treadmill you are not *in* a cave - you are in your own dome that sounds like a cave. Your brain already has enough to do while you walk; it does not need to check whether the forest in your ears matches the window. That is why Wisp has no head tracking: not a missing feature, a different idea.
+
+Inside the dome, **distance means closeness**, the way it does between people (the anthropologist Edward T. Hall called these proxemic zones):
+
+| Layer | Distance | What lives there | How it feels |
+| --- | --- | --- | --- |
+| Intimate | at the ear, up to ~0.5 m | messages, the companion | personal, only for you |
+| Personal | 0.5-1.2 m | an audiobook, a friend on a call | close, «with me» |
+| Room | 1.2-3 m | music, radio | like furniture: there, but not in the way |
+| Far | 3 m and beyond | rain, forest, city | background, air, a sense of place |
+
+This is where «music steps aside» comes from: what matters moves into a nearer layer, the rest moves further out. Not louder or quieter - closer or further.
+
+Screens cannot do this. A huge TV on the wall or a monitor in front of your eyes is still one flat surface: windows and tabs can only be stacked, and «nearer» or «further» can only be drawn. By ear, distance is felt at once - from loudness, from how the high frequencies fade, from how much room echo there is - with no effort at all. And sounds at different distances do not hide each other: the brain separates them by itself, the way you follow one voice in a noisy café.
+
+**Calm, not immersive.** Dolby Atmos, games and films are made for immersion: they take you out of reality into an imagined scene - a battlefield, a desert, space - and that needs you to sit still and imagine. On the street this works against you: the scene in your ears argues with what your eyes see. Wisp does the opposite: it does not pretend to be another place, it only lays the sounds out around you, and reality stays in charge. This is what Mark Weiser and John Seely Brown called *calm technology* in the 1990s: it lives at the edge of attention and comes to the center only when needed. In Wisp that is literal - the far layer is the edge, the layer at your ear is the center. So the rule is simple: on the move, sound never argues with what your eyes see. No battlefields or caves by default - only places and distances. An «atmosphere» is something you switch on yourself, when reality can be let go - on a treadmill, at home with your eyes closed.
+
 ## Features
 
 - **Radar** - drag the parrot to place the sound: shoulder, ahead, behind, up to 3 m away.
@@ -119,6 +140,10 @@ Telegram: [@WispPlayer_bot](https://t.me/WispPlayer_bot) - bugs, ideas, translat
 Главная находка: если вывести звук из центра головы в сторону и немного вдаль, он перестаёт забирать всё внимание и работает как фон - как радио на подоконнике, пока вы работаете. А орбита, наоборот, превращает прогулку в ощущение: звук живёт вокруг вас, и взгляд остаётся на улице, а не в экране.
 
 Всё работает на встроенном в браузер Web Audio, файлы никуда не уходят. Wisp - это не только плеер, а система, где у каждого звука своё место на одном общем радаре. Три вкладки: **Плеер** (музыка, книги, радио), **Попутчик** - голосовой ИИ на плече (Gemini Live, со своим бесплатным ключом) и **Звонок** - разговор по ссылке, где каждый собеседник - своя точка вокруг головы. Всё может звучать одновременно, а когда кто-то говорит, музыка не выключается, а отходит назад и становится тише.
+
+**Личный слой, а не окно в другой мир.** VR и отслеживание головы привязывают звук к миру - чтобы заменить реальность. Wisp - наоборот: прозрачный купол между тобой и миром, как шлем или платок. Звуки живут на его поверхности и идут вместе с тобой. Внутри купола расстояние означает близость, как между людьми: у уха - сообщения и попутчик, рядом - книга, в комнате - музыка, вдали - дождь и город. Поэтому «музыка уступает» не тише, а дальше. Экран так не умеет: огромный телевизор или монитор перед глазами - всё равно одна плоскость, окна и вкладки можно только сложить стопкой, а «ближе-дальше» - только нарисовать. На слух расстояние чувствуется сразу и без усилий, а звуки на разных расстояниях не заслоняют друг друга.
+
+**Спокойная технология, а не погружение.** Atmos, игры и кино уводят из реальности в выдуманную сцену - поле боя, пустыню, космос, - и для этого нужно сидеть и представлять. На улице такая картинка в ушах спорит с тем, что видят глаза. Wisp не изображает другое место: он только раскладывает звуки вокруг, а реальность остаётся главной. Это то, что Марк Вайзер и Джон Сили Браун ещё в 1990-х назвали «спокойной технологией»: она живёт на краю внимания и выходит в центр, только когда нужно. Поэтому в дороге - никаких пещер и полей боя по умолчанию, только места и расстояния. Атмосферу каждый включает сам, когда реальность можно отпустить: на беговой дорожке или дома с закрытыми глазами.
 
 **Идеи на будущее** (опубликованы 6 октября 2026 года, подробно - в английском разделе «Ideas for the future»): уведомления голосом, у каждого источника своё место вокруг головы, при этом остальной звук не выключается, а отходит назад, книга встаёт на паузу, а ответ голосом нажимает кнопки уведомления; приоритеты расстоянием как замена обычному «приглушить или остановить»; жест «говорю с тобой» для ИИ; мягкое слежение за головой; блуждание звука по 8 секторам сферы.
 
