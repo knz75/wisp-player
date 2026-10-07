@@ -249,6 +249,12 @@
     <h3 data-i="live"></h3><div class="seg" data-mw="live"></div>
     <h3 data-i="duck2"></h3><div class="seg" data-mw="duck"></div>
     <h3 data-i="detail"></h3><div class="seg" data-mw="detail"></div>
+    <div class="ear-l"><span data-i="dome"></span><b id="domeVal"></b></div>
+    <input type="range" class="w-seek" id="domeSl" min="40" max="160" step="5">
+    <p class="ear-t" data-i="domeHint"></p>
+    <div class="ear-l"><span data-i="width"></span><b id="widthVal"></b></div>
+    <input type="range" class="w-seek" id="widthSl" min="0" max="120" step="5">
+    <p class="ear-t" data-i="widthHint"></p>
     <h3 data-i="sleep"></h3><div class="seg" data-mw="sleep"></div>
   </div></details>
   <details class="fold" id="earFold"><summary data-i="earTitle"></summary><div class="fb">
@@ -846,6 +852,14 @@ Object.entries({ ru: 'Музыка уступает голосу', uk: 'Музи
   es: 'La música cede a las voces', fr: 'La musique cède aux voix', it: 'La musica cede alle voci', pt: 'A música cede às vozes', tr: 'Müzik seslere yol verir' })
   .forEach(([k, v]) => { if (T[k]) T[k].duck2 = v; });
 Object.entries({
+  ru: ['Радиус купола', 'Ближе - укутаться, звук у самой головы. Дальше - как в просторной комнате. Меняет сразу все звуки, расстановка сохраняется.', 'Ширина стерео', 'Песня как две колонки: 0° - одна точка, около 60° - колонки перед тобой, больше - музыка разъезжается вокруг.'],
+  uk: ['Радіус купола', 'Ближче - закутатися, звук біля самої голови. Далі - як у просторій кімнаті. Змінює одразу всі звуки, розстановка зберігається.', 'Ширина стерео', 'Пісня як дві колонки: 0° - одна точка, близько 60° - колонки перед тобою, більше - музика розʼїжджається довкола.'],
+  pl: ['Promień kopuły', 'Bliżej - otulić się, dźwięk tuż przy głowie. Dalej - jak w przestronnym pokoju. Zmienia wszystkie dźwięki naraz, układ zostaje.', 'Szerokość stereo', 'Utwór jak dwa głośniki: 0° - jeden punkt, ok. 60° - głośniki przed tobą, więcej - muzyka rozchodzi się wokół.'],
+  en: ['Dome radius', 'Closer - wrap yourself in, the sound right at your head. Further - like a spacious room. Changes all sounds at once, the layout stays.', 'Stereo width', 'A song as two speakers: 0° - one point, about 60° - speakers in front of you, more - the music spreads around you.'],
+  de: ['Kuppelradius', '', 'Stereobreite', ''], es: ['Radio de la cúpula', '', 'Anchura estéreo', ''], fr: ['Rayon du dôme', '', 'Largeur stéréo', ''],
+  it: ['Raggio della cupola', '', 'Ampiezza stereo', ''], pt: ['Raio da cúpula', '', 'Largura estéreo', ''], tr: ['Kubbe yarıçapı', '', 'Stereo genişliği', '']
+}).forEach(([k, v]) => { if (T[k]) { T[k].dome = v[0]; if (v[1]) T[k].domeHint = v[1]; T[k].width = v[2]; if (v[3]) T[k].widthHint = v[3]; } });
+Object.entries({
   ru: { scanTitle:'Найти станции', scanIn:'Скан:', scanWorld:'🌍 Весь мир', scanOther:'Другая страна…', scanLoading:'Ищу станции…', scanFail:'Каталог радио не ответил, попробуйте позже',
     scanNone:'Подходящих станций не нашлось', scanChecking:'Проверяю, какие идут в 3D: {n} из {m}', scanDone:'Найдено {n}, в 3D: {k}. Нажмите на станцию - послушать, «+» - сохранить в свои.' },
   uk: { scanTitle:'Знайти станції', scanIn:'Скан:', scanWorld:'🌍 Увесь світ', scanOther:'Інша країна…', scanLoading:'Шукаю станції…', scanFail:'Каталог радіо не відповів, спробуйте пізніше',
@@ -909,14 +923,14 @@ const L = v => typeof v === 'string' ? v : (v && (v[lang] || v.en)) || '';
 // ---------------- Состояние ----------------
 const S = {
   pos: store.get('pp_pos', { x: -0.2, y: 0 }), speed: store.get('pp_speed', 1),
-  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, vol: store.get('pp_vol', 1), detail: store.get('pp_detail', false), live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
+  radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, vol: store.get('pp_vol', 1), dome: store.get('pp_dome', 1), width: store.get('pp_width', 0), detail: store.get('pp_detail', false), live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
   sleepMin: 0, sleepEnd: 0
 };
 const METERS = 3, SIZE = 300, C = 150;
 
 // ---------------- Звук ----------------
 EAR.s = store.get('pp_ear', 0.45);
-let ac = null, panner, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave, duckG, mainVol;
+let ac = null, panner, pannerR, chL, chR, lowpass, wet, master, analyser, spatialOut, dryGain, freq, wave, duckG, mainVol;
 // Мягкое «комнатное» эхо: шум, который со временем темнеет (как в настоящей комнате),
 // плюс 18 мс тишины в начале. Резкого белого шума с верхами больше нет - он и давал «писк».
 function makeImpulse(sec) {
@@ -945,7 +959,13 @@ function initAudio() {
     wet = ac.createGain(); spatialOut = ac.createGain(); dryGain = ac.createGain(); dryGain.gain.value = 0;
     master = ac.createGain(); analyser = ac.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.75;
     freq = new Uint8Array(analyser.frequencyBinCount); wave = new Uint8Array(analyser.fftSize);
-    src.connect(mono); mono.connect(lowpass); lowpass.connect(panner); panner.connect(spatialOut);
+    // песня - две виртуальные колонки: левый канал в одну точку, правый в другую (ширина 0 - обе в одном месте)
+    lowpass.channelCount = 2; lowpass.channelCountMode = 'explicit'; lowpass.channelInterpretation = 'speakers';
+    pannerR = ac.createPanner(); pannerR.panningModel = 'HRTF'; pannerR.distanceModel = 'inverse'; pannerR.refDistance = 1; pannerR.rolloffFactor = 1;
+    for (const pn of [panner, pannerR]) { try { pn.channelCount = 1; pn.channelCountMode = 'explicit'; } catch (e) {} }
+    const split = ac.createChannelSplitter(2); chL = ac.createGain(); chR = ac.createGain(); chL.gain.value = chR.gain.value = 0.5;
+    src.connect(lowpass); lowpass.connect(split); split.connect(chL, 0); split.connect(chR, 1);
+    chL.connect(panner); chR.connect(pannerR); panner.connect(spatialOut); pannerR.connect(spatialOut);
     lowpass.connect(verb); verb.connect(wetLP); wetLP.connect(wetHP); wetHP.connect(wet); wet.connect(spatialOut);
     duckG = ac.createGain(); duckG.connect(master);
     mainVol = ac.createGain(); mainVol.gain.value = S.vol; mainVol.connect(duckG); // громкость самого плеера
@@ -1020,10 +1040,21 @@ function setMainVol(v) {
 function reapplyAll() { auPending = false; Object.values(SRCS).forEach(src => { try { applySrc(src); } catch (e) {} }); }
 function applyPos(now) {
   if (!ac) return;
-  const P = musicPos(), x = P.x * METERS, z = P.y * METERS, d = Math.hypot(x, z);
+  const P = musicPos(), x = P.x * METERS * S.dome, z = P.y * METERS * S.dome, d = Math.hypot(x, z);
   const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7)));
-  if (panner.positionX) { setParam(panner.positionX, x, now); setParam(panner.positionY, 0, now); setParam(panner.positionZ, earZ(z, d), now); }
-  else panner.setPosition(x, 0, earZ(z, d));
+  // две колонки по сторонам от места музыки; левая всегда левее (даже если сцена сзади)
+  const w = (S.width || 0) * Math.PI / 180;
+  let A = { x, z }, B = { x, z };
+  if (w > 0.001 && d > 0.05) {
+    const az = Math.atan2(x, -z);
+    A = { x: d * Math.sin(az - w / 2), z: -d * Math.cos(az - w / 2) }; B = { x: d * Math.sin(az + w / 2), z: -d * Math.cos(az + w / 2) };
+    if (A.x > B.x) { const t = A; A = B; B = t; }
+  }
+  for (const [pn, q] of [[panner, A], [pannerR, B]]) {
+    if (pn.positionX) { setParam(pn.positionX, q.x, now); setParam(pn.positionY, 0, now); setParam(pn.positionZ, earZ(q.z, d), now); }
+    else pn.setPosition(q.x, 0, earZ(q.z, d));
+  }
+  const cg = 0.5 + 0.21 * Math.min(1, (S.width || 0) / 120); setParam(chL.gain, cg, now); setParam(chR.gain, cg, now);
   const back = d > 0.01 ? Math.max(0, z / d) : 0; // 0 - впереди или сбоку, 1 - прямо за спиной
   setParam(lowpass.frequency, 20000 * Math.pow(5000 / 20000, k) * earMul(back), now);
   setParam(wet.gain, S.echo ? 0.015 + 0.07 * (d / METERS) : 0, now); // эхо тихое и тёмное; можно выключить
@@ -1152,7 +1183,7 @@ const fmt = s => { s = Math.floor(s || 0); const h = Math.floor(s / 3600), m = M
 const fmtM = s => { s = Math.ceil(s); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const stripExt = n => n.replace(/\.[^.]+$/, '');
 function posInfo() {
-  const m = Math.hypot(S.pos.x, S.pos.y) * METERS;
+  const m = Math.hypot(S.pos.x, S.pos.y) * METERS * S.dome;
   const deg = (Math.round(Math.atan2(S.pos.x, -S.pos.y) * 180 / Math.PI) + 360) % 360;
   return { m, deg, dist: m < 0.05 ? '0.0 m' : m.toFixed(1) + ' m', degS: String(deg).padStart(3, '0') + '°' };
 }
@@ -1840,13 +1871,15 @@ if (FEEDBACK_URL) $('fbLink').href = FEEDBACK_URL; else $('fbLink').classList.ad
 const pinged = {};
 // Для статистики «живых людей»: сколько дней прошло с первого визита (0 - сегодня впервые).
 // Никакого номера или имени - только это число, оно лежит в браузере человека.
-const SINCE = (() => { const today = Math.floor(Date.now() / 864e5); let f = store.get('pp_first', 0); if (!f) { f = today; store.set('pp_first', f); } return Math.max(0, Math.min(999, today - f)); })();
+// FIRST - этот браузер видит Wisp впервые в жизни (уходит с отметкой open ровно один раз).
+let FIRST = false;
+const SINCE = (() => { const today = Math.floor(Date.now() / 864e5); let f = store.get('pp_first', 0); if (!f) { f = today; store.set('pp_first', f); FIRST = true; } return Math.max(0, Math.min(999, today - f)); })();
 function ping(ev) {
   if (pinged[ev] || location.protocol !== 'https:') return;
   pinged[ev] = 1;
   try {
     const app = window.matchMedia && matchMedia('(display-mode: standalone)').matches ? 'app' : 'web';
-    fetch('/e/' + ev + '?l=' + lang + '&m=' + app + '&d=' + SINCE, { cache: 'no-store', keepalive: true }).catch(() => {});
+    fetch('/e/' + ev + '?l=' + lang + '&m=' + app + '&d=' + SINCE + (ev === 'open' && FIRST ? '&f=1' : ''), { cache: 'no-store', keepalive: true }).catch(() => {});
   } catch (e) {}
 }
 ping('open');
@@ -2091,7 +2124,7 @@ const AI = (() => {
   }
   function applyPos() {
     if (!ready) return;
-    const p = livePosOf(SRCS.ai), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
+    const p = livePosOf(SRCS.ai), x = p.x * METERS * S.dome, z = p.y * METERS * S.dome, d = Math.hypot(x, z), now = ac.currentTime;
     tgt(pan.positionX, x, 0.04); tgt(pan.positionY, 0, 0.04); tgt(pan.positionZ, earZ(z, d), 0.04);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
     tgt(lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.04);
@@ -2495,7 +2528,7 @@ const CALL = (() => {
   }
   function applyPos(v) {
     if (!v || !v.pan) return;
-    const p = livePosOf(v), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
+    const p = livePosOf(v), x = p.x * METERS * S.dome, z = p.y * METERS * S.dome, d = Math.hypot(x, z), now = ac.currentTime;
     tgt(v.pan.positionX, x, 0.08); tgt(v.pan.positionY, 0, 0.08); tgt(v.pan.positionZ, earZ(z, d), 0.08);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
     tgt(v.lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.08);
@@ -2787,7 +2820,7 @@ const TAB = (() => {
   }
   function applyPos() {
     if (!voice) return;
-    const p = livePosOf(SRCS.ai), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
+    const p = livePosOf(SRCS.ai), x = p.x * METERS * S.dome, z = p.y * METERS * S.dome, d = Math.hypot(x, z), now = ac.currentTime;
     tgt(voice.pan.positionX, x, 0.06); tgt(voice.pan.positionY, 0, 0.06); tgt(voice.pan.positionZ, earZ(z, d), 0.06);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
     tgt(voice.lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.06);
@@ -2851,7 +2884,7 @@ const LAY = (() => {
   }
   function applyPos(c) {
     if (!c || !c.pan) return;
-    const p = duckedPos(c), x = p.x * METERS, z = p.y * METERS, d = Math.hypot(x, z), now = ac.currentTime;
+    const p = duckedPos(c), x = p.x * METERS * S.dome, z = p.y * METERS * S.dome, d = Math.hypot(x, z), now = ac.currentTime;
     tgt(c.pan.positionX, x, 0.08); tgt(c.pan.positionY, 0, 0.08); tgt(c.pan.positionZ, earZ(z, d), 0.08);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
     tgt(c.lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.08);
@@ -3297,6 +3330,18 @@ const SCAN = (() => {
     q('scanCountry').addEventListener('change', e => { if (e.target.value) scan(e.target.value); });
   }
   return { init, paint };
+})();
+
+// ---------------- Купол и ширина стерео ----------------
+(() => {
+  const dSl = $('domeSl'), wSl = $('widthSl');
+  const show = () => {
+    dSl.value = Math.round(S.dome * 100); dSl.style.setProperty('--p', ((S.dome * 100 - 40) / 120 * 100) + '%'); $('domeVal').textContent = Math.round(S.dome * 100) + '%';
+    wSl.value = S.width; wSl.style.setProperty('--p', (S.width / 120 * 100) + '%'); $('widthVal').textContent = S.width + '°';
+  };
+  dSl.addEventListener('input', () => { S.dome = +dSl.value / 100; store.set('pp_dome', S.dome); show(); reapplyAll(); });
+  wSl.addEventListener('input', () => { S.width = +wSl.value; store.set('pp_width', S.width); show(); if (ac) applyPos(false); });
+  show();
 })();
 
 // ---------------- Старт ----------------
