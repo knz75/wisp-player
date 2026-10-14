@@ -15,6 +15,7 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: #000; }
   body { min-height: 100vh; user-select: none; -webkit-user-select: none; }
+  #aiLog { user-select: text; -webkit-user-select: text; white-space: pre-wrap; word-break: break-word; }
   button, label, input { touch-action: manipulation; }
   svg.i { width: 22px; height: 22px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
   .hidden { display: none !important; }
@@ -279,6 +280,23 @@
     <label class="fl" for="aiKey" data-ait="key"></label>
     <input class="tin" id="aiKey" type="password" autocomplete="off" placeholder="AIza...">
     <p class="note" data-ait="keyHow"></p>
+    <label class="fl" data-ait="mode"></label>
+    <div class="seg" id="aiModeSeg">
+      <button type="button" class="mb" data-aimode="chat" data-ait="mChat"></button>
+      <button type="button" class="mb" data-aimode="smart" data-ait="mSmart"></button>
+    </div>
+    <p class="note" data-ait="modeHow"></p>
+    <div id="aiBrainBox">
+      <label class="fl" data-ait="len"></label>
+      <div class="seg" id="aiLenSeg">
+        <button type="button" class="mb" data-ailen="short" data-ait="lShort"></button>
+        <button type="button" class="mb" data-ailen="mid" data-ait="lMid"></button>
+        <button type="button" class="mb" data-ailen="long" data-ait="lLong"></button>
+      </div>
+      <label class="fl" for="aiBrainSel" data-ait="brain"></label>
+      <select class="tin" id="aiBrainSel"></select>
+      <input class="tin hidden" id="aiBrain" autocomplete="off" data-aiph="brainPh">
+    </div>
     <label class="fl" for="aiVoice" data-ait="voice"></label>
     <select class="tin" id="aiVoice"><option>Puck</option><option>Charon</option><option>Fenrir</option><option>Orus</option><option>Kore</option><option>Aoede</option><option>Leda</option><option>Zephyr</option></select>
     <label class="fl" for="aiModelSel" data-ait="model"></label>
@@ -302,7 +320,10 @@
       <label class="fl" data-ait="past"></label><div id="aiMemList"></div>
       <button class="mb" id="aiForget" data-ait="forget"></button>
     </div></details>
-    <details class="fold sub"><summary data-ait="log"></summary><div class="fb"><pre id="aiLog"></pre></div></details>
+    <details class="fold sub"><summary data-ait="log"></summary><div class="fb">
+      <div class="row2"><button class="mb" id="aiLogCopy" data-ait="logCopy"></button><button class="mb" id="aiLogSave" data-ait="logSave"></button></div>
+      <button class="mb" id="aiTalkSave" data-ait="talkSave"></button>
+      <pre id="aiLog"></pre></div></details>
   </div></details>
   <details class="fold"><summary data-i="callLink"></summary><div class="fb">
     <label class="fl" for="callDev" data-ct="mic"></label>
@@ -2155,11 +2176,17 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 //  Свой голос, своё место на общем радаре, свои орбиты. Ключ - свой у каждого.
 // ======================================================================
 const AIT = {
-  ru: { st_off:'Не подключено', st_conn:'Подключаемся...', st_listen:'Слушаю', st_talk:'Говорит', v_listen:'СЛУШАЕТ', v_talk:'ГОВОРИТ',
+  ru: { st_off:'Не подключено', st_conn:'Подключаемся...', st_listen:'Слушаю', st_talk:'Говорит', st_think:'Думает...', v_listen:'СЛУШАЕТ', v_talk:'ГОВОРИТ', v_think:'ДУМАЕТ',
     talk:'▶ Поговорить', end:'■ Закончить', mute:'Пауза микрофона', unmute:'Включить микрофон', pocket:'Карманный режим',
     pocketText:'Карманный режим<br>удерживайте 2 секунды, чтобы выйти', you:'Вы', noKey:'Нужен ключ - меню → Попутчик', micFail:'Микрофон не включился: ',
     key:'Ключ Gemini API - хранится только в этом браузере', keyHow:'Бесплатный ключ можно получить на aistudio.google.com/apikey',
-    voice:'Голос', model:'Модель', custom:'Своя - ввести название вручную', modelPh:'точное название, например gemini-...', test:'Проверить все модели',
+    len:'Длина ответа «Умного мозга»', lShort:'Коротко', lMid:'Средне', lLong:'Подробно',
+    logCopy:'📋 Скопировать журнал', logSave:'💾 Скачать журнал', talkSave:'💬 Скачать разговор', copied:'Скопировано ✓', talkEmpty:'Разговоров пока нет', you2:'Вы', comp:'Попутчик',
+    mode:'Режим собеседника', mChat:'⚡ Болтовня', mSmart:'🧠 Умный', bTest:'🔍 Тест мозга',
+    modeHow:'«Болтовня» - отвечает сама Live-модель. «Умный» - Live-модель только слушает и зачитывает вслух ответ от взрослой текстовой модели.',
+    brain:'Модель «Умного мозга» (кто думает над ответом)', brainPh:'точное название, например gemini-3.1-pro-preview',
+    bAuto:'Авто (лучшая доступная по ключу)',
+    voice:'Голос (кто слушает и озвучивает)', model:'Голосовая Live-модель', custom:'Своя - ввести название вручную', modelPh:'точное название, например gemini-...', test:'Проверить все модели',
     persona:'Характер помощника', patience:'Терпение - сколько тишины ждать, прежде чем ответить', p800:'Обычное', p1500:'Терпеливое - 1.5 с', p2500:'Очень терпеливое - 2.5 с',
     duck:'Музыка уступает - пока попутчик говорит, музыка отходит назад и звучит тише', search:'Поиск Google - свежие события и новости (на бесплатном ключе есть не у всех моделей)',
     guard:'Защита от эха: пока попутчик говорит, микрофон молчит. Перебить его нельзя, зато он не слышит сам себя. В наушниках можно выключить',
@@ -2177,11 +2204,17 @@ const AIT = {
       'Для всего свежего и местного (события, погода, новости, часы работы, что рядом) обязательно ищи в Google. ' +
       'Говори естественно, без списков и перечислений. Обычно 2-5 предложений, подробнее - если просят. ' +
       'Собеседник говорит на ходу, речь может распознаться с ошибками - если смысл неясен, переспроси коротко.' },
-  en: { st_off:'Not connected', st_conn:'Connecting...', st_listen:'Listening', st_talk:'Speaking', v_listen:'LISTENING', v_talk:'SPEAKING',
+  en: { st_off:'Not connected', st_conn:'Connecting...', st_listen:'Listening', st_talk:'Speaking', st_think:'Thinking...', v_listen:'LISTENING', v_talk:'SPEAKING', v_think:'THINKING',
     talk:'▶ Talk', end:'■ End', mute:'Pause mic', unmute:'Unmute mic', pocket:'Pocket mode',
     pocketText:'Pocket mode<br>hold for 2 seconds to exit', you:'You', noKey:'A key is needed - menu → Companion', micFail:'Microphone did not start: ',
     key:'Gemini API key - stored only in this browser', keyHow:'You can get a free key at aistudio.google.com/apikey',
-    voice:'Voice', model:'Model', custom:'Custom - type the name', modelPh:'exact name, e.g. gemini-...', test:'Test all models',
+    len:'«Smart» answer length', lShort:'Short', lMid:'Medium', lLong:'Detailed',
+    logCopy:'📋 Copy log', logSave:'💾 Download log', talkSave:'💬 Download conversation', copied:'Copied ✓', talkEmpty:'No conversations yet', you2:'You', comp:'Companion',
+    mode:'Companion mode', mChat:'⚡ Chatty', mSmart:'🧠 Smart', bTest:'🔍 Test Brain',
+    modeHow:'«Chatty» replies instantly. «Smart» uses Live voice for listening & speaking, while a smart text model prepares deep answers.',
+    brain:'Smart Brain model (who thinks)', brainPh:'exact model name, e.g. gemini-3.1-pro-preview',
+    bAuto:'Auto (best available on key)',
+    voice:'Voice (listener & speaker)', model:'Live voice model', custom:'Custom - type the name', modelPh:'exact name, e.g. gemini-...', test:'Test all models',
     persona:'Companion personality', patience:'Patience - how much silence to wait before answering', p800:'Normal', p1500:'Patient - 1.5 s', p2500:'Very patient - 2.5 s',
     duck:'Music steps aside - while the companion speaks, music moves back and gets quieter', search:'Google Search - fresh events and news (not every model has it on a free key)',
     guard:'Echo guard: while the companion speaks, the microphone stays silent. You cannot interrupt it, but it does not hear itself. With headphones you can turn it off',
@@ -2210,28 +2243,106 @@ const AI = (() => {
   let panel = null;
   const pe = n => panel && panel.querySelector('[data-ai="' + n + '"]');
 
-  // ---------- настройки (ключи те же, что у старой страницы попутчика - всё сохранённое подхватится) ----------
   const OLD_PERSONA = 'Ты дружелюбный собеседник на прогулке, как друг, который идёт рядом. Говори по-русски, если собеседник сам не перейдёт на другой язык. Отвечай коротко и живо - одно-три предложения, без списков и перечислений. Если не расслышал - переспроси. Не торопись заканчивать разговор.';
-  const DEF_MODEL = 'gemini-3.8-live', DEF_VOICE = 'Puck';
+  const DEF_MODEL = 'gemini-3.8-live', DEF_VOICE = 'Puck', DEF_BRAIN = 'auto';
   const MODELS = [['gemini-3.8-live', '3.8 Live', 'mNew'], ['gemini-3.8-live-extended-thinking', '3.8 Live', 'mThink'],
     ['gemini-3.1-flash-live-preview', '3.1 Flash Live (preview)', ''], ['gemini-2.5-flash-native-audio-preview-12-2025', '2.5 Native Audio', 'mOld']];
+  // Стартовый список текстовых моделей (дополняется автоматически реальными моделями по ключу пользователя)
+  let BRAIN_MODELS = [
+    ['auto', 'Auto', 'bAuto'],
+    ['gemini-3.1-pro-preview', 'Gemini 3.1 Pro (preview)', ''],
+    ['gemini-3.1-flash-preview', 'Gemini 3.1 Flash (preview)', ''],
+    ['gemini-3.1-flash-lite-preview', 'Gemini 3.1 Flash-Lite (preview)', ''],
+    ['gemini-3.1-flash-lite', 'Gemini 3.1 Flash-Lite', ''],
+    ['gemini-2.5-pro', 'Gemini 2.5 Pro', ''],
+    ['gemini-2.5-flash', 'Gemini 2.5 Flash', ''],
+    ['gemini-2.5-flash-lite', 'Gemini 2.5 Flash-Lite', '']
+  ];
+  let discoveredBrains = [];
   const modelLabel = m => m[1] + (m[2] ? ' - ' + at(m[2]) : '');
-  let searchFallback = false, guardOn = true;
+  let aiMode = 'smart', searchFallback = false, toolFallback = false, guardOn = true;
+  let brainBusy = false, thinkTimer = 0, lastWorkingBrain = ls('wispAiLastBrain') || '';
+  const noSearchModels = new Set(); // модели, у которых поиск упёрся в лимит (429), - больше не тратим на них время в этом сеансе
+  let ansLen = ls('wispAiLen') || 'mid';
+  // разговор целиком (для скачивания): только реплики, без технических строк, хранится в телефоне
+  let TALK = (() => { try { return JSON.parse(ls('wispAiTalk') || '[]'); } catch (e) { return []; } })();
   const isDefPersona = v => !v || v === OLD_PERSONA || v === AIT.ru.personaDef || v === AIT.en.personaDef;
+
+  // Автоопределение доступных текстовых моделей на ключе пользователя
+  async function discoverModels() {
+    const key = q('aiKey') && q('aiKey').value.trim();
+    if (!key) return [];
+    try {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key));
+      if (!r.ok) return [];
+      const j = await r.json();
+      const raw = (j.models || []).filter(m => {
+        const id = (m.name || '').replace(/^models\//, '');
+        const methods = m.supportedGenerationMethods || [];
+        if (!methods.includes('generateContent')) return false;
+        if (!/^gemini-/i.test(id)) return false;
+        if (/tts|audio|live|embedding|imagen|veo|vision|aqa|bisim|learnlm|robotics|computer-use/i.test(id)) return false;
+        return true;
+      }).map(m => (m.name || '').replace(/^models\//, ''));
+      // Сортируем: свежие версии (3.8 > 3.1 > 3.0 > 2.5) и умные (pro > flash > lite) выше
+      const score = id => {
+        let s = 0;
+        if (/3\.8/.test(id)) s += 400; else if (/3\.1/.test(id)) s += 300; else if (/3\.0|gemini-3-/.test(id)) s += 250; else if (/2\.5/.test(id)) s += 200; else if (/2\.0/.test(id)) s += 100;
+        if (/-pro/i.test(id)) s += 50; else if (/-flash(?!-lite)/i.test(id)) s += 30; else if (/lite/i.test(id)) s += 10;
+        if (!/preview|exp/i.test(id)) s += 5;
+        return s;
+      };
+      raw.sort((a, b) => score(b) - score(a));
+      discoveredBrains = raw;
+      if (raw.length) {
+        log('Найдены текстовые модели (' + raw.length + '): ' + raw.slice(0, 6).join(', '));
+        const seen = new Set(['auto']);
+        const merged = [['auto', 'Auto', 'bAuto']];
+        for (const id of raw) { if (!seen.has(id)) { seen.add(id); merged.push([id, id, '']); } }
+        for (const m of BRAIN_MODELS) { if (!seen.has(m[0])) { seen.add(m[0]); merged.push(m); } }
+        BRAIN_MODELS = merged;
+        fillModels();
+      }
+      return raw;
+    } catch (e) { return []; }
+  }
 
   function fillModels() {
     const cur = q('aiModel').value;
     q('aiModelSel').innerHTML = MODELS.map(m => '<option value="' + m[0] + '">' + esc(modelLabel(m)) + '</option>').join('') + '<option value="custom">' + esc(at('custom')) + '</option>';
     q('aiModel').value = cur; syncModelSel();
+    if (q('aiBrainSel')) {
+      const bCur = q('aiBrain').value || DEF_BRAIN;
+      q('aiBrainSel').innerHTML = BRAIN_MODELS.map(m => '<option value="' + m[0] + '">' + esc(modelLabel(m)) + '</option>').join('') + '<option value="custom">' + esc(at('custom')) + '</option>';
+      q('aiBrain').value = bCur; syncBrainSel();
+    }
   }
   function syncModelSel() {
     const v = q('aiModel').value.trim(), known = MODELS.some(m => m[0] === v);
     q('aiModelSel').value = known ? v : 'custom';
     q('aiModel').classList.toggle('hidden', known);
   }
-  function setSum() { const s = q('aiSum'); if (s) s.textContent = q('aiKey').value ? '' : '· ' + at('needKey'); }
+  function syncBrainSel() {
+    if (!q('aiBrainSel')) return;
+    const v = q('aiBrain').value.trim(), known = BRAIN_MODELS.some(m => m[0] === v);
+    q('aiBrainSel').value = known ? v : 'custom';
+    q('aiBrain').classList.toggle('hidden', known);
+  }
+  function syncModeUi() {
+    if (q('aiModeSeg')) q('aiModeSeg').querySelectorAll('[data-aimode]').forEach(b => b.classList.toggle('on', b.dataset.aimode === aiMode));
+    if (q('aiBrainBox')) q('aiBrainBox').classList.toggle('hidden', aiMode !== 'smart');
+    setSum(); render();
+  }
+  function setAiMode(m) {
+    if (m !== 'chat' && m !== 'smart') return;
+    aiMode = m; ls('wispAiMode', m); toolFallback = false;
+    syncModeUi(); restartSession();
+  }
+  function setSum() {
+    const s = q('aiSum');
+    if (s) s.textContent = !q('aiKey').value ? '· ' + at('needKey') : '· ' + at(aiMode === 'smart' ? 'mSmart' : 'mChat');
+  }
   function init() {
-    // общая галка эхоподавления: если разговор идёт, микрофон переоткрывается с новым режимом
     MIC.on.push(async () => {
       if (!micStream || !micSrc) return;
       try {
@@ -2242,7 +2353,10 @@ const AI = (() => {
     });
     q('aiKey').value = ls('wispAiKey') || '';
     q('aiModel').value = ls('wispAiModel') || DEF_MODEL;
+    if (q('aiBrain')) q('aiBrain').value = ls('wispAiBrain') || DEF_BRAIN;
+    aiMode = ls('wispAiMode') || 'smart';
     fillModels();
+    if (q('aiKey').value.trim()) discoverModels();
     q('aiVoice').value = ls('wispAiVoice') || DEF_VOICE;
     { const v = ls('wispAiPersona'); q('aiPersona').value = isDefPersona(v) ? at('personaDef') : v; }
     q('aiPatience').value = ls('wispAiPatience') || '1500';
@@ -2252,13 +2366,43 @@ const AI = (() => {
     q('aiMemOn').checked = ls('wispAiMemOn') !== '0';
     q('aiProfile').value = ls('wispAiProfile') || '';
 
+    if (q('aiModeSeg')) q('aiModeSeg').querySelectorAll('[data-aimode]').forEach(b => b.addEventListener('click', () => setAiMode(b.dataset.aimode)));
+    const syncLen = () => { if (q('aiLenSeg')) q('aiLenSeg').querySelectorAll('[data-ailen]').forEach(b => b.classList.toggle('on', b.dataset.ailen === ansLen)); };
+    if (q('aiLenSeg')) q('aiLenSeg').querySelectorAll('[data-ailen]').forEach(b => b.addEventListener('click', () => { ansLen = b.dataset.ailen; ls('wispAiLen', ansLen); syncLen(); }));
+    syncLen();
+    // журнал: скопировать, скачать (по порядку, сверху - старое), скачать сам разговор без технических строк
+    const stamp = () => new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
+    const saveTxt = (name, text) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+    const logInOrder = () => (q('aiLog').textContent || '').split('\n').filter(Boolean).reverse().join('\n');
+    const flashBtn = b => { const old = b.textContent; b.textContent = at('copied'); setTimeout(() => { b.textContent = old; }, 1500); };
+    if (q('aiLogCopy')) q('aiLogCopy').addEventListener('click', async () => {
+      const tx = logInOrder();
+      try { await navigator.clipboard.writeText(tx); }
+      catch (e) { const r = document.createRange(); r.selectNodeContents(q('aiLog')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); try { document.execCommand('copy'); } catch (_) {} }
+      flashBtn(q('aiLogCopy'));
+    });
+    if (q('aiLogSave')) q('aiLogSave').addEventListener('click', () => saveTxt('wisp-log_' + stamp() + '.txt', logInOrder()));
+    if (q('aiTalkSave')) q('aiTalkSave').addEventListener('click', () => {
+      if (!TALK.length) { log(at('talkEmpty')); return; }
+      let day = '';
+      const lines = TALK.map(r => { const d = r.t.slice(0, 10), tm = r.t.slice(11, 16); const head = d !== day ? (day = d, '\n=== ' + d + ' ===\n') : ''; return head + tm + '  ' + (r.w === 'u' ? at('you2') : at('comp')) + ': ' + r.x; });
+      saveTxt('wisp-talk_' + stamp() + '.txt', lines.join('\n').trim() + '\n');
+    });
+    if (q('aiBrainSel')) {
+      q('aiBrainSel').onchange = () => {
+        if (q('aiBrainSel').value === 'custom') { q('aiBrain').classList.remove('hidden'); q('aiBrain').focus(); return; }
+        q('aiBrain').value = q('aiBrainSel').value; q('aiBrain').classList.add('hidden');
+        ls('wispAiBrain', q('aiBrain').value);
+      };
+      q('aiBrain').onchange = () => ls('wispAiBrain', q('aiBrain').value.trim());
+    }
     q('aiModelSel').onchange = () => {
       if (q('aiModelSel').value === 'custom') { q('aiModel').classList.remove('hidden'); q('aiModel').focus(); return; }
       q('aiModel').value = q('aiModelSel').value; q('aiModel').classList.add('hidden');
-      ls('wispAiModel', q('aiModel').value); searchFallback = false; restartSession();
+      ls('wispAiModel', q('aiModel').value); searchFallback = false; toolFallback = false; restartSession();
     };
-    q('aiModel').onchange = () => { ls('wispAiModel', q('aiModel').value.trim()); restartSession(); };
-    q('aiKey').onchange = () => { ls('wispAiKey', q('aiKey').value.trim()); setSum(); };
+    q('aiModel').onchange = () => { ls('wispAiModel', q('aiModel').value.trim()); toolFallback = false; restartSession(); };
+    q('aiKey').onchange = () => { ls('wispAiKey', q('aiKey').value.trim()); setSum(); discoverModels(); };
     q('aiVoice').onchange = () => { ls('wispAiVoice', q('aiVoice').value); restartSession(); };
     q('aiPersona').onchange = () => { ls('wispAiPersona', q('aiPersona').value); restartSession(); };
     q('aiPatience').onchange = () => { ls('wispAiPatience', q('aiPatience').value); restartSession(); };
@@ -2268,7 +2412,9 @@ const AI = (() => {
     q('aiMemOn').onchange = () => ls('wispAiMemOn', q('aiMemOn').checked ? '1' : '0');
     q('aiProfile').onchange = () => ls('wispAiProfile', q('aiProfile').value.trim());
     q('aiReset').onclick = () => {
-      q('aiModel').value = DEF_MODEL; syncModelSel(); q('aiVoice').value = DEF_VOICE; q('aiPersona').value = at('personaDef');
+      q('aiModel').value = DEF_MODEL; syncModelSel();
+      if (q('aiBrain')) { q('aiBrain').value = DEF_BRAIN; syncBrainSel(); ls('wispAiBrain', DEF_BRAIN); }
+      q('aiVoice').value = DEF_VOICE; q('aiPersona').value = at('personaDef');
       ls('wispAiModel', DEF_MODEL); ls('wispAiVoice', DEF_VOICE); ls('wispAiPersona', ''); setSum();
     };
     q('aiForget').onclick = () => { if (confirm(at('forgetQ'))) { MEM = []; FACTS = []; saveMem(); log('Память очищена'); } };
@@ -2280,27 +2426,25 @@ const AI = (() => {
     });
     ['pointerup', 'pointercancel', 'pointerleave'].forEach(tp => q('aiPocket').addEventListener(tp, holdEnd));
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && pocketOn && !wakeLock) lockScreen(); });
-    setSum(); renderMem();
+    syncModeUi(); renderMem();
   }
   function applyLang() {
     document.querySelectorAll('[data-ait]').forEach(el => el.innerHTML = at(el.dataset.ait));
     document.querySelectorAll('[data-aiph]').forEach(el => el.placeholder = at(el.dataset.aiph));
     if (q('aiModel')) fillModels();
-    // характер по умолчанию - на языке плеера; свой текст пользователя не трогаем
     if (q('aiPersona') && isDefPersona(ls('wispAiPersona'))) q('aiPersona').value = at('personaDef');
     if (q('aiMemSum')) renderMem();
-    setSum(); render();
+    syncModeUi();
   }
 
   function log(tx) { const el = q('aiLog'); if (!el) return; const d = new Date().toTimeString().slice(0, 8); el.textContent = (d + ' ' + tx + '\n' + el.textContent).slice(0, 15000); }
   let stKey = 'st_off', stRaw = '', stCls = '';
   function setStatus(key, cls, raw) { stKey = key; stCls = cls || ''; stRaw = raw || ''; render(); }
 
-  // ---------- звук: голос попутчика на своём месте радара ----------
   const WORKLET = 'class Cap extends AudioWorkletProcessor{process(i){const c=i[0]&&i[0][0];if(c)this.port.postMessage(c.slice(0));return true}}registerProcessor("cap",Cap);';
   let ready = false, voiceIn, lp, pan, wet, an, wave, micHP, micGain, micAn, micArr;
   let micStream = null, micSrc = null, muted = false, playEnd = 0, sources = [];
-  const speaking = () => ready && playEnd > ac.currentTime;
+  const speaking = () => ready && (playEnd > ac.currentTime || brainBusy);
   async function setup() {
     initAudio(); await ac.resume();
     if (ready) return;
@@ -2328,18 +2472,30 @@ const AI = (() => {
   }
   function applyPos() {
     if (!ready) return;
-    const p = livePosOf(SRCS.ai), x = p.x * METERS * S.dome, z = p.y * METERS * S.dome, d = Math.hypot(x, z), now = ac.currentTime;
+    const p = livePosOf(SRCS.ai), x = p.x * METERS * S.dome, z = p.y * METERS * S.dome, d = Math.hypot(x, z);
     tgt(pan.positionX, x, 0.04); tgt(pan.positionY, 0, 0.04); tgt(pan.positionZ, earZ(z, d), 0.04);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
     tgt(lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.04);
     tgt(wet.gain, S.echo ? 0.015 + 0.07 * (d / METERS) : 0, 0.04);
+  }
+  function thinkBeep() {
+    if (!ready || !ac || ac.state !== 'running' || ac.currentTime < playEnd + 0.25) return;
+    const now = ac.currentTime, o = new OscillatorNode(ac, { type: 'sine', frequency: 520 }), g = new GainNode(ac, { gain: 0.0001 });
+    o.frequency.exponentialRampToValueAtTime(680, now + 0.18);
+    g.gain.exponentialRampToValueAtTime(0.04, now + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+    o.connect(g).connect(voiceIn);
+    o.start(now); o.stop(now + 0.3);
   }
   function level() { if (!speaking() || !an) return 0; an.getByteTimeDomainData(wave); let m = 0; for (const v of wave) m = Math.max(m, Math.abs(v - 128) / 128); return m; }
   function tickUi() {
     micAn.getFloatTimeDomainData(micArr);
     let m = 0; for (const v of micArr) m = Math.max(m, Math.abs(v));
     const l = pe('lvl'); if (l) l.style.width = (live ? Math.min(100, m * 140) : 0) + '%';
-    if (live) { const sp = speaking(); if (stKey !== (sp ? 'st_talk' : 'st_listen')) setStatus(sp ? 'st_talk' : 'st_listen', sp ? 'talk' : 'live'); }
+    if (live) {
+      const nextSt = brainBusy ? 'st_think' : (playEnd > ac.currentTime) ? 'st_talk' : 'st_listen';
+      if (stKey !== nextSt) setStatus(nextSt, nextSt === 'st_listen' ? 'live' : 'talk');
+    }
   }
 
   function openMic(id) {
@@ -2348,7 +2504,6 @@ const AI = (() => {
     return navigator.mediaDevices.getUserMedia({ audio: a });
   }
   async function getMic() {
-    // встроенный микрофон телефона, чтобы Bluetooth-наушники остались в стерео
     let s = await openMic(null);
     const sp = (await navigator.mediaDevices.enumerateDevices()).find(d => d.kind === 'audioinput' && /speakerphone/i.test(d.label));
     if (sp && sp.deviceId && !MIC.proc) { s.getTracks().forEach(tr => tr.stop()); s = await openMic(sp.deviceId); }
@@ -2359,8 +2514,8 @@ const AI = (() => {
   }
   let capBuf = [], capLen = 0;
   function onFrame(f) {
-    if (!live) return;
-    if (guardOn && ac.currentTime < playEnd + 0.35) { capBuf = []; capLen = 0; return; } // защита от эха
+    if (!live || brainBusy) { capBuf = []; capLen = 0; return; }
+    if (guardOn && ac.currentTime < playEnd + 0.35) { capBuf = []; capLen = 0; return; }
     capBuf.push(f); capLen += f.length;
     if (capLen < Math.round(ac.sampleRate * 0.1)) return;
     const all = new Float32Array(capLen); let o = 0;
@@ -2386,7 +2541,6 @@ const AI = (() => {
   }
   function stopPlayback() { for (const s of sources) { try { s.stop(); } catch (e) {} } sources = []; playEnd = 0; }
 
-  // ---------- где я и когда ----------
   let placeCtx = '';
   function getPlace() {
     return new Promise(res => {
@@ -2404,7 +2558,7 @@ const AI = (() => {
       }, e => { log('GPS недоступен: ' + e.message); res(''); }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     });
   }
-  // ---------- память ----------
+
   const lsJSON = (k, def) => { try { return JSON.parse(ls(k) || '') || def; } catch (e) { return def; } };
   let MEM = lsJSON('wispAiMem', []), FACTS = lsJSON('wispAiFacts', []), convo = [];
   function saveMem() { ls('wispAiMem', JSON.stringify(MEM)); ls('wispAiFacts', JSON.stringify(FACTS)); renderMem(); }
@@ -2431,6 +2585,8 @@ const AI = (() => {
   }
   function addConvo(who, text) {
     if (!text) return;
+    TALK.push({ t: new Date().toISOString(), w: who, x: text }); if (TALK.length > 400) TALK = TALK.slice(-400);
+    ls('wispAiTalk', JSON.stringify(TALK));
     convo.push((who === 'u' ? 'Пользователь: ' : 'Спутник: ') + text);
     ls('wispAiPending', JSON.stringify({ d: new Date().toISOString(), lines: convo }));
   }
@@ -2446,7 +2602,7 @@ const AI = (() => {
       '\n\nВерни только JSON без пояснений: {"summary": "2-3 предложения ' + L + ': о чём говорили и что важного сказал пользователь", ' +
       '"tags": ["3-6 коротких тегов ' + L + '"], "facts": ["устойчивые факты о пользователе ' + L + ', которые он сказал прямо: кто он, что любит, планы; если таких нет - пустой список"]}' +
       (FACTS.length ? '\nУже известные факты (не повторяй их): ' + FACTS.join('; ') : '');
-    const order = [ls('wispAiSumModel'), ...SUM_MODELS].filter((m, i, a) => m && a.indexOf(m) === i);
+    const order = [ls('wispAiSumModel'), ...SUM_MODELS, ...discoveredBrains].filter((m, i, a) => m && a.indexOf(m) === i);
     for (const model of order) {
       try {
         const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
@@ -2478,6 +2634,101 @@ const AI = (() => {
     return tx + memoryText();
   }
 
+  // ---------- ВТОРОЙ МОЗГ (Умный режим) ----------
+  const ASK_BRAIN_DECL = {
+    name: 'ask_brain',
+    description: 'Получить точный и умный ответ для собеседника. Вызывай эту функцию ВСЕГДА на любой вопрос, тему или реплику собеседника.',
+    parameters: {
+      type: 'OBJECT',
+      properties: { query: { type: 'STRING', description: 'Вопрос или реплика собеседника.' } },
+      required: ['query']
+    }
+  };
+
+  async function buildBrainOrder() {
+    if (!discoveredBrains.length) await discoverModels();
+    const chosen = (q('aiBrain') && q('aiBrain').value.trim()) || DEF_BRAIN;
+    const fallbacks = [
+      ...(chosen && chosen !== 'auto' ? [chosen] : []),
+      ...(lastWorkingBrain ? [lastWorkingBrain] : []),
+      ...discoveredBrains,
+      ls('wispAiSumModel'),
+      'gemini-3.1-pro-preview', 'gemini-3.1-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemini-3.1-flash-lite',
+      'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'
+    ];
+    const uniq = fallbacks.filter((m, i, a) => m && m !== 'auto' && a.indexOf(m) === i);
+    // явно выбранная и последняя рабочая - первыми, остальные: lite, flash, прочие, pro в самом конце
+    const head = uniq.filter(m => (chosen && chosen !== 'auto' && m === chosen) || m === lastWorkingBrain);
+    const rank = m => /lite/.test(m) ? 0 : /flash/.test(m) ? 1 : /pro/.test(m) ? 3 : 2;
+    return head.concat(uniq.filter(m => !head.includes(m)).sort((a, b) => rank(a) - rank(b)));
+  }
+
+  async function askBrain(query) {
+    const key = q('aiKey').value.trim();
+    const order = await buildBrainOrder();
+    const basePersona = q('aiPersona').value.replace(/Обычно 2-5 предложений[^.]*\./i, '').replace(/Usually 2-5 sentences[^.]*\./i, '');
+    const sys = basePersona + '\n\n' + contextText() +
+      '\n\nПРАВИЛА ОТВЕТА:\n' +
+      '1. Отвечай сразу по сути - умно, конкретно, с фактами, именами, цифрами и примерами. Никаких выдумок.\n' +
+      '2. Без воды: никаких пустых подводок («Знаешь, я тебя понимаю», «Раз уж мы заговорили»), без нравоучений и без философских вопросов в конце.\n' +
+      '3. Длина: ' + ({ short: '1-2 предложения, только самое главное.', mid: '3-5 плотных предложений.', long: '8-12 предложений, развёрнуто, но каждое по делу.' }[ansLen] || '3-5 плотных предложений.') + ' Если собеседник прямо просит рассказать подробно - можно длиннее.\n' +
+      '4. Пиши для чтения вслух: живым разговорным языком, без списков, таблиц и символов разметки (*, #, -).';
+    const recent = convo.slice(-10).join('\n');
+    const prompt = (recent ? 'Контекст текущего разговора:\n' + recent + '\n\n' : '') + 'Реплика собеседника (распознана с голоса): ' + query;
+    const useSearch = q('aiSearch').checked;
+    let lastErr = 'нет доступных моделей';
+
+    const t0 = performance.now(); let tries = 0;
+    for (const model of order) {
+      // потолок: не больше 3 настоящих попыток и около 9 секунд - иначе человек ждёт слишком долго
+      if (tries >= 3 || performance.now() - t0 > 9000) { log('Мозг: хватит попыток, отвечу без него'); break; }
+      // Всегда пробуем сначала с поиском (если включён), а при любой ошибке (кроме 404) - обязательно пробуем эту же модель БЕЗ поиска
+      for (const withSearch of ((useSearch && !noSearchModels.has(model)) ? [true, false] : [false])) {
+        if (!withSearch) tries++;
+        try {
+          const body = {
+            systemInstruction: { parts: [{ text: sys }] },
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.5 }
+          };
+          if (withSearch) body.tools = [{ googleSearch: {} }];
+          const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key), {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          });
+          const j = await r.json();
+          if (!r.ok) {
+            const msg = ((j.error && j.error.message) || r.status).toString();
+            lastErr = model + ': ' + msg.slice(0, 90);
+            log('Мозг ' + model + (withSearch ? ' (поиск)' : '') + ' [' + r.status + ']: ' + msg.slice(0, 120));
+            if (withSearch && r.status === 429) noSearchModels.add(model); // поиск здесь в лимите - больше не пробуем
+            if (r.status === 404) { if (!withSearch) tries--; break; } // модели нет - не считаем попыткой, сразу к следующей
+            continue; // иначе пробуем без поиска (или следующую модель)
+          }
+          const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+          const ans = parts.filter(p => !p.thought).map(p => p.text || '').join(' ').replace(/[*#_`~>]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          if (ans) {
+            lastWorkingBrain = model; ls('wispAiLastBrain', model);
+            log('🧠 Мозг (' + model + (withSearch ? '+поиск' : '') + '): ' + ans);
+            return { ok: true, model, text: ans };
+          }
+        } catch (e) { lastErr = model + ': ' + e.message; log('Мозг ' + model + ': ' + e.message); }
+      }
+    }
+    log('Мозг недоступен (' + lastErr + ') - попутчик ответит сам');
+    return { ok: false, model: '', text: 'Ошибка API Умного мозга (' + lastErr + '). Скажи собеседнику коротко, что не удалось связаться с большой моделью.' };
+  }
+
+  async function testBrainBtn() {
+    if (!q('aiKey').value.trim()) { setStatus('noKey', 'bad'); openMenu(); q('aiFold').open = true; q('aiKey').focus(); return; }
+    const h = pe('heard'); if (h) h.innerHTML = '<b>🧠:</b> Проверяю доступные текстовые модели...';
+    const t0 = performance.now();
+    const res = await askBrain('Коротко, в двух предложениях: скажи какую-нибудь интересную научную деталь про космос.');
+    const sec = ((performance.now() - t0) / 1000).toFixed(1);
+    if (h) h.innerHTML = res.ok
+      ? '<b>🧠 ' + esc(res.model) + ' (' + sec + ' с):</b> ' + esc(res.text)
+      : '<b style="color:#ff6b6b">🧠:</b> ' + esc(res.text);
+  }
+
   // ---------- Gemini Live ----------
   const WS_URL = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=';
   let ws = null, live = false, wanted = false, handle = null, retries = 0, gotSetup = false, inTxt = '', outTxt = '';
@@ -2488,16 +2739,24 @@ const AI = (() => {
     inTxt = ''; outTxt = '';
   }
   function buildSetup(model, h, noSearch) {
+    const isSmart = aiMode === 'smart' && !toolFallback;
+    const sysText = isSmart
+      ? 'Ты - голосовой диктор аналитического ИИ-спутника. ' +
+        'ПРАВИЛО 1: На любой вопрос, тему или реплику собеседника ты ОБЯЗАН НЕМЕДЛЕННО и МОЛЧА вызвать функцию ask_brain(query), передав туда слова собеседника. ' +
+        'КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО отвечать из своей головы или фантазировать без вызова ask_brain! ' +
+        'ПРАВИЛО 2: Когда функция ask_brain вернёт готовый текст в поле answer - озвучь этот текст собеседнику вслух естественно и близко к тексту, со всеми фактами и именами. Ничего не добавляй от себя: без вступлений, без комментариев и без вопросов в конце. Если в поле instruction сказано ответить самому - ответь сам, коротко.'
+      : q('aiPersona').value + '\n\n' + contextText();
     const st = {
       model: 'models/' + model,
       generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: q('aiVoice').value } } } },
-      systemInstruction: { parts: [{ text: q('aiPersona').value + '\n\n' + contextText() }] },
+      systemInstruction: { parts: [{ text: sysText }] },
       realtimeInputConfig: { automaticActivityDetection: { endOfSpeechSensitivity: 'END_SENSITIVITY_LOW', prefixPaddingMs: 300, silenceDurationMs: +q('aiPatience').value } },
       inputAudioTranscription: {}, outputAudioTranscription: {},
       contextWindowCompression: { slidingWindow: {} },
       sessionResumption: h ? { handle: h } : {}
     };
-    if (q('aiSearch').checked && !noSearch) st.tools = [{ googleSearch: {} }];
+    if (isSmart) st.tools = [{ functionDeclarations: [ASK_BRAIN_DECL] }];
+    else if (q('aiSearch').checked && !noSearch) st.tools = [{ googleSearch: {} }];
     return st;
   }
   const minimalSetup = model => ({ model: 'models/' + model, generationConfig: { responseModalities: ['AUDIO'] } });
@@ -2518,6 +2777,8 @@ const AI = (() => {
     if (!q('aiKey').value.trim()) { out.textContent = at('needKey'); return; }
     q('aiTest').disabled = true;
     let s = '';
+    const found = await discoverModels();
+    if (found.length) s += '🧠 Доступные модели мозга: ' + found.slice(0, 6).join(', ') + '\n\n';
     for (const m of MODELS) {
       const label = modelLabel(m);
       out.textContent = s + '… ' + label + ' - ' + at('checking');
@@ -2532,20 +2793,49 @@ const AI = (() => {
     log('Проверка моделей:\n' + s);
     q('aiTest').disabled = false;
   }
+  async function handleBrainCall(fc) {
+    const userQ = (fc.args && fc.args.query) || inTxt.trim() || 'Продолжи мысль';
+    if (inTxt.trim()) { log('Вы: ' + inTxt.trim()); addConvo('u', inTxt.trim()); inTxt = ''; }
+    log('Запрос к Умному мозгу: ' + userQ);
+    brainBusy = true; setStatus('st_think', 'talk');
+    thinkBeep(); clearInterval(thinkTimer); thinkTimer = setInterval(thinkBeep, 2400);
+    const res = await askBrain(userQ);
+    clearInterval(thinkTimer); thinkTimer = 0; brainBusy = false;
+    if (!wanted || !ws || ws.readyState !== 1) return;
+    const h = pe('heard');
+    if (h) h.innerHTML = (res.ok ? '<b>🧠 ' + esc(res.model) + ':</b> ' : '<b style="color:#ff6b6b">🧠:</b> ') + esc(res.text.slice(0, 220));
+    send({
+      toolResponse: {
+        functionResponses: [{
+          id: fc.id,
+          name: fc.name,
+          response: {
+            answer: res.text,
+            instruction: res.ok
+              ? 'Прочитай этот текст собеседнику вслух естественно и близко к тексту. НЕ добавляй от себя никаких вступлений, комментариев и вопросов в конце.'
+              : 'Большая модель сейчас недоступна. Ответь собеседнику сам, коротко и по делу, как обычный собеседник. Не говори про ошибки и модели.'
+          }
+        }]
+      }
+    });
+  }
   function connect() {
     gotSetup = false;
     ws = new WebSocket(WS_URL + encodeURIComponent(q('aiKey').value.trim()));
     ws.onopen = () => send({ setup: buildSetup(q('aiModel').value.trim(), handle, searchFallback) });
     ws.onmessage = async ev => {
       let m; try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : await ev.data.text()); } catch (e) { return; }
-      if (m.setupComplete) { gotSetup = true; live = true; retries = 0; log(handle ? 'Продолжаем разговор' : 'Подключено'); setStatus('st_listen', 'live'); }
+      if (m.setupComplete) { gotSetup = true; live = true; retries = 0; log((handle ? 'Продолжаем разговор' : 'Подключено') + ' [' + (aiMode === 'smart' ? 'Умный' : 'Болтовня') + ']'); setStatus('st_listen', 'live'); }
       if (m.sessionResumptionUpdate && m.sessionResumptionUpdate.newHandle) handle = m.sessionResumptionUpdate.newHandle;
       if (m.goAway) { log('Google просит переподключиться'); reconnect(); }
+      if (m.toolCall && m.toolCall.functionCalls) {
+        for (const fc of m.toolCall.functionCalls) if (fc.name === 'ask_brain') handleBrainCall(fc);
+      }
       const sc = m.serverContent;
       if (sc) {
         if (sc.inputTranscription && sc.inputTranscription.text) { inTxt += sc.inputTranscription.text; const h = pe('heard'); if (h) h.innerHTML = '<b>' + esc(at('you')) + ':</b> ' + esc(inTxt.trim()); }
         if (sc.outputTranscription && sc.outputTranscription.text) outTxt += sc.outputTranscription.text;
-        if (sc.interrupted) stopPlayback();
+        if (sc.interrupted && !brainBusy) stopPlayback();
         if (sc.turnComplete || sc.interrupted) flushTxt(sc.interrupted);
         for (const p of ((sc.modelTurn && sc.modelTurn.parts) || [])) {
           if (p.inlineData && /audio\/pcm/.test(p.inlineData.mimeType || '')) { const r = /rate=(\d+)/.exec(p.inlineData.mimeType); playPcm(p.inlineData.data, r ? +r[1] : 24000); }
@@ -2553,10 +2843,11 @@ const AI = (() => {
       }
     };
     ws.onclose = e => {
-      live = false;
+      live = false; clearInterval(thinkTimer); brainBusy = false;
       if (!wanted) return;
       if (!gotSetup) {
         log('Google закрыл соединение: ' + e.code + ' ' + (e.reason || ''));
+        if (aiMode === 'smart' && !toolFallback) { toolFallback = true; log('Live-модель не приняла функции - переключаю в обычный режим'); setTimeout(connect, 400); return; }
         if (/quota/i.test(e.reason || '') && q('aiSearch').checked && !searchFallback) { searchFallback = true; log('Поиск на бесплатном ключе недоступен - работаю без поиска'); setTimeout(connect, 500); return; }
         if (handle && retries < 2) { handle = null; retries++; setTimeout(connect, 800); return; }
         stop(); setStatus('err', 'bad', e.reason || 'code ' + e.code);
@@ -2566,10 +2857,9 @@ const AI = (() => {
       reconnect();
     };
   }
-  // голос, характер и модель Google принимает только в начале сеанса - начинаем новый
   function restartSession() {
     if (!wanted) return;
-    handle = null; retries = 0; live = false;
+    handle = null; retries = 0; live = false; clearInterval(thinkTimer); brainBusy = false;
     const old = ws; ws = null; if (old) { old.onclose = null; try { old.close(); } catch (e) {} }
     stopPlayback(); setStatus('st_conn'); log(at('changing'));
     setTimeout(() => { if (wanted) connect(); }, 300);
@@ -2590,8 +2880,9 @@ const AI = (() => {
       micStream = await getMic();
       micSrc = ac.createMediaStreamSource(micStream); micSrc.connect(micHP);
     } catch (e) { setStatus('micFail', 'bad', e.name); log(e.name + ' ' + e.message); starting = false; render(); return; }
-    wanted = true; handle = null; retries = 0; searchFallback = false;
+    wanted = true; handle = null; retries = 0; searchFallback = false; toolFallback = false;
     setStatus('st_conn');
+    discoverModels();
     if (ls('wispAiPending')) { setStatus('remembering'); await summarize(); }
     convo = [];
     placeCtx = await getPlace();
@@ -2601,7 +2892,7 @@ const AI = (() => {
   function stop() {
     const was = wanted;
     if (wanted) flushTxt(false);
-    wanted = false; live = false;
+    wanted = false; live = false; clearInterval(thinkTimer); thinkTimer = 0; brainBusy = false;
     if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} ws = null; }
     stopPlayback();
     if (micSrc) { micSrc.disconnect(); micSrc = null; }
@@ -2614,7 +2905,6 @@ const AI = (() => {
   }
   function toggleMute() { if (!micGain) return; muted = !muted; micGain.gain.value = muted ? 0 : 1; render(); }
 
-  // ---------- карманный режим: экран не гаснет, но полностью чёрный ----------
   let wakeLock = null, pocketOn = false, holdTimer = null, holdStart = 0, holdRaf = 0;
   async function lockScreen() { try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } catch (e) { log('Экран: ' + e.name); } }
   async function pocketEnter() {
@@ -2630,14 +2920,16 @@ const AI = (() => {
   }
   function holdEnd() { clearTimeout(holdTimer); cancelAnimationFrame(holdRaf); q('aiPocketBar').style.width = '0'; }
 
-  // ---------- панель на главной (рисуется в каждом скине заново) ----------
   const panelHtml = () => '<div class="wai-st"><span data-ai="st"></span><b data-ai="vst"></b></div>' +
     '<button class="wb wai-talk" data-ai="talk"></button>' +
+    '<div class="wai-row"><button class="wb" data-ai="mode"></button><button class="wb" data-ai="btest"></button></div>' +
     '<div class="wai-row"><button class="wb" data-ai="mute"></button><button class="wb" data-ai="pocket"></button></div>' +
     '<div class="wai-lvl"><i data-ai="lvl"></i></div><div class="wai-heard" data-ai="heard"></div>';
   function bindPanel(el) {
     panel = el;
     pe('talk').addEventListener('click', () => wanted ? stop() : start());
+    pe('mode').addEventListener('click', () => setAiMode(aiMode === 'smart' ? 'chat' : 'smart'));
+    pe('btest').addEventListener('click', testBrainBtn);
     pe('mute').addEventListener('click', toggleMute);
     pe('pocket').addEventListener('click', pocketEnter);
     render();
@@ -2645,10 +2937,12 @@ const AI = (() => {
   function render() {
     if (!panel) return;
     const st = pe('st'); st.textContent = at(stKey) + (stRaw ? ' ' + stRaw : ''); st.className = stCls;
-    const sp = live && speaking();
-    pe('vst').textContent = live ? at(sp ? 'v_talk' : 'v_listen') : '';
+    const sp = live && (playEnd > (ac ? ac.currentTime : 0));
+    pe('vst').textContent = live ? at(brainBusy ? 'v_think' : sp ? 'v_talk' : 'v_listen') : '';
     pe('talk').textContent = wanted ? at('end') : at('talk');
     pe('talk').classList.toggle('on', wanted); pe('talk').disabled = starting;
+    if (pe('mode')) { pe('mode').textContent = at(aiMode === 'smart' ? 'mSmart' : 'mChat'); pe('mode').classList.toggle('on', aiMode === 'smart'); }
+    if (pe('btest')) pe('btest').textContent = at('bTest');
     pe('mute').textContent = muted ? at('unmute') : at('mute'); pe('mute').disabled = !wanted; pe('mute').classList.toggle('on', muted);
     pe('pocket').textContent = at('pocket');
   }
@@ -2657,7 +2951,6 @@ const AI = (() => {
 
 // ======================================================================
 //  Звонок - собеседники как источники звука на общем радаре.
-//  Каждый голос - своя точка: место, орбита, живая точка. Сервер только соединяет.
 // ======================================================================
 const CT = {
   ru: { start:'Начать звонок', join:'Войти в звонок', demo:'Послушать пример', intro:'Голос собеседника звучит с места, которое вы выберете на радаре. Наденьте наушники, телефон можно убрать в карман.',
