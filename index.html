@@ -246,7 +246,7 @@
     <h3 data-i="speed"></h3><div class="seg" data-mw="speed"></div>
     <h3 data-i="fx"></h3><div class="seg" data-mw="fx"></div>
     <h3 data-i="echo"></h3><div class="seg" data-mw="echo"></div>
-    <h3 data-i="live"></h3><div class="seg" data-mw="live"></div>
+    <h3 data-i="liveSet"></h3><div class="seg" data-mw="live"></div>
     <h3 data-i="duck2"></h3><div class="seg" data-mw="duck"></div>
     <h3 data-i="detail"></h3><div class="seg" data-mw="detail"></div>
     <div class="ear-l"><span data-i="dome"></span><b id="domeVal"></b></div>
@@ -256,6 +256,7 @@
     <input type="range" class="w-seek" id="widthSl" min="0" max="120" step="5">
     <p class="ear-t" data-i="widthHint"></p>
     <h3 data-i="sleep"></h3><div class="seg" data-mw="sleep"></div>
+    <label class="chk"><input type="checkbox" id="micProc"><span data-ait="proc"></span></label>
   </div></details>
   <details class="fold" id="earFold"><summary data-i="earTitle"></summary><div class="fb">
     <p class="ear-t" data-i="earText"></p>
@@ -291,9 +292,7 @@
     <select class="tin" id="aiPatience"><option value="800" data-ait="p800"></option><option value="1500" data-ait="p1500"></option><option value="2500" data-ait="p2500"></option></select>
     <label class="chk"><input type="checkbox" id="aiSearch"><span data-ait="search"></span></label>
     <label class="chk"><input type="checkbox" id="aiGeo"><span data-ait="geo"></span></label>
-    <label class="chk"><input type="checkbox" id="aiEcho"><span data-ait="echo"></span></label>
     <label class="chk"><input type="checkbox" id="aiGuard"><span data-ait="guard"></span></label>
-    <label class="chk"><input type="checkbox" id="aiProc"><span data-ait="proc"></span></label>
     <button class="mb" id="aiReset" data-ait="reset"></button>
     <details class="fold sub"><summary><span><span data-ait="memory"></span> <small id="aiMemSum"></small></span></summary><div class="fb">
       <label class="chk"><input type="checkbox" id="aiMemOn"><span data-ait="memOn"></span></label>
@@ -308,7 +307,6 @@
   <details class="fold"><summary data-i="callLink"></summary><div class="fb">
     <label class="fl" for="callDev" data-ct="mic"></label>
     <select class="tin" id="callDev"></select>
-    <label class="chk"><input type="checkbox" id="callProc"><span data-ct="ec"></span></label>
   </div></details>
   <details class="fold"><summary data-i="skins"></summary><div class="fb">
     <div class="skins" id="skinList"></div>
@@ -509,6 +507,89 @@ SKINS.push({
 </div>`
 });
 
+// ---------------- 0. SIMPLE (по умолчанию): Drone HUD, радар сразу под примером ----------------
+SKINS.unshift(Object.assign({}, SKINS[0], {
+  id: 'simple',
+  name: {"ru": "Простой", "pl": "Prosty", "en": "Simple"},
+  desc: {"ru": "Drone HUD, но радар сразу под примером, а плеер без мёртвых кнопок, пока нет книги.", "pl": "Drone HUD, ale radar od razu pod przykładem, a odtwarzacz bez martwych przycisków, dopóki nie ma książki.", "en": "Drone HUD with the radar right under the demo, and no dead player buttons until a book is loaded."},
+  preview: "linear-gradient(135deg,#02080b,#062026)",
+  css: SKINS[0].css + `
+#skin .hud > * { order:4; }
+#skin .top { order:0; }
+#skin .wtabs { order:1; }
+#skin .wdemo { order:2; }
+#skin .wpanel { order:5; }
+#skin .rsec { order:3; }
+#skin .src { order:4; }
+#skin:not(.empty) .src { order:3; }
+#skin[data-mode="player"]:not(.empty) .rsec { order:6; }
+#skin.empty .nowbox { display:none; }
+#skin [data-slot] { display:contents; }
+#skin .src .files { margin-top:0; }
+#skin:not(.empty) .src .files { margin-top:6px; }
+#skin .rsec .rlock { width:auto; padding:0 10px; gap:6px; z-index:3; }
+#skin .rsec .rlt { font-size:.68rem; letter-spacing:1px; text-transform:uppercase; }
+`,
+  html: `
+<div class="hud">
+  <header class="top">
+    <div class="logo"><svg viewBox="-20 -20 682 1126"><use href="#i-parrot"/></svg></div>
+    <div class="brand"><b>WISP<i>//</i></b><div class="st" data-txt="state"></div></div>
+    <button class="sq" data-act="menu"><svg class="i"><use href="#i-menu"/></svg></button>
+  </header>
+
+  <div data-slot="tabs"></div>
+  <div data-slot="demo"></div>
+
+  <section class="pn mp src">
+    <div class="ph"><span data-i="src"></span></div>
+    <div class="nowbox">
+      <div class="now">
+        <button class="play" data-act="play"><svg class="i ic-play"><use href="#i-play"/></svg><svg class="i ic-pause"><use href="#i-pause"/></svg></button>
+        <div class="meta"><div class="tt" data-txt="title"></div><div class="tm"><b data-txt="time"></b><small class="need-track" data-txt="remain"></small></div></div>
+      </div>
+      <div class="viz" data-widget="viz"></div>
+      <div data-widget="seek"></div>
+      <div class="times need-track"><span>00:00</span><span data-txt="dur"></span></div>
+      <div class="tr">
+        <button class="hb" data-act="prev"><svg class="i"><use href="#i-prev"/></svg></button>
+        <button class="hb" data-act="back"><svg class="i"><use href="#i-back"/></svg></button>
+        <button class="hb" data-act="fwd"><svg class="i"><use href="#i-fwd"/></svg></button>
+        <button class="hb" data-act="next"><svg class="i"><use href="#i-next"/></svg></button>
+      </div>
+    </div>
+    <div class="files">
+      <button class="hb" data-act="open"><svg class="i"><use href="#i-files"/></svg><span data-i="files"></span></button>
+      <button class="hb" data-act="openDir"><svg class="i"><use href="#i-folder"/></svg><span data-i="folder"></span></button>
+      <button class="hb" data-act="radio"><svg class="i"><use href="#i-radio"/></svg><span data-i="radio"></span></button>
+    </div>
+  </section>
+
+  <section class="pn need-multi mp">
+    <div class="ph" data-fold="list"><span data-i="chapters"></span><span class="r" data-txt="count"></span></div>
+    <div class="list" data-widget="list"></div>
+  </section>
+
+  <div data-slot="panels"></div>
+
+  <section class="pn rsec">
+    <div class="ph"><span data-i="grid"></span></div>
+    <div data-slot="chips"></div>
+    <div class="rbox"><div class="radar" data-widget="radar"></div>
+      <button class="rlock" data-act="lock"><svg class="i ic-unlock"><use href="#i-unlock"/></svg><svg class="i ic-lock"><use href="#i-lock"/></svg><span class="rlt" data-txt="locks"></span></button></div>
+    <div data-slot="selected"></div>
+    <div data-slot="orbit"><div data-widget="orbit"></div></div>
+    <div class="ro">
+      <div><small>AZM</small><b data-txt="deg"></b></div>
+      <div><small>RNG</small><b data-txt="dist"></b></div>
+      <div class="lkv"><small data-i="lock"></small><b data-txt="locks"></b></div>
+    </div>
+    <div class="presets" data-widget="presets"></div>
+  </section>
+
+</div>`
+}));
+
 // ---------------- 2. WATCH ----------------
 SKINS.push({
   id: 'watch',
@@ -707,6 +788,11 @@ SKINS.push({
 //  Скин = { id, name, desc, preview, css, html, radar, viz }
 //  В разметке скина: data-act="…" (кнопки), data-txt="…" (тексты),
 //  data-widget="…" (радар, волна, полоса и т.д.), data-i="…" (перевод).
+//  Блоки, которые подставляет сам плеер, скин расставляет слотами: <div data-slot="…"></div>.
+//  Слоты: tabs (вкладки Плеер/Попутчик/Звонок), demo (пример), panels (Попутчик и Звонок),
+//         chips (кружки источников), selected (карточка выбранного источника),
+//         orbit (орбита; внутрь класть <div data-widget="orbit"></div>).
+//  Нет слота - блок встаёт на прежнее место, поэтому скины без слотов работают как раньше.
 // ======================================================================
 const $ = id => document.getElementById(id);
 const audioEl = $('audio'), root = $('skin');
@@ -719,6 +805,9 @@ const EAR = { s: 0.45 };
 const earBack = (z, d) => d > 0.01 ? Math.max(0, z / d) : 0;
 const earZ = (z, d) => z * (1 + 0.6 * EAR.s * earBack(z, d));
 const earMul = back => Math.pow(Math.pow(0.25, EAR.s), back);
+// Эхоподавление микрофона - одно на Попутчика и Звонок (раньше были две отдельные галки).
+// Подхватывает старое значение: сначала общее, потом Попутчика, потом Звонка.
+const MIC = { proc: (() => { try { for (const k of ['wispMicProc', 'wispAiProc', 'wispCallProc']) { const v = localStorage.getItem(k); if (v !== null) return v === '1'; } } catch (e) {} return !/Android/i.test(navigator.userAgent); })(), on: [] };
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
@@ -852,6 +941,15 @@ Object.entries({ ru: 'Музыка уступает голосу', uk: 'Музи
   es: 'La música cede a las voces', fr: 'La musique cède aux voix', it: 'La musica cede alle voci', pt: 'A música cede às vozes', tr: 'Müzik seslere yol verir' })
   .forEach(([k, v]) => { if (T[k]) T[k].duck2 = v; });
 Object.entries({
+  ru: { rkRe: 'Связь пропала, подключаюсь...', rkTry: 'Пробую станцию: ', rkAlt: 'Играет запасная: ', rkNone: 'Станции не отвечают, пробую снова...' },
+  en: { rkRe: 'Connection lost, reconnecting...', rkTry: 'Trying station: ', rkAlt: 'Playing backup: ', rkNone: 'No station responds, trying again...' },
+  pl: { rkRe: 'Brak połączenia, łączę ponownie...', rkTry: 'Próbuję stację: ', rkAlt: 'Gra zapasowa: ', rkNone: 'Stacje nie odpowiadają, próbuję ponownie...' },
+  uk: { rkRe: 'Зв’язок зник, підключаюсь...', rkTry: 'Пробую станцію: ', rkAlt: 'Грає запасна: ', rkNone: 'Станції не відповідають, пробую знову...' }
+}).forEach(([k, v]) => { if (T[k]) Object.assign(T[k], v); });
+Object.entries({ ru: 'Живой звук', uk: 'Живий звук', pl: 'Żywy dźwięk', en: 'Living sound', de: 'Lebendiger Klang',
+  es: 'Sonido vivo', fr: 'Son vivant', it: 'Suono vivo', pt: 'Som vivo', tr: 'Canlı ses' })
+  .forEach(([k, v]) => { if (T[k]) T[k].liveSet = v; });
+Object.entries({
   ru: ['Радиус купола', 'Ближе - укутаться, звук у самой головы. Дальше - как в просторной комнате. Меняет сразу все звуки, расстановка сохраняется.', 'Ширина стерео', 'Песня как две колонки: 0° - одна точка, около 60° - колонки перед тобой, больше - музыка разъезжается вокруг.'],
   uk: ['Радіус купола', 'Ближче - закутатися, звук біля самої голови. Далі - як у просторій кімнаті. Змінює одразу всі звуки, розстановка зберігається.', 'Ширина стерео', 'Пісня як дві колонки: 0° - одна точка, близько 60° - колонки перед тобою, більше - музика розʼїжджається довкола.'],
   pl: ['Promień kopuły', 'Bliżej - otulić się, dźwięk tuż przy głowie. Dalej - jak w przestronnym pokoju. Zmienia wszystkie dźwięki naraz, układ zostaje.', 'Szerokość stereo', 'Utwór jak dwa głośniki: 0° - jeden punkt, ok. 60° - głośniki przed tobą, więcej - muzyka rozchodzi się wokół.'],
@@ -921,6 +1019,8 @@ const t = k => (T[lang] && T[lang][k]) || T.en[k] || k;
 const L = v => typeof v === 'string' ? v : (v && (v[lang] || v.en)) || '';
 
 // ---------------- Состояние ----------------
+// Сторож радио (подробности ниже, в разделе «Радио»)
+const RK = { home: null, cur: null, busy: false, chain: false, n: 0, start: 0, tried: [], cands: [], ci: 0, last: 0, lastT: -1, stuck: 0, hadPlay: false, noAltUntil: 0, tm: 0, wait: 0, note: '' };
 const S = {
   pos: store.get('pp_pos', { x: -0.2, y: 0 }), speed: store.get('pp_speed', 1),
   radio: null, plain: false, fx: true, echo: store.get('pp_echo', true), locked: true, vol: store.get('pp_vol', 1), dome: store.get('pp_dome', 1), width: store.get('pp_width', 0), detail: store.get('pp_detail', false), live: store.get('pp_live', true), dragging: false, duck: store.get('pp_duck', true), tracks: [], cur: -1, ready: false, seeking: false,
@@ -950,7 +1050,6 @@ function initAudio() {
     const AC = window.AudioContext || window.webkitAudioContext;
     try { ac = new AC({ latencyHint: 'playback' }); } catch (e) { ac = new AC(); } // большой буфер: плеер, а не игра - меньше треска
     const src = ac.createMediaElementSource(audioEl);
-    const mono = ac.createGain(); mono.channelCount = 1; mono.channelCountMode = 'explicit'; mono.channelInterpretation = 'speakers';
     lowpass = ac.createBiquadFilter(); lowpass.type = 'lowpass'; lowpass.Q.value = 0.5;
     panner = ac.createPanner(); panner.panningModel = 'HRTF'; panner.distanceModel = 'inverse'; panner.refDistance = 1; panner.rolloffFactor = 1;
     const verb = ac.createConvolver(); verb.buffer = makeImpulse(0.6);
@@ -965,7 +1064,7 @@ function initAudio() {
     for (const pn of [panner, pannerR]) { try { pn.channelCount = 1; pn.channelCountMode = 'explicit'; } catch (e) {} }
     const split = ac.createChannelSplitter(2); chL = ac.createGain(); chR = ac.createGain(); chL.gain.value = chR.gain.value = 0.5;
     src.connect(lowpass); lowpass.connect(split); split.connect(chL, 0); split.connect(chR, 1);
-    chL.connect(panner); chR.connect(pannerR); panner.connect(spatialOut); pannerR.connect(spatialOut);
+    chL.connect(panner); chR.connect(panner); panner.connect(spatialOut); pannerR.connect(spatialOut); // пока ширина 0 - одна панорама на оба канала
     lowpass.connect(verb); verb.connect(wetLP); wetLP.connect(wetHP); wetHP.connect(wet); wet.connect(spatialOut);
     duckG = ac.createGain(); duckG.connect(master);
     mainVol = ac.createGain(); mainVol.gain.value = S.vol; mainVol.connect(duckG); // громкость самого плеера
@@ -1055,11 +1154,14 @@ function applyPos(now) {
     else pn.setPosition(q.x, 0, earZ(q.z, d));
   }
   const cg = 0.5 + 0.21 * Math.min(1, (S.width || 0) / 120); setParam(chL.gain, cg, now); setParam(chR.gain, cg, now);
+  // правый канал идёт в свою панораму только при ширине больше 0, иначе обе колонки - одна точка, и вторая панорама не нужна
+  const wide = w > 0.001 && d > 0.05;
+  if (wide !== chR._wide) { chR._wide = wide; try { chR.disconnect(); } catch (e) {} chR.connect(wide ? pannerR : panner); }
   const back = d > 0.01 ? Math.max(0, z / d) : 0; // 0 - впереди или сбоку, 1 - прямо за спиной
   setParam(lowpass.frequency, 20000 * Math.pow(5000 / 20000, k) * earMul(back), now);
   setParam(wet.gain, S.echo ? 0.015 + 0.07 * (d / METERS) : 0, now); // эхо тихое и тёмное; можно выключить
 }
-function setEcho(v) { S.echo = v; store.set('pp_echo', v); initAudio(); applyPos(false); render(); }
+function setEcho(v) { S.echo = v; store.set('pp_echo', v); initAudio(); applyPos(false); if (AI.active()) AI.applyPos(); render(); }
 function applyFx(now) {
   if (!ac) return;
   const tc = now ? 0.001 : 0.08;
@@ -1166,8 +1268,8 @@ function makeOrbit(el, tune) {
   const pace = q('.ob-pace'), size = q('.ob-size');
   if (pace) {
     pace.value = paceToV(O.period); size.value = Math.round(O.size * 100);
-    pace.addEventListener('input', () => { O.period = vToPace(+pace.value); saveOrbit(); render(); });
-    size.addEventListener('input', () => { O.size = +size.value / 100; O.trail = []; saveOrbit(); render(); requestDraw(); });
+    pace.addEventListener('input', () => { O.period = vToPace(+pace.value); pace.style.setProperty('--p', pace.value + '%'); saveOrbit(); render(); });
+    size.addEventListener('input', () => { O.size = +size.value / 100; size.style.setProperty('--p', ((+size.value - 20) / 80 * 100) + '%'); O.trail = []; saveOrbit(); render(); requestDraw(); });
   }
   return { el, shapes: [...el.querySelectorAll('.ob-s')], go: q('.ob-go'), dir: q('.ob-dir'), pace, size, pv: q('.ob-pv'), sv: q('.ob-sv') };
 }
@@ -1197,7 +1299,7 @@ const TXT = {
   dist: () => posInfo().dist,
   deg: () => posInfo().degS,
   speed: () => S.speed + '×',
-  state: () => S.cur < 0 && !S.radio ? t('tagline') : M().paused ? t('st_pause') : t('st_play'),
+  state: () => S.radio && RK.note ? RK.note : S.cur < 0 && !S.radio ? t('tagline') : M().paused ? t('st_pause') : t('st_play'),
   fxs: () => S.fx ? t('on') : t('off'),
   echos: () => S.echo ? t('on') : t('off'),
   csum: () => S.speed + '×' + (S.fx ? '' : ' · 2D') + (S.echo ? '' : ' · ' + t('echo') + ' ' + t('off')) + (S.sleepEnd ? ' · ☾' + fmtM(Math.max(0, (S.sleepEnd - Date.now()) / 1000)) : ''),
@@ -1232,18 +1334,25 @@ function mountSkin(sk) {
   root.innerHTML = sk.html;
   W = { txt: [], radar: [], viz: [], seek: [], ring: [], speed: [...MW.speed], sleep: [...MW.sleep], fx: [...MW.fx], echo: [...MW.echo], live: [...MW.live], duck: [...MW.duck], detail: [...MW.detail], list: [], orbit: [...MW.orbit] };
   const mps = root.querySelectorAll('.mp');
-  if (mps.length) {
+  // Слоты: скин сам указывает, где встанут блоки, которые подставляет плеер (data-slot="…").
+  // Нет слота - блок встаёт на прежнее место (перед первой секцией плеера / после последней).
+  const slot = n => root.querySelector('[data-slot="' + n + '"]');
+  const sTabs = slot('tabs'), sDemo = slot('demo'), sPanels = slot('panels');
+  if (mps.length || sTabs) {
     const tabs = document.createElement('div'); tabs.className = 'wtabs';
     tabs.innerHTML = '<button class="wb" data-mode="player" data-i="tabPlayer"></button><button class="wb" data-mode="ai" data-i="aiLink"></button><button class="wb" data-mode="call" data-i="callLink"></button>';
     tabs.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
-    mps[0].before(tabs);
+    if (sTabs) sTabs.appendChild(tabs); else mps[0].before(tabs);
     const db = document.createElement('div'); db.className = 'wdemo mp';
     db.innerHTML = '<b data-i="demoTitle"></b><button class="wb wdemo-go" data-i="demoBtn"></button><span data-i="demoSub"></span>';
-    mps[0].before(db); db.querySelector('.wdemo-go').addEventListener('click', () => DEMO.play());
+    if (sDemo) sDemo.appendChild(db); else if (mps.length) mps[0].before(db);
+    db.querySelector('.wdemo-go').addEventListener('click', () => DEMO.play());
+    let prevPanel = null;
+    const addPanel = el => { if (sPanels) sPanels.appendChild(el); else if (mps.length) (prevPanel || mps[mps.length - 1]).after(el); else root.appendChild(el); prevPanel = el; };
     const pnl = document.createElement('div'); pnl.className = 'wpanel wai'; pnl.innerHTML = AI.panelHtml();
-    mps[mps.length - 1].after(pnl); AI.bindPanel(pnl);
+    addPanel(pnl); AI.bindPanel(pnl);
     const cp = document.createElement('div'); cp.className = 'wpanel wcall'; cp.innerHTML = CALL.panelHtml();
-    pnl.after(cp); CALL.bindPanel(cp);
+    addPanel(cp); CALL.bindPanel(cp);
     TAB.mount(pnl);
   } else if (MODE !== 'player') setMode('player');
   LAY.mountScene(root);
@@ -1361,7 +1470,12 @@ function render() {
     o.shapes.forEach(b => { b.classList.toggle('on', b.dataset.sh === O.shape); b.title = t('sh_' + b.dataset.sh); });
     if (o.go) { const go = O.on ? '■ ' + t('stop') : '▶ ' + t('sh_' + O.shape); if (o.go.textContent !== go) o.go.textContent = go; o.go.classList.toggle('on', O.on); }
     if (o.dir) o.dir.textContent = (O.dir > 0 ? '↻ ' : '↺ ') + t('dir');
-    if (o.pv) { o.pv.textContent = O.period + ' s'; o.sv.textContent = (O.size * METERS).toFixed(1) + ' m'; }
+    if (o.pv) { o.pv.textContent = O.period + ' s'; o.sv.textContent = (O.size * METERS * S.dome).toFixed(1) + ' m'; }
+    if (o.pace && document.activeElement !== o.pace && document.activeElement !== o.size) {
+      const pv = paceToV(O.period), sv = Math.round(O.size * 100);
+      o.pace.value = pv; o.pace.style.setProperty('--p', pv + '%');
+      o.size.value = sv; o.size.style.setProperty('--p', ((sv - 20) / 80 * 100) + '%');
+    }
   });
 }
 function applyLang() {
@@ -1616,7 +1730,7 @@ function frame(ts) {
     W.radar.forEach(r => drawRadar(r.g, ts));
     W.viz.forEach(drawViz);
   }
-  const animated = !M().paused || O.on || (skin && skin.radar && (skin.radar.sweep || skin.radar.beam === 'dashed'));
+  const animated = !M().paused || O.on || LAY.anyPlaying() || AI.active() || CALL.active() || TAB.active() || (skin && skin.radar && (skin.radar.sweep || skin.radar.beam === 'dashed'));
   if (animated) requestAnimationFrame(frame); else rafOn = false;
 }
 function requestDraw() { drawPending = true; if (!rafOn) { rafOn = true; requestAnimationFrame(frame); } }
@@ -1730,18 +1844,20 @@ function toast(msg) {
   const el = $('toast'); el.textContent = msg; el.classList.add('show');
   clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3500);
 }
-function stopRadio() {
+function stopRadio(keepKeeper) {
+  if (!keepKeeper) rkStop();
   if (!S.radio) return;
   S.radio = null; S.plain = false;
   audioEl.onplaying = audioEl.onerror = null;
   audioPlain.pause(); audioPlain.removeAttribute('src'); audioPlain.load();
   audioEl.pause(); audioEl.removeAttribute('crossorigin');
 }
-function playStation(st) {
+function playStation(st, auto) {
   savePos();
-  if (S.radio) stopRadio(); else { audioEl.pause(); if (audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src); }
+  if (S.radio) stopRadio(true); else { audioEl.pause(); if (audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src); }
   S.tracks = []; S.cur = -1; S.ready = false; renderList();
   S.radio = st; S.plain = false; S.demo = false;
+  if (auto) RK.hadPlay = false; else rkReset(st);
   const my = ++radioTry;
   initAudio();
   // Просим поток с разрешением на обработку. Не дал разрешения - поток не откроется, и мы переключимся на стерео.
@@ -1750,7 +1866,7 @@ function playStation(st) {
   audioEl.playbackRate = 1;
   audioEl.src = st.url;
   let started = false;
-  audioEl.onplaying = () => { if (my !== radioTry) return; if (!started) { started = true; mark(st, true); } };
+  audioEl.onplaying = () => { if (my !== radioTry) return; if (!started) { started = true; mark(st, true); } rkOk(); };
   let tries = 0;
   audioEl.onerror = () => {
     if (my !== radioTry || S.plain) return;
@@ -1762,7 +1878,7 @@ function playStation(st) {
       startPlain(st, my);
       return;
     }
-    else setTimeout(() => { if (my === radioTry && S.radio === st) { audioEl.src = st.url; audioEl.play().catch(() => {}); } }, 2000); // обрыв - переподключаемся
+    rkFail('error'); // обрыв посреди игры: дальше работает сторож (переподключение, потом запасная станция)
   };
   audioEl.play().catch(() => {});
   setupMediaSession(st.name); render(); requestDraw();
@@ -1772,8 +1888,9 @@ function startPlain(st, my) {
   S.plain = true;
   audioPlain.volume = S.vol;
   audioPlain.src = st.url;
-  audioPlain.onplaying = () => { if (my === radioTry) { mark(st, false); toast(t('no3d')); } audioPlain.onplaying = null; };
-  audioPlain.onerror = () => { if (my === radioTry && S.radio === st) { toast(t('streamFail')); stopRadio(); render(); } };
+  let plainMarked = false;
+  audioPlain.onplaying = () => { if (my !== radioTry) return; if (!plainMarked) { plainMarked = true; mark(st, false); toast(t('no3d')); } rkOk(); };
+  audioPlain.onerror = () => { if (my !== radioTry || S.radio !== st) return; if (RK.chain || RK.busy || RK.hadPlay) { rkFail('error'); return; } toast(t('streamFail')); stopRadio(); render(); };
   audioPlain.play().catch(() => {});
   render(); requestDraw();
 }
@@ -1781,6 +1898,83 @@ function mark(st, d3) {
   const s = stations.find(x => x.url === st.url); if (s && s.d3 !== d3) { s.d3 = d3; store.set('pp_stations', stations); }
   renderStations();
 }
+// ---------------- Сторож радио ----------------
+// Три вида обрыва: поток закончился (ended), завис без данных (время стоит), ошибка.
+// Дальше: та же станция с растущими паузами; через минуту - запасная из списка
+// (сначала тот же эфир в другом качестве, потом остальные); если и они молчат - тихо пробуем свою раз в минуту.
+const RK_DELAYS = [1500, 4000, 8000, 15000, 30000, 60000], RK_SAME_MS = 60000, RK_PROBE_MS = 10000, RK_STALL_TICKS = 7;
+function rkClear() { clearTimeout(RK.tm); clearTimeout(RK.wait); RK.tm = RK.wait = 0; }
+function rkNote(s) { RK.note = s; render(); }
+function rkReset(st) { rkClear(); RK.home = RK.cur = st; RK.busy = RK.chain = false; RK.n = 0; RK.tried = []; RK.hadPlay = false; RK.stuck = 0; RK.lastT = -1; RK.noAltUntil = 0; RK.note = ''; }
+function rkStop() { rkClear(); RK.busy = RK.chain = false; RK.note = ''; RK.home = RK.cur = null; RK.hadPlay = false; }
+function rkOk() {
+  RK.hadPlay = true; RK.stuck = 0;
+  if (RK.busy) { rkClear(); RK.busy = false; RK.chain = false; RK.n = 0; }
+  const alt = S.radio && RK.home && S.radio.url !== RK.home.url;
+  const note = alt ? t('rkAlt') + (S.radio.name || S.radio.url) : '';
+  if (note !== RK.note) rkNote(note);
+}
+function rkFail() {
+  if (!S.radio) return;
+  const now = Date.now();
+  if (now - RK.last < 800) return; // error, pause и ended приходят пачкой
+  RK.last = now;
+  if (RK.chain) { rkNextCand(); return; }
+  if (!RK.busy) { RK.busy = true; RK.start = now; RK.n = 0; RK.tried = [S.radio.url]; RK.cur = S.radio; rkNote(t('rkRe')); }
+  else clearTimeout(RK.wait);
+  rkAttempt();
+}
+function rkAttempt() {
+  clearTimeout(RK.tm); if (!S.radio) return;
+  if (Date.now() - RK.start >= RK_SAME_MS && RK.n >= 3 && Date.now() >= RK.noAltUntil) { rkFailover(); return; }
+  const st = RK.cur, canAlt = () => RK.n >= 3 && Date.now() >= RK.noAltUntil;
+  let wait = RK_DELAYS[Math.min(RK.n, RK_DELAYS.length - 1)];
+  const left = RK_SAME_MS - (Date.now() - RK.start);
+  if (canAlt() && wait > left) wait = Math.max(0, left); // не ждём лишнего: на пороге минуты сразу идём к запасной
+  RK.tm = setTimeout(() => {
+    if (!S.radio || !RK.busy || RK.chain) return;
+    if (Date.now() - RK.start >= RK_SAME_MS && canAlt()) { rkFailover(); return; }
+    RK.n++;
+    if (ac && ac.state !== 'running') ac.resume();
+    const el = S.plain ? audioPlain : audioEl;
+    try { el.src = st.url; el.play().catch(() => {}); } catch (e) {}
+    RK.wait = setTimeout(() => { if (RK.busy && !RK.chain) rkAttempt(); }, RK_PROBE_MS);
+  }, wait);
+}
+function rkFailover() {
+  RK.chain = true; rkClear();
+  const key = n => (n || '').split('·')[0].trim().toLowerCase();
+  const others = stations.filter(x => x.url !== RK.cur.url && !RK.tried.includes(x.url));
+  const same = others.filter(x => key(x.name) === key(RK.cur.name));
+  const rest = others.filter(x => !same.includes(x)), i0 = stations.findIndex(x => x.url === RK.cur.url);
+  const rot = i0 < 0 ? rest : [...rest.filter(x => stations.indexOf(x) > i0), ...rest.filter(x => stations.indexOf(x) < i0)];
+  RK.cands = [...same, ...rot]; RK.ci = 0;
+  rkNextCand();
+}
+function rkNextCand() {
+  clearTimeout(RK.wait);
+  const c = RK.cands[RK.ci++];
+  if (!c) {
+    RK.chain = false; RK.noAltUntil = Date.now() + 5 * 60000; RK.n = RK_DELAYS.length; RK.start = Date.now();
+    rkNote(t('rkNone'));
+    if (RK.cur && S.radio && S.radio.url !== RK.cur.url) playStation(RK.cur, true);
+    rkAttempt(); return;
+  }
+  RK.tried.push(c.url); rkNote(t('rkTry') + (c.name || c.url));
+  playStation(c, true);
+  RK.wait = setTimeout(() => { if (RK.chain) rkNextCand(); }, RK_PROBE_MS + 4000);
+}
+audioEl.addEventListener('ended', () => { if (S.radio && !S.plain && (RK.hadPlay || RK.chain)) rkFail('ended'); });
+audioPlain.addEventListener('ended', () => { if (S.radio && S.plain && (RK.hadPlay || RK.chain)) rkFail('ended'); });
+setInterval(() => {
+  if (!S.radio || !RK.hadPlay) { RK.stuck = 0; return; }
+  const el = S.plain ? audioPlain : audioEl;
+  if (el.paused || RK.busy || RK.chain) { RK.stuck = 0; RK.lastT = -1; return; }
+  if (el.currentTime === RK.lastT) { if (++RK.stuck >= RK_STALL_TICKS) { RK.stuck = 0; rkFail('stall'); } }
+  else { RK.stuck = 0; RK.lastT = el.currentTime; }
+}, 2000);
+window.addEventListener('online', () => { if (S.radio && RK.busy && !RK.chain) { RK.n = 0; rkAttempt(); } });
+
 function stepStation(k) {
   if (!stations.length) return;
   const i = stations.findIndex(x => S.radio && x.url === S.radio.url);
@@ -1820,14 +2014,19 @@ $('radioClose').addEventListener('click', closeRadio);
 
 // ---------------- Таймер сна ----------------
 let sleepTick = null, fading = false;
+// звуки, которые идут мимо общей громкости (радио без 3D), гасим вручную: f от 1 до 0
+function sleepScale(f) { audioPlain.volume = Math.max(0, Math.min(1, S.vol * f)); LAY.sleepScale(f); }
 function setSleep(min) {
   clearInterval(sleepTick); sleepTick = null; fading = false;
   if (master) { master.gain.cancelScheduledValues(ac.currentTime); master.gain.setValueAtTime(1, ac.currentTime); }
+  sleepScale(1);
   S.sleepMin = min; S.sleepEnd = min ? Date.now() + min * 60000 : 0;
   if (min) sleepTick = setInterval(() => {
     const left = (S.sleepEnd - Date.now()) / 1000;
     if (left <= 10 && !fading && master) { fading = true; master.gain.setTargetAtTime(0, ac.currentTime, 3); }
-    if (left <= 0) { M().pause(); setSleep(0); return; }
+    if (left <= 10) sleepScale(Math.max(0, left / 10));
+    // сначала всё на паузу (и главный плеер, и дополнительные звуки), потом возвращаем громкость - так ничего не грянет
+    if (left <= 0) { M().pause(); LAY.pauseAll(); setSleep(0); return; }
     render();
   }, 1000);
   render();
@@ -1922,7 +2121,7 @@ function cleanCss(css) {
 function cleanRadar(r) {
   const o = {}, pick = (k, ok) => { if (r && ok(r[k])) o[k] = r[k]; };
   pick('r', v => typeof v === 'number' && v >= 80 && v <= 140);
-  pick('pad', v => typeof v === 'number' && v >= 0 && v <= 20);
+  pick('pad', v => typeof v === 'number' && v >= 0 && v <= 40);
   pick('rings', v => ['meters', 'dense', 'soft'].includes(v));
   pick('ticks', v => ['deg', 'hours', 'none'].includes(v));
   pick('beam', v => ['solid', 'dashed', 'none'].includes(v));
@@ -2017,7 +2216,7 @@ const AI = (() => {
   const MODELS = [['gemini-3.8-live', '3.8 Live', 'mNew'], ['gemini-3.8-live-extended-thinking', '3.8 Live', 'mThink'],
     ['gemini-3.1-flash-live-preview', '3.1 Flash Live (preview)', ''], ['gemini-2.5-flash-native-audio-preview-12-2025', '2.5 Native Audio', 'mOld']];
   const modelLabel = m => m[1] + (m[2] ? ' - ' + at(m[2]) : '');
-  let proc = !/Android/i.test(navigator.userAgent), echoOn = true, searchFallback = false, guardOn = true;
+  let searchFallback = false, guardOn = true;
   const isDefPersona = v => !v || v === OLD_PERSONA || v === AIT.ru.personaDef || v === AIT.en.personaDef;
 
   function fillModels() {
@@ -2032,6 +2231,15 @@ const AI = (() => {
   }
   function setSum() { const s = q('aiSum'); if (s) s.textContent = q('aiKey').value ? '' : '· ' + at('needKey'); }
   function init() {
+    // общая галка эхоподавления: если разговор идёт, микрофон переоткрывается с новым режимом
+    MIC.on.push(async () => {
+      if (!micStream || !micSrc) return;
+      try {
+        const s = await getMic();
+        micSrc.disconnect(); micStream.getTracks().forEach(t => t.stop());
+        micStream = s; micSrc = ac.createMediaStreamSource(s); micSrc.connect(micHP);
+      } catch (e) { log('mic: ' + e.name); }
+    });
     q('aiKey').value = ls('wispAiKey') || '';
     q('aiModel').value = ls('wispAiModel') || DEF_MODEL;
     fillModels();
@@ -2040,8 +2248,6 @@ const AI = (() => {
     q('aiPatience').value = ls('wispAiPatience') || '1500';
     q('aiGeo').checked = ls('wispAiGeo') !== '0';
     q('aiSearch').checked = ls('wispAiSearch') !== '0';
-    { const v = ls('wispAiProc'); if (v !== null) proc = v === '1'; } q('aiProc').checked = proc;
-    echoOn = ls('wispAiEcho') !== '0'; q('aiEcho').checked = echoOn;
     guardOn = ls('wispAiGuard') !== '0'; q('aiGuard').checked = guardOn;
     q('aiMemOn').checked = ls('wispAiMemOn') !== '0';
     q('aiProfile').value = ls('wispAiProfile') || '';
@@ -2059,8 +2265,6 @@ const AI = (() => {
     q('aiSearch').onchange = () => { ls('wispAiSearch', q('aiSearch').checked ? '1' : '0'); searchFallback = false; restartSession(); };
     q('aiGeo').onchange = () => ls('wispAiGeo', q('aiGeo').checked ? '1' : '0');
     q('aiGuard').onchange = () => { guardOn = q('aiGuard').checked; ls('wispAiGuard', guardOn ? '1' : '0'); };
-    q('aiProc').onchange = () => { proc = q('aiProc').checked; ls('wispAiProc', proc ? '1' : '0'); };
-    q('aiEcho').onchange = () => { echoOn = q('aiEcho').checked; ls('wispAiEcho', echoOn ? '1' : '0'); applyPos(); };
     q('aiMemOn').onchange = () => ls('wispAiMemOn', q('aiMemOn').checked ? '1' : '0');
     q('aiProfile').onchange = () => ls('wispAiProfile', q('aiProfile').value.trim());
     q('aiReset').onclick = () => {
@@ -2128,7 +2332,7 @@ const AI = (() => {
     tgt(pan.positionX, x, 0.04); tgt(pan.positionY, 0, 0.04); tgt(pan.positionZ, earZ(z, d), 0.04);
     const k = Math.min(1, Math.max(0, (d - 0.7) / (METERS - 0.7))), back = d > 0.01 ? Math.max(0, z / d) : 0;
     tgt(lp.frequency, Math.max(2500, 20000 * Math.pow(5000 / 20000, k) * earMul(back)), 0.04);
-    tgt(wet.gain, echoOn ? 0.015 + 0.07 * (d / METERS) : 0, 0.04);
+    tgt(wet.gain, S.echo ? 0.015 + 0.07 * (d / METERS) : 0, 0.04);
   }
   function level() { if (!speaking() || !an) return 0; an.getByteTimeDomainData(wave); let m = 0; for (const v of wave) m = Math.max(m, Math.abs(v - 128) / 128); return m; }
   function tickUi() {
@@ -2139,7 +2343,7 @@ const AI = (() => {
   }
 
   function openMic(id) {
-    const a = { echoCancellation: proc, noiseSuppression: proc, autoGainControl: proc, channelCount: 1 };
+    const a = { echoCancellation: MIC.proc, noiseSuppression: MIC.proc, autoGainControl: MIC.proc, channelCount: 1 };
     if (id) a.deviceId = { exact: id };
     return navigator.mediaDevices.getUserMedia({ audio: a });
   }
@@ -2147,7 +2351,7 @@ const AI = (() => {
     // встроенный микрофон телефона, чтобы Bluetooth-наушники остались в стерео
     let s = await openMic(null);
     const sp = (await navigator.mediaDevices.enumerateDevices()).find(d => d.kind === 'audioinput' && /speakerphone/i.test(d.label));
-    if (sp && sp.deviceId && !proc) { s.getTracks().forEach(tr => tr.stop()); s = await openMic(sp.deviceId); }
+    if (sp && sp.deviceId && !MIC.proc) { s.getTracks().forEach(tr => tr.stop()); s = await openMic(sp.deviceId); }
     const tr = s.getAudioTracks()[0];
     log('Микрофон: ' + tr.label);
     tr.onmute = () => log('Android отключил микрофон'); tr.onunmute = () => log('Микрофон снова работает'); tr.onended = () => log('Микрофон закрыт системой');
@@ -2265,9 +2469,12 @@ const AI = (() => {
     log('Не удалось сделать выжимку - попробую при следующем разговоре');
   }
   function contextText() {
-    const now = new Date();
-    let tx = 'Сейчас ' + now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + '.';
-    if (placeCtx) tx += ' Собеседник сейчас здесь: ' + placeCtx + '. Используй это, когда речь о том, что рядом.';
+    const now = new Date(), ru = lang === 'ru' || lang === 'uk';
+    const loc = navigator.language || 'en-US';
+    const when = now.toLocaleDateString(ru ? 'ru-RU' : loc, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + now.toLocaleTimeString(ru ? 'ru-RU' : loc, { hour: '2-digit', minute: '2-digit' });
+    let tx = ru ? 'Сейчас ' + when + '.' : 'It is now ' + when + '.';
+    if (placeCtx) tx += ru ? ' Собеседник сейчас здесь: ' + placeCtx + '. Используй это, когда речь о том, что рядом.' : ' The user is here now: ' + placeCtx + '. Use it when the talk is about what is nearby.';
+    tx += ru ? ' Отвечай на том языке, на котором говорит собеседник.' : ' Always reply in the language the user speaks.';
     return tx + memoryText();
   }
 
@@ -2495,9 +2702,8 @@ const CALL = (() => {
   const joinRoom = (new URLSearchParams(location.search).get('call') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 64);
   let ws = null, room = null, pingTimer = null, peerNo = 0, sel = null, stKey = 'off', stRaw = '', stCls = '', starting = false;
   let micStream = null, micSrc = null, micHP = null, micGain = null, micDest = null, sendTrack = null, micAn = null, micArr = null;
-  let muted = false, fileSrc = null, demo = null, demoBuf = null, proc = !/Android/i.test(navigator.userAgent);
+  let muted = false, fileSrc = null, demo = null, demoBuf = null;
   const peers = new Map();
-  { const v = lsg('wispCallProc'); if (v !== null) proc = v === '1'; }
 
   function setStatus(k, cls, raw) { stKey = k; stCls = cls || ''; stRaw = raw || ''; render(); }
   function newRoom() { const a = new Uint8Array(6); crypto.getRandomValues(a); return Array.from(a, b => (b % 36).toString(36)).join('') + Date.now().toString(36).slice(-2); }
@@ -2550,7 +2756,7 @@ const CALL = (() => {
 
   // ---------- микрофон ----------
   function openMic(id) {
-    const a = { echoCancellation: proc, noiseSuppression: proc, autoGainControl: proc, channelCount: 1 };
+    const a = { echoCancellation: MIC.proc, noiseSuppression: MIC.proc, autoGainControl: MIC.proc, channelCount: 1 };
     if (id) a.deviceId = { exact: id };
     return navigator.mediaDevices.getUserMedia({ audio: a });
   }
@@ -2713,12 +2919,11 @@ const CALL = (() => {
 
   // ---------- меню и панель ----------
   function init() {
-    q('callProc').checked = proc;
-    q('callProc').onchange = async () => {
-      proc = q('callProc').checked; lss('wispCallProc', proc ? '1' : '0');
+    // общая галка эхоподавления в настройках: если звонок идёт, микрофон переоткрывается с новым режимом
+    MIC.on.push(async () => {
       if (!micStream) return;
       try { plugMic(await openMic(q('callDev').value)); } catch (e) { setStatus('micSwitch', 'bad', e.name); }
-    };
+    });
     q('callDev').onchange = async () => { try { plugMic(await openMic(q('callDev').value)); } catch (e) { setStatus('micSwitch', 'bad', e.name); } };
     if (joinRoom) setMode('call');
   }
@@ -2923,6 +3128,14 @@ const LAY = (() => {
     if (m.paused) { c.want = true; if (c.kind === 'radio' && !c.plain) m.src = c.url; m.play().catch(() => {}); }
     else { c.want = false; m.pause(); if (c.kind === 'radio') { m.removeAttribute('src'); m.load(); } }
   }
+  // для таймера сна: приглушить звуки без 3D и поставить всё на паузу
+  function sleepScale(f) { for (const c of list) if (c.plain) c.plain.volume = Math.max(0, Math.min(1, c.vol * f)); }
+  function pauseAll() {
+    for (const c of list) {
+      if (c.kind === 'tab') { if (!c.muted) toggle(c); }
+      else { const m = media(c); if (m && !m.paused) toggle(c); }
+    }
+  }
   function remove(c) {
     c.want = false;
     const m = media(c); if (m) { m.pause(); m.removeAttribute('src'); m.load(); }
@@ -3002,11 +3215,16 @@ const LAY = (() => {
     chipsEl = selEl = null; chipSig = selSig = '';
     const radarEl = root.querySelector('[data-widget="radar"]'); if (!radarEl) return;
     const anchor = radarEl.closest('.rbox, .face') || radarEl;
-    chipsEl = document.createElement('div'); chipsEl.className = 'wscene-src'; anchor.before(chipsEl);
-    selEl = document.createElement('div'); selEl.className = 'wscene-sel'; anchor.after(selEl);
-    // орбиты переезжают под радар: они относятся к выбранному источнику, а не к плееру
+    const sChips = root.querySelector('[data-slot="chips"]'), sSel = root.querySelector('[data-slot="selected"]'), sOrb = root.querySelector('[data-slot="orbit"]');
+    chipsEl = document.createElement('div'); chipsEl.className = 'wscene-src'; if (sChips) sChips.appendChild(chipsEl); else anchor.before(chipsEl);
+    selEl = document.createElement('div'); selEl.className = 'wscene-sel'; if (sSel) sSel.appendChild(selEl); else anchor.after(selEl);
+    // орбиты по умолчанию переезжают под радар: они относятся к выбранному источнику, а не к плееру; слот orbit это отменяет
     const ow = root.querySelector('[data-widget="orbit"]');
-    if (ow) { const box = ow.parentElement; selEl.after(ow); if (box && box !== root && !box.contains(radarEl) && !box.classList.contains('hud') && !box.classList.contains('wrap')) box.remove(); }
+    if (ow) {
+      const box = ow.parentElement;
+      if (sOrb) { if (!sOrb.contains(ow)) sOrb.appendChild(ow); } else selEl.after(ow);
+      if (!sOrb && box && box !== root && !box.contains(radarEl) && !box.classList.contains('hud') && !box.classList.contains('wrap')) box.remove();
+    }
     fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'audio/*'; fileIn.multiple = true; fileIn.className = 'hidden';
     fileIn.addEventListener('change', () => { const fs = [...fileIn.files]; fileIn.value = ''; if (fs.length) addFiles(fs, false); });
     dirIn = document.createElement('input'); dirIn.type = 'file'; dirIn.multiple = true; dirIn.className = 'hidden';
@@ -3092,7 +3310,7 @@ const LAY = (() => {
     for (const c of store.get('pp_layers', []).slice(0, MAX)) make('radio', c.name, c.url, c.pos, c.vol, c.slot);
     sel = 'music';
   }
-  return { init, applyLang, applyPos, tick, anyPlaying, playerSrc, mountScene, selectSource, nameOf, paint, build, save };
+  return { init, applyLang, applyPos, tick, anyPlaying, playerSrc, mountScene, selectSource, nameOf, paint, build, save, sleepScale, pauseAll };
 })();
 
 // цветные точки на вкладках: источник работает - у кнопки вкладки горит его цвет, тот же, что на радаре
@@ -3334,12 +3552,14 @@ const SCAN = (() => {
 
 // ---------------- Купол и ширина стерео ----------------
 (() => {
+  { const mp = $('micProc'); mp.checked = MIC.proc;
+    mp.addEventListener('change', () => { MIC.proc = mp.checked; try { localStorage.setItem('wispMicProc', MIC.proc ? '1' : '0'); } catch (e) {} MIC.on.forEach(f => f()); }); }
   const dSl = $('domeSl'), wSl = $('widthSl');
   const show = () => {
     dSl.value = Math.round(S.dome * 100); dSl.style.setProperty('--p', ((S.dome * 100 - 40) / 120 * 100) + '%'); $('domeVal').textContent = Math.round(S.dome * 100) + '%';
     wSl.value = S.width; wSl.style.setProperty('--p', (S.width / 120 * 100) + '%'); $('widthVal').textContent = S.width + '°';
   };
-  dSl.addEventListener('input', () => { S.dome = +dSl.value / 100; store.set('pp_dome', S.dome); show(); reapplyAll(); });
+  dSl.addEventListener('input', () => { S.dome = +dSl.value / 100; store.set('pp_dome', S.dome); show(); reapplyAll(); render(); });
   wSl.addEventListener('input', () => { S.width = +wSl.value; store.set('pp_width', S.width); show(); if (ac) applyPos(false); });
   show();
 })();
