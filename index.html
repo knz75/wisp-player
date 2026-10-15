@@ -143,6 +143,9 @@
   #skin .wss-ctl { display: grid; grid-template-columns: 48px minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
   #skin .wss-ctl .wb { min-height: 40px; }
   #skin .wss-ctl.two { grid-template-columns: 48px minmax(0, 1fr); }
+  #skin .wss-ctl.vol1 { grid-template-columns: 26px minmax(0, 1fr); min-height: 32px; }
+  #skin .wss-vl { font-size: .95rem; opacity: .75; text-align: center; }
+  #skin.nodemo .wdemo { display: none !important; }
   #skin .wss-ctl.four { grid-template-columns: 48px 48px minmax(0, 1fr) 44px; }
   #skin .wss-hint { font-size: .75rem; opacity: .7; line-height: 1.4; margin: 0; }
   #skin .w-orbit .wb.on { background: var(--cur, var(--r-acc)) !important; border-color: var(--cur, var(--r-acc)) !important; color: #071014 !important; }
@@ -538,12 +541,16 @@ SKINS.unshift(Object.assign({}, SKINS[0], {
 #skin .hud > * { order:4; }
 #skin .top { order:0; }
 #skin .wtabs { order:1; }
-#skin .wdemo { order:2; }
-#skin .wpanel { order:5; }
-#skin .rsec { order:3; }
-#skin .src { order:4; }
-#skin:not(.empty) .src { order:3; }
-#skin[data-mode="player"]:not(.empty) .rsec { order:6; }
+#skin .src, #skin .wpanel { order:2; }
+#skin .wscene-sel { order:3; }
+#skin .rsec { order:5; }
+#skin .need-multi { order:6; }
+/* выбран дополнительный звук - вверху его карточка вместо главного плеера; в других вкладках карточка не нужна */
+#skin[data-mode="player"].sel-layer .src, #skin.sel-layer .need-multi { display:none; }
+#skin:not([data-mode="player"]) .wscene-sel { display:none; }
+#skin.empty:not(.sel-layer) .wscene-sel { display:none; }
+#skin .src .wdemo { border:none; padding:0 0 8px; margin:0; max-width:none; }
+#skin .src .wdemo b, #skin .src .wdemo span { display:none; }
 #skin.empty .nowbox { display:none; }
 #skin [data-slot] { display:contents; }
 #skin .src .files { margin-top:0; }
@@ -560,10 +567,10 @@ SKINS.unshift(Object.assign({}, SKINS[0], {
   </header>
 
   <div data-slot="tabs"></div>
-  <div data-slot="demo"></div>
 
   <section class="pn mp src">
     <div class="ph"><span data-i="src"></span></div>
+    <div data-slot="demo"></div>
     <div class="nowbox">
       <div class="now">
         <button class="play" data-act="play"><svg class="i ic-play"><use href="#i-play"/></svg><svg class="i ic-pause"><use href="#i-pause"/></svg></button>
@@ -585,6 +592,7 @@ SKINS.unshift(Object.assign({}, SKINS[0], {
       <button class="hb" data-act="radio"><svg class="i"><use href="#i-radio"/></svg><span data-i="radio"></span></button>
     </div>
   </section>
+  <div data-slot="selected"></div>
 
   <section class="pn need-multi mp">
     <div class="ph" data-fold="list"><span data-i="chapters"></span><span class="r" data-txt="count"></span></div>
@@ -598,7 +606,6 @@ SKINS.unshift(Object.assign({}, SKINS[0], {
     <div data-slot="chips"></div>
     <div class="rbox"><div class="radar" data-widget="radar"></div>
       <button class="rlock" data-act="lock"><svg class="i ic-unlock"><use href="#i-unlock"/></svg><svg class="i ic-lock"><use href="#i-lock"/></svg><span class="rlt" data-txt="locks"></span></button></div>
-    <div data-slot="selected"></div>
     <div data-slot="orbit"><div data-widget="orbit"></div></div>
     <div class="ro">
       <div><small>AZM</small><b data-txt="deg"></b></div>
@@ -961,6 +968,10 @@ Object.entries({ ru: 'Плеер', uk: 'Плеєр', pl: 'Odtwarzacz', en: 'Play
 Object.entries({ ru: 'Музыка уступает голосу', uk: 'Музика поступається голосу', pl: 'Muzyka ustępuje głosowi', en: 'Music yields to voices', de: 'Musik weicht Stimmen',
   es: 'La música cede a las voces', fr: 'La musique cède aux voix', it: 'La musica cede alle voci', pt: 'A música cede às vozes', tr: 'Müzik seslere yol verir' })
   .forEach(([k, v]) => { if (T[k]) T[k].duck2 = v; });
+// стороны вокруг головы: «маятник» стал «спереди», добавились «справа» и «слева»
+Object.entries({ ru: ['Спереди', 'Справа', 'Слева'], uk: ['Спереду', 'Праворуч', 'Ліворуч'], pl: ['Z przodu', 'Z prawej', 'Z lewej'], en: ['Front', 'Right', 'Left'],
+  de: ['Vorne', 'Rechts', 'Links'], es: ['Delante', 'Derecha', 'Izquierda'], fr: ['Devant', 'À droite', 'À gauche'], it: ['Davanti', 'Destra', 'Sinistra'],
+  pt: ['Frente', 'Direita', 'Esquerda'], tr: ['Ön', 'Sağ', 'Sol'] }).forEach(([k, v]) => { if (T[k]) { T[k].sh_pendulum = v[0]; T[k].sh_right = v[1]; T[k].sh_left = v[2]; } });
 Object.entries({
   ru: { rkRe: 'Связь пропала, подключаюсь...', rkTry: 'Пробую станцию: ', rkAlt: 'Играет запасная: ', rkNone: 'Станции не отвечают, пробую снова...' },
   en: { rkRe: 'Connection lost, reconnecting...', rkTry: 'Trying station: ', rkAlt: 'Playing backup: ', rkNone: 'No station responds, trying again...' },
@@ -1212,12 +1223,15 @@ const SHAPES = {
   pendulum: u => { const th = 1.35 * Math.sin(TAU * u); return { x: Math.sin(th), y: -Math.cos(th) }; },
   // Сзади: дуга за спиной от плеча к плечу, перед остаётся свободным
   back:     u => { const th = 1.35 * Math.sin(TAU * u); return { x: Math.sin(th), y: Math.cos(th) }; },
+  // Справа и слева: такая же дуга, но у правого или левого уха - от переда к затылку и обратно
+  right:    u => { const d = 1.35 * Math.sin(TAU * u); return { x: Math.cos(d), y: Math.sin(d) }; },
+  left:     u => { const d = 1.35 * Math.sin(TAU * u); return { x: -Math.cos(d), y: Math.sin(d) }; },
   wander:   u => { const a = TAU * u; let x = 0.55 * Math.sin(a) + 0.3 * Math.sin(3 * a + 1) + 0.12 * Math.sin(7 * a + 2), y = -0.55 * Math.cos(2 * a) + 0.3 * Math.sin(5 * a + 0.5) - 0.1 * Math.cos(a);
     const d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } return { x, y }; }
 };
 const SHAPE_IDS = Object.keys(SHAPES);
-const MAIN_SHAPES = ['circle', 'back', 'pendulum', 'wander', 'eight'];
-const MORE_SHAPES = SHAPE_IDS.filter(id => !MAIN_SHAPES.includes(id));
+const MAIN_SHAPES = ['circle', 'pendulum', 'back', 'right', 'left'];
+const MORE_SHAPES = ['wander', 'eight', 'oval', 'square', 'triangle', 'star', 'spiral', 'comet'];
 let O = Object.assign({ shape: 'circle', period: 10, size: 0.7, dir: 1 }, store.get('pp_orbit', {}), { on: false, u: 0, last: 0, trail: [] });
 if (!SHAPES[O.shape]) O.shape = 'circle';
 const HOOKS = { paint: [] };
@@ -2100,6 +2114,9 @@ const pinged = {};
 // Никакого номера или имени - только это число, оно лежит в браузере человека.
 // FIRST - этот браузер видит Wisp впервые в жизни (уходит с отметкой open ровно один раз).
 let FIRST = false;
+// пример показываем новичку: первые 3 открытия и пока он сам ничего не включал
+const OPENS = (() => { const n = (store.get('pp_opens', 0) || 0) + 1; store.set('pp_opens', n); return n; })();
+let PLAYED = !!store.get('pp_played', false);
 const SINCE = (() => { const today = Math.floor(Date.now() / 864e5); let f = store.get('pp_first', 0); if (!f) { f = today; store.set('pp_first', f); FIRST = true; } return Math.max(0, Math.min(999, today - f)); })();
 function ping(ev) {
   if (pinged[ev] || location.protocol !== 'https:') return;
@@ -3572,11 +3589,11 @@ const LAY = (() => {
       selSig = sig; selEl.style.setProperty('--c', colorOf(s)); selEl.innerHTML = '';
       const head = document.createElement('div'); head.className = 'wss-head';
       head.innerHTML = '<b>' + esc(tagOf(s)) + '</b><span>' + esc(nameOf(s) + (multi ? ' · ' + (s.idx + 1) + '/' + s.files.length : '')) + '</span>';
-      selEl.appendChild(head);
+      if (s.key !== 'music') selEl.appendChild(head);
       if (s.key === 'music') {
-        const ctl = document.createElement('div'); ctl.className = 'wss-ctl two';
-        ctl.innerHTML = '<button class="wb wss-pp"></button><input type="range" class="w-seek wss-vol" min="0" max="100" value="' + Math.round(S.vol * 100) + '" aria-label="' + esc(lt('volume')) + '">';
-        ctl.querySelector('.wss-pp').addEventListener('click', () => act('play'));
+        // пауза и название уже есть в самом плеере - здесь только громкость
+        const ctl = document.createElement('div'); ctl.className = 'wss-ctl vol1';
+        ctl.innerHTML = '<span class="wss-vl" aria-hidden="true">🔊</span><input type="range" class="w-seek wss-vol" min="0" max="100" value="' + Math.round(S.vol * 100) + '" aria-label="' + esc(lt('volume')) + '">';
         const v = ctl.querySelector('.wss-vol'); v.style.setProperty('--p', v.value + '%');
         v.addEventListener('input', e => { v.style.setProperty('--p', e.target.value + '%'); setMainVol(+e.target.value / 100); });
         selEl.appendChild(ctl);
@@ -3620,7 +3637,11 @@ HOOKS.paint.push(() => {
   root.querySelectorAll('.wtabs [data-mode]').forEach(b => { b.classList.toggle('live', !!live[b.dataset.mode]); b.style.setProperty('--dot', col[b.dataset.mode]); });
   root.style.setProperty('--cur', CUR.key === 'music' ? 'var(--r-acc, #3ef0ff)' : CUR.key === 'next' ? '#ffb86b' : (CUR.color || 'var(--r-acc, #3ef0ff)'));
   root.classList.toggle('detail', !!S.detail);
-  root.classList.toggle('empty', S.cur < 0 && !S.radio);
+  const isEmpty = S.cur < 0 && !S.radio;
+  root.classList.toggle('empty', isEmpty);
+  if (!isEmpty && !PLAYED) { PLAYED = true; store.set('pp_played', true); }
+  root.classList.toggle('nodemo', !isEmpty || OPENS > 3 || PLAYED);
+  root.classList.toggle('sel-layer', !!(CUR && CUR.layer));
   LAY.paint();
 });
 
