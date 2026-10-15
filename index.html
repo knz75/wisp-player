@@ -1821,9 +1821,16 @@ function takeFiles(e) {
   const path = f => f.webkitRelativePath || f.name;
   files.sort((a, b) => path(a).localeCompare(path(b), undefined, { numeric: true }));
   S.tracks = files; S.cur = -1; S.demo = false;
-  let best = 0, bestAt = -1;
+  // С какого трека начать: где остановились в прошлый раз. Если тот трек уже дослушан до конца (done, а у старых записей - время 0),
+  // идём к следующему, а если дослушана вся папка - начинаем сначала. Иначе после конца папки она бы начиналась с последнего трека и сразу замолкала.
+  let best = -1, bestAt = -1;
   files.forEach((f, i) => { const s = store.get(keyOf(f), null); if (s && s.at > bestAt) { bestAt = s.at; best = i; } });
-  load(best);
+  let start = 0;
+  if (best >= 0) {
+    const s = store.get(keyOf(files[best]), null), finished = s && (s.done || s.t === 0);
+    start = finished ? (best + 1 < files.length ? best + 1 : 0) : best;
+  }
+  load(start);
 }
 $('fileInput').addEventListener('change', takeFiles);
 $('dirInput').addEventListener('change', takeFiles);
@@ -1831,7 +1838,7 @@ audioEl.addEventListener('timeupdate', () => { render(); if (Date.now() - lastSa
 audioEl.addEventListener('play', () => { render(); requestDraw(); try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {} });
 audioEl.addEventListener('pause', () => { render(); savePos(); requestDraw(); try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {} });
 audioEl.addEventListener('ended', () => {
-  if (S.cur >= 0) store.set(keyOf(S.tracks[S.cur]), { t: 0, at: Date.now() });
+  if (S.cur >= 0) store.set(keyOf(S.tracks[S.cur]), { t: 0, at: Date.now(), done: true });
   S.ready = false; if (S.cur < S.tracks.length - 1) load(S.cur + 1); else if (S.demo) load(0);
 });
 window.addEventListener('pagehide', savePos);
