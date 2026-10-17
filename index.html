@@ -177,6 +177,10 @@
   #skin .wpanel .wai-lvl { height: 3px; background: rgba(127,127,127,.25); }
   #skin .wpanel .wai-lvl i { display: block; height: 100%; width: 0; background: var(--r-acc, #7dff9a); }
   #skin .wpanel .wai-heard { font-size: .8rem; opacity: .75; line-height: 1.4; min-height: 1.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  #skin .wpanel .wai-start { border: 1px dashed rgba(127,127,127,.45); border-radius: 10px; padding: 8px 10px; font-size: .82rem; line-height: 1.45; }
+  #skin .wpanel .wai-start ol { margin: 6px 0 8px 18px; padding: 0; }
+  #skin .wpanel .wai-start a { color: inherit; text-decoration: underline; display: inline-block; }
+  #skin .wpanel .wai-start .wb { width: 100%; }
   #skin .wpanel [hidden] { display: none !important; }
   #skin .wpanel .wc-note { margin: 0; font-size: .8rem; line-height: 1.45; opacity: .8; }
   #skin .wpanel .wc-link { font-size: .72rem; opacity: .75; word-break: break-all; user-select: text; -webkit-user-select: text; }
@@ -2204,6 +2208,7 @@ const AIT = {
     talk:'▶ Поговорить', end:'■ Закончить', mute:'Пауза микрофона', unmute:'Включить микрофон', pocket:'Карманный режим',
     pocketText:'Карманный режим<br>удерживайте 2 секунды, чтобы выйти', you:'Вы', noKey:'Нужен ключ - меню → Попутчик', micFail:'Микрофон не включился: ',
     key:'Ключ Gemini API - хранится только в этом браузере', keyHow:'Бесплатный ключ можно получить на aistudio.google.com/apikey',
+    startH:'Как начать', st1:'Возьмите бесплатный ключ Gemini:', st2:'Нажмите «Поговорить» - откроется поле, вставьте туда ключ.', st3:'Наденьте наушники и говорите.', sndTest:'▶ Проверить звук в наушниках',
     len:'Длина ответа «Умного мозга»', lShort:'Коротко', lMid:'Средне', lLong:'Подробно',
     logCopy:'📋 Скопировать журнал', logSave:'💾 Скачать журнал', talkSave:'💬 Скачать разговор', copied:'Скопировано ✓', talkEmpty:'Разговоров пока нет', you2:'Вы', comp:'Попутчик',
     mode:'Режим собеседника', mChat:'⚡ Болтовня', mSmart:'🧠 Умный', bTest:'🔍 Тест мозга',
@@ -2232,6 +2237,7 @@ const AIT = {
     talk:'▶ Talk', end:'■ End', mute:'Pause mic', unmute:'Unmute mic', pocket:'Pocket mode',
     pocketText:'Pocket mode<br>hold for 2 seconds to exit', you:'You', noKey:'A key is needed - menu → Companion', micFail:'Microphone did not start: ',
     key:'Gemini API key - stored only in this browser', keyHow:'You can get a free key at aistudio.google.com/apikey',
+    startH:'How to start', st1:'Get a free Gemini key:', st2:'Tap «Talk» - a field opens, paste the key there.', st3:'Put on headphones and talk.', sndTest:'▶ Test the sound in headphones',
     len:'«Smart» answer length', lShort:'Short', lMid:'Medium', lLong:'Detailed',
     logCopy:'📋 Copy log', logSave:'💾 Download log', talkSave:'💬 Download conversation', copied:'Copied ✓', talkEmpty:'No conversations yet', you2:'You', comp:'Companion',
     mode:'Companion mode', mChat:'⚡ Chatty', mSmart:'🧠 Smart', bTest:'🔍 Test Brain',
@@ -2946,7 +2952,10 @@ const AI = (() => {
 
   const panelHtml = () => '<div class="wai-st"><span data-ai="st"></span><b data-ai="vst"></b></div>' +
     '<button class="wb wai-talk" data-ai="talk"></button>' +
-    '<div class="wai-row"><button class="wb" data-ai="mode"></button><button class="wb" data-ai="btest"></button></div>' +
+    '<div class="wai-start" data-ai="startbox"><b data-ait="startH"></b><ol>' +
+      '<li><span data-ait="st1"></span> <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></li>' +
+      '<li data-ait="st2"></li><li data-ait="st3"></li></ol><button class="wb" data-ai="sndtest"></button></div>' +
+    '<div class="wai-row" data-ai="moderow"><button class="wb" data-ai="mode"></button><button class="wb" data-ai="btest"></button></div>' +
     '<div class="wai-row"><button class="wb" data-ai="mute"></button><button class="wb" data-ai="pocket"></button></div>' +
     '<div class="wai-lvl"><i data-ai="lvl"></i></div><div class="wai-heard" data-ai="heard"></div>';
   function bindPanel(el) {
@@ -2954,6 +2963,8 @@ const AI = (() => {
     pe('talk').addEventListener('click', () => wanted ? stop() : start());
     pe('mode').addEventListener('click', () => setAiMode(aiMode === 'smart' ? 'chat' : 'smart'));
     pe('btest').addEventListener('click', testBrainBtn);
+    pe('sndtest').addEventListener('click', () => DEMO.play({ stay: true }));
+    if (q('aiKey')) q('aiKey').addEventListener('input', render);
     pe('mute').addEventListener('click', toggleMute);
     pe('pocket').addEventListener('click', pocketEnter);
     render();
@@ -2967,6 +2978,11 @@ const AI = (() => {
     pe('talk').classList.toggle('on', wanted); pe('talk').disabled = starting;
     if (pe('mode')) { pe('mode').textContent = at(aiMode === 'smart' ? 'mSmart' : 'mChat'); pe('mode').classList.toggle('on', aiMode === 'smart'); }
     if (pe('btest')) pe('btest').textContent = at('bTest');
+    // пока нет ключа - «как начать» и проверка звука; с ключом - режим и тест мозга
+    const hasKey = !!(q('aiKey') && q('aiKey').value.trim());
+    pe('startbox').classList.toggle('hidden', hasKey || wanted);
+    pe('moderow').classList.toggle('hidden', !hasKey);
+    pe('sndtest').textContent = at('sndTest');
     pe('mute').textContent = muted ? at('unmute') : at('mute'); pe('mute').disabled = !wanted; pe('mute').classList.toggle('on', muted);
     pe('pocket').textContent = at('pocket');
   }
@@ -3243,6 +3259,7 @@ const CALL = (() => {
     });
     q('callDev').onchange = async () => { try { plugMic(await openMic(q('callDev').value)); } catch (e) { setStatus('micSwitch', 'bad', e.name); } };
     if (joinRoom) setMode('call');
+    else if (new URLSearchParams(location.search).get('tab') === 'ai') setMode('ai'); // ссылка wispplayer.com/?tab=ai - сразу к попутчику
   }
   function applyLang() { document.querySelectorAll('[data-ct]').forEach(el => el.textContent = ct(el.dataset.ct)); render(); }
   const panelHtml = () => '<div class="wai-st"><span data-c="st"></span><b data-c="n"></b></div>' +
@@ -3755,15 +3772,18 @@ const DEMO = (() => {
     for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i] * k)) * 32767, true);
     return new File([ab], 'Wisp demo.wav', { type: 'audio/wav' });
   }
-  async function play() {
+  async function play(opt) {
     if (busy) return; busy = true;
+    const stay = !!(opt && opt.stay); // stay - проверка звука из вкладки «Попутчик»: вкладку не переключаем
     initAudio(); ac.resume();
     try { if (!file) file = await synth(); } catch (e) { busy = false; toast(t('noAudio')); return; }
     S.demo = true; S.tracks = [file]; S.cur = -1; load(0);
     // музыка - выбранный источник, и сразу по кругу (настройки орбиты пользователя не сохраняем)
-    LAY.selectSource(SRCS.music);
-    O.shape = 'circle'; O.size = 0.6; O.period = 12; O.dir = 1;
-    if (!O.on) orbitStart(); else render();
+    if (!stay) LAY.selectSource(SRCS.music);
+    const MO = SRCS.music.O;
+    MO.shape = 'circle'; MO.size = 0.6; MO.period = 12; MO.dir = 1;
+    if (!MO.on) { ping('orbit'); MO.on = true; MO.last = performance.now(); MO.trail = []; if (!orbitTimer) orbitTimer = setInterval(orbitTick, 40); orbitTick(); }
+    render(); requestDraw();
     ping('demo'); busy = false;
   }
   return { play };
